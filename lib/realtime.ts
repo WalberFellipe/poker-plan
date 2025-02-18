@@ -1,91 +1,58 @@
-import { prisma } from './prisma'
+"use client"
 
-export type RoomEvent = {
-  type: 'vote' | 'reveal' | 'reset' | 'join' | 'leave'
-  roomId: string
-  data: any
+import { Vote, User } from '@prisma/client'
+
+type VoteWithUser = Vote & {
+  user: Pick<User, 'id' | 'name' | 'image'>
 }
 
-export class RealtimeService {
-  private static instance: RealtimeService
-  private subscriptions: Map<string, Set<(event: RoomEvent) => void>>
+export type RoomEvent = {
+  type: 'vote' | 'reveal' | 'reset'
+  data: {
+    vote?: VoteWithUser
+    revealed?: boolean
+    reset?: boolean
+  }
+}
 
-  private constructor() {
-    this.subscriptions = new Map()
-    this.initializePulse()
+class RealtimeClient {
+  private static instance: RealtimeClient
+  private eventSources: Map<string, EventSource> = new Map()
+  private subscribers: Map<string, Set<(event: RoomEvent) => void>> = new Map()
+
+  private constructor() {}
+
+  static getInstance(): RealtimeClient {
+    if (!RealtimeClient.instance) {
+      RealtimeClient.instance = new RealtimeClient()
+    }
+    return RealtimeClient.instance
   }
 
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new RealtimeService()
+  subscribe(roomId: string, callback: (event: RoomEvent) => void): () => void {
+    if (!this.subscribers.has(roomId)) {
+      this.subscribers.set(roomId, new Set())
     }
-    return this.instance
-  }
 
-  private async initializePulse() {
-    try {
-      // Inscrever para mudanças em Room
-      const roomSubscription = await prisma.room.subscribe({
-        create: true,
-        update: true,
-        delete: true,
-      })
-
-      // Inscrever para mudanças em Vote
-      const voteSubscription = await prisma.vote.subscribe({
-        create: true,
-        update: true,
-        delete: true,
-      })
-
-      // Processar eventos de sala
-      for await (const event of roomSubscription) {
-        const roomId = event.data.id as string
-        if (this.subscriptions.has(roomId)) {
-          const handlers = this.subscriptions.get(roomId)!
-          handlers.forEach(handler => {
-            handler({
-              type: event.action === 'create' ? 'join' : 'leave',
-              roomId,
-              data: event.data
-            })
-          })
-        }
-      }
-
-      // Processar eventos de votos
-      for await (const event of voteSubscription) {
-        const roomId = event.data.roomId as string
-        if (this.subscriptions.has(roomId)) {
-          const handlers = this.subscriptions.get(roomId)!
-          handlers.forEach(handler => {
-            handler({
-              type: 'vote',
-              roomId,
-              data: event.data
-            })
-          })
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao inicializar Pulse:', error)
-    }
-  }
-
-  subscribe(roomId: string, handler: (event: RoomEvent) => void) {
-    if (!this.subscriptions.has(roomId)) {
-      this.subscriptions.set(roomId, new Set())
-    }
-    this.subscriptions.get(roomId)!.add(handler)
+    const roomSubscribers = this.subscribers.get(roomId)!
+    roomSubscribers.add(callback)
 
     return () => {
-      const handlers = this.subscriptions.get(roomId)
-      if (handlers) {
-        handlers.delete(handler)
-        if (handlers.size === 0) {
-          this.subscriptions.delete(roomId)
-        }
+      roomSubscribers.delete(callback)
+      if (roomSubscribers.size === 0) {
+        this.disconnect(roomId)
       }
     }
   }
-} 
+
+  private disconnect(roomId: string) {
+    const eventSource = this.eventSources.get(roomId)
+    if (eventSource) {
+      eventSource.close()
+      this.eventSources.delete(roomId)
+      this.subscribers.delete(roomId)
+    }
+  }
+}
+
+export const RealtimeService = RealtimeClient 

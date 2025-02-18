@@ -11,12 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { User } from "lucide-react"
-
+import Image from "next/image"
 export function Header() {
   const { data: session, status } = useSession()
-
-  console.log('Session Status:', status)
-  console.log('Session Data:', session)
 
   return (
     <header className="border-b w-full">
@@ -33,10 +30,6 @@ export function Header() {
               Criar Sala
             </Link>
           </nav>
-          {/* Debug info */}
-          <span className="text-sm text-muted-foreground">
-            Status: {status}
-          </span>
         </div>
 
         <div className="flex items-center gap-4">
@@ -45,10 +38,12 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   {session.user?.image ? (
-                    <img
+                    <Image
                       src={session.user.image}
                       alt={session.user.name || ""}
-                      className="h-8 w-8 rounded-full"
+                      width={32}
+                      height={32}
+                      className="rounded-full"
                     />
                   ) : (
                     <User className="h-5 w-5" />

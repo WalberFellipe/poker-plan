@@ -49,7 +49,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   customCards   Card[]
-  participatedRooms Room[]
+  participatedRooms RoomParticipant[]
   createdRooms  Room[]    @relation("RoomHost")
   votes         Vote[]
 }
@@ -67,11 +67,13 @@ model Room {
   name        String
   hostId      String? 
   host        User?     @relation("RoomHost", fields: [hostId], references: [id])
-  participants User[]
+  participants RoomParticipant[]
   stories     Story[]
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   active      Boolean   @default(true)
   code        String    @unique
+  anonymousParticipants AnonymousParticipant[]
 }
 
 model Story {
@@ -83,6 +85,7 @@ model Story {
   finalScore  Float?
   createdAt   DateTime  @default(now())
   revealed    Boolean   @default(false)
+  anonymousVotes AnonymousVote[]
 }
 
 model Vote {
@@ -94,13 +97,52 @@ model Vote {
   value       Float
   createdAt   DateTime  @default(now())
 
-  @@unique([storyId, userId]) // um usuário só pode votar uma vez por história
+  @@unique([storyId, userId])
 }
 
 model Card {
   id          String    @id @default(cuid())
   value       Float
-  label       String?   // para cards personalizados como "?" ou "☕"
+  label       String?   
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RoomParticipant {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  room Room @relation(fields: [roomId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+}
+
+model AnonymousParticipant {
+  id        String   @id @default(cuid())
+  name      String
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id])
+  votes     AnonymousVote[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roomId])
+}
+
+model AnonymousVote {
+  id          String    @id @default(cuid())
+  storyId     String
+  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  participantId String
+  participant AnonymousParticipant @relation(fields: [participantId], references: [id])
+  value       Float
+  createdAt   DateTime  @default(now())
+
+  @@unique([storyId, participantId])
 }

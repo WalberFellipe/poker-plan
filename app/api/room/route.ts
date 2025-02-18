@@ -2,9 +2,10 @@ import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { nanoid } from 'nanoid'
+import { authOptions } from "@/lib/auth"
 
 export async function POST(req: Request) {
-  const session = await getServerSession()
+  const session = await getServerSession(authOptions)
   
   try {
     const { name } = await req.json()
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
       data: {
         name,
         code: nanoid(6),
-        ...(session?.user ? { hostId: session.user.id } : {})
+        hostId: session?.user?.id || null,
       },
     })
 
