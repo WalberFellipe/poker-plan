@@ -5,6 +5,7 @@ import { Providers } from './providers'
 import { AuthProvider } from './providers/auth-provider'
 import { Header } from '@/components/layout/header'
 import { Toaster } from "@/components/ui/toaster"
+import { Analytics } from "@vercel/analytics/react";
 
 
 const geistSans = localFont({
@@ -97,6 +98,7 @@ export default function RootLayout({
               <Header />
               <main className="flex-1">
                 {children}
+                <Analytics />
               </main>
             </div>
           </Providers>
