@@ -213,6 +213,7 @@ export function useRoomVotes(
       setVotes([])
       setLocalVote(null)
       setRevealed(false)
+      setIsResetting(false);
       toast({ description: "Votação resetada!" })
     } catch {
       toast({
