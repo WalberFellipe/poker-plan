@@ -41,17 +41,17 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  customCards   Card[]
-  participatedRooms RoomParticipant[]
-  createdRooms  Room[]    @relation("RoomHost")
-  votes         Vote[]
+  id                String    @id @default(cuid())
+  name              String?
+  email             String?   @unique
+  emailVerified     DateTime?
+  image             String?
+  accounts          Account[]
+  sessions          Session[]
+  customCards       Card[]
+  participatedRooms RoomParticipant[] @relation("RoomParticipation")
+  createdRooms      Room[]    @relation("RoomHost")
+  votes             Vote[]
 }
 
 model VerificationToken {
@@ -63,17 +63,16 @@ model VerificationToken {
 }
 
 model Room {
-  id          String    @id @default(cuid())
-  name        String
-  hostId      String? 
-  host        User?     @relation("RoomHost", fields: [hostId], references: [id])
-  participants RoomParticipant[]
-  stories     Story[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  active      Boolean   @default(true)
-  code        String    @unique
+  id                  String               @id @default(cuid())
+  name                String
+  createdAt          DateTime             @default(now())
+  stories            Story[]
+  participants       RoomParticipant[]
   anonymousParticipants AnonymousParticipant[]
+  ownerId            String
+  owner              User                 @relation("RoomHost", fields: [ownerId], references: [id])
+
+  @@index([ownerId])
 }
 
 model Story {
@@ -89,15 +88,16 @@ model Story {
 }
 
 model Vote {
-  id          String    @id @default(cuid())
-  storyId     String
-  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  value       Float
-  createdAt   DateTime  @default(now())
+  id            String   @id @default(cuid())
+  value         Int
+  userId        String
+  storyId       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  story         Story    @relation(fields: [storyId], references: [id])
+  user          User     @relation(fields: [userId], references: [id])
 
-  @@unique([storyId, userId])
+  @@unique([userId, storyId])
 }
 
 model Card {
@@ -112,11 +112,9 @@ model RoomParticipant {
   id        String   @id @default(cuid())
   roomId    String
   userId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User     @relation("RoomParticipation", fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  room Room @relation(fields: [roomId], references: [id])
-  user User @relation(fields: [userId], references: [id])
 
   @@unique([roomId, userId])
   @@index([roomId])
@@ -124,25 +122,25 @@ model RoomParticipant {
 }
 
 model AnonymousParticipant {
-  id        String   @id @default(cuid())
-  name      String
-  roomId    String
-  room      Room     @relation(fields: [roomId], references: [id])
-  votes     AnonymousVote[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  roomId        String
+  name          String?
+  room          Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  votes         AnonymousVote[]
+  createdAt     DateTime @default(now())
 
   @@index([roomId])
 }
 
 model AnonymousVote {
-  id          String    @id @default(cuid())
-  storyId     String
-  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  value         Int
   participantId String
-  participant AnonymousParticipant @relation(fields: [participantId], references: [id])
-  value       Float
-  createdAt   DateTime  @default(now())
+  storyId       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  story         Story    @relation(fields: [storyId], references: [id])
+  participant   AnonymousParticipant @relation(fields: [participantId], references: [id])
 
-  @@unique([storyId, participantId])
+  @@unique([participantId, storyId])
 }

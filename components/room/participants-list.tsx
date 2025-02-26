@@ -1,19 +1,10 @@
 import { Check, User } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image";
-
-interface Participant {
-  id: string
-  userId: string
-  name: string | null
-  image: string | null
-  isAnonymous: boolean
-  hasVoted?: boolean
-  vote?: number
-}
+import { ListParticipant } from "@/types/entities";
 
 interface ParticipantsListProps {
-  participants: Participant[]
+  participants: ListParticipant[]
 }
 
 export function ParticipantsList({ participants }: ParticipantsListProps) {

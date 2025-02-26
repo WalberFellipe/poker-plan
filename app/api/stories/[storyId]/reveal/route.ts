@@ -2,49 +2,70 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { pusherServer } from '@/lib/pusher'
+import { pusher } from '@/lib/pusher'
 
 export async function POST(
   request: Request,
   { params }: { params: { storyId: string } }
 ) {
-  const session = await getServerSession(authOptions)
-  const { participantId } = await request.json()
-  const storyId = params.storyId
-
   try {
-    // Verificar se é um usuário autenticado ou um participante anônimo
-    if (!session?.user?.id && !participantId) {
-      return new NextResponse('Usuário não autorizado', { status: 401 })
+    const session = await getServerSession(authOptions)
+    const body = await request.json()
+    const { participantId } = body
+    const storyId = params.storyId
+    const story = await prisma.story.findUnique({
+      where: { id: storyId },
+      include: { room: true }
+    })
+
+    if (!story) {
+      return NextResponse.json(
+        { error: "História não encontrada" },
+        { status: 404 }
+      )
     }
 
-    // Se for participante anônimo, verificar se ele existe
+    // Verificar autorização
+    if (!session?.user?.id && !participantId) {
+      return NextResponse.json(
+        { error: "Usuário não autorizado" },
+        { status: 401 }
+      )
+    }
+
     if (participantId) {
-      const participant = await prisma.anonymousParticipant.findUnique({
-        where: { id: participantId }
+      // Verificar se o participante anônimo existe e pertence à sala
+      const participant = await prisma.anonymousParticipant.findFirst({
+        where: {
+          id: participantId,
+          roomId: story.roomId
+        }
       })
 
       if (!participant) {
-        return new NextResponse('Participante não encontrado', { status: 404 })
+        return NextResponse.json(
+          { error: "Participante não autorizado" },
+          { status: 401 }
+        )
       }
     }
 
-    // Atualizar a história para revelar os votos
-    const story = await prisma.story.update({
+    // Atualizar história
+    await prisma.story.update({
       where: { id: storyId },
       data: { revealed: true }
     })
 
-    // Enviar evento em tempo real
-    await pusherServer.trigger(
-      `room-${story.roomId}`,
-      'reveal',
-      { revealed: true }
-    )
+    // Notificar via Pusher
+    await pusher.trigger(`room-${story.roomId}`, "vote:reveal", {
+      storyId,
+    });
 
-    return NextResponse.json(story)
-  } catch (error) {
-    console.error('Erro ao revelar votos:', error)
-    return new NextResponse('Erro ao revelar votos', { status: 500 })
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json(
+      { error: "Erro ao revelar votos" },
+      { status: 500 }
+    )
   }
 } 

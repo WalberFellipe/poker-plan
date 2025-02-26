@@ -2,67 +2,50 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-// import { pusherServer } from '@/lib/pusher'
+import { pusher } from "@/lib/pusher";
 
 export async function GET(
   request: Request,
   { params }: { params: { storyId: string } }
 ) {
-  const storyId = await Promise.resolve(params.storyId)
-
   try {
-    // Buscar votos de usuários autenticados
-    const authenticatedVotes = await prisma.vote.findMany({
-      where: {
-        storyId
-      },
+    const { storyId } = await Promise.resolve(params)
+
+    // Buscar a história com todos os votos
+    const story = await prisma.story.findUnique({
+      where: { id: storyId },
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            image: true
+        votes: true,
+        anonymousVotes: {
+          include: {
+            participant: true
           }
         }
       }
     })
 
-    // Buscar votos anônimos
-    const anonymousVotes = await prisma.anonymousVote.findMany({
-      where: {
-        storyId: storyId
-      },
-      include: {
-        participant: true
-      }
-    })
+    if (!story?.revealed) {
+      return NextResponse.json([])
+    }
 
-    // Combinar os votos
+    // Combinar votos normais e anônimos
     const allVotes = [
-      ...authenticatedVotes.map(v => ({
-        id: v.id,
-        userId: v.userId,
-        value: v.value,
-        user: v.user,
-        isAnonymous: false
-      })),
-      ...anonymousVotes.map(v => ({
-        id: v.id,
-        userId: v.participantId,
-        value: v.value,
-        user: {
-          id: v.participantId,
-          name: v.participant.name,
-          image: null
-        },
-        isAnonymous: true
+      ...story.votes,
+      ...story.anonymousVotes.map(vote => ({
+        id: vote.id,
+        value: vote.value,
+        storyId: vote.storyId,
+        userId: vote.participantId,
+        userName: vote.participant.name
       }))
     ]
 
     return NextResponse.json(allVotes)
-  } catch (error) {
-    console.error('Erro ao buscar votos:', error)
-    return new NextResponse('Erro ao buscar votos', { status: 500 })
+  } catch {
+    return NextResponse.json(
+      { error: 'Erro ao buscar votos' },
+      { status: 500 }
+    )
   }
 }
 
@@ -70,59 +53,117 @@ export async function POST(
   request: Request,
   { params }: { params: { storyId: string } }
 ) {
-  const session = await getServerSession(authOptions)
-  const { value, participantId } = await request.json()
-  const storyId = params.storyId
-
   try {
+    const session = await getServerSession(authOptions)
+    const { value, participantId } = await request.json()
+    const { storyId } = await Promise.resolve(params)
+
+    // Verificar se a história existe
+    const story = await prisma.story.findUnique({
+      where: { id: storyId },
+      include: { room: true }
+    })
+
+    if (!story) {
+      return NextResponse.json(
+        { error: "História não encontrada" },
+        { status: 404 }
+      )
+    }
+
+    let vote;
+
     if (session?.user?.id) {
-      // Voto de usuário autenticado
-      const vote = await prisma.vote.upsert({
+      // Usuário autenticado
+      const existingVote = await prisma.vote.findFirst({
         where: {
-          storyId_userId: {
-            storyId,
-            userId: session.user.id
-          }
-        },
-        update: { value },
-        create: {
-          storyId,
           userId: session.user.id,
-          value
+          storyId
         }
       })
-      return NextResponse.json(vote)
+
+      if (existingVote) {
+        vote = await prisma.vote.update({
+          where: { id: existingVote.id },
+          data: { value }
+        })
+      } else {
+        vote = await prisma.vote.create({
+          data: {
+            storyId,
+            userId: session.user.id,
+            value
+          }
+        })
+      }
+
+      // Notificar via Pusher
+      await pusher.trigger(`room-${story.roomId}`, "vote:new", {
+        storyId,
+        userId: session.user.id,
+        value: story.revealed ? value : undefined,
+        revealed: story.revealed,
+      });
+
     } else if (participantId) {
-      // Verificar se o participante anônimo existe
-      const participant = await prisma.anonymousParticipant.findUnique({
-        where: { id: participantId }
+      // Verificar se o participante anônimo existe e pertence à sala
+      const participant = await prisma.anonymousParticipant.findFirst({
+        where: {
+          id: participantId,
+          roomId: story.roomId
+        }
       })
 
       if (!participant) {
-        return new NextResponse('Participante não encontrado', { status: 404 })
+        return NextResponse.json(
+          { error: "Participante não autorizado" },
+          { status: 401 }
+        )
       }
 
-      // Voto de usuário anônimo
-      const vote = await prisma.anonymousVote.upsert({
+      // Participante anônimo
+      const existingVote = await prisma.anonymousVote.findFirst({
         where: {
-          storyId_participantId: {
-            storyId,
-            participantId
-          }
-        },
-        update: { value },
-        create: {
-          storyId,
           participantId,
-          value
+          storyId
         }
       })
-      return NextResponse.json(vote)
+
+      if (existingVote) {
+        vote = await prisma.anonymousVote.update({
+          where: { id: existingVote.id },
+          data: { value }
+        })
+      } else {
+        vote = await prisma.anonymousVote.create({
+          data: {
+            storyId,
+            participantId,
+            value
+          }
+        })
+      }
+
+      // Notificar via Pusher
+      await pusher.trigger(`room-${story.roomId}`, "vote:new", {
+        storyId,
+        userId: participantId,
+        value: story.revealed ? value : undefined,
+        revealed: story.revealed,
+      });
+
+    } else {
+      return NextResponse.json(
+        { error: "Usuário não autorizado" },
+        { status: 401 }
+      )
     }
 
-    return new NextResponse('Usuário não autorizado', { status: 401 })
-  } catch (error) {
-    console.error('Erro ao salvar voto:', error)
-    return new NextResponse(`Erro ao salvar voto: ${error}`, { status: 500 })
+    return NextResponse.json({ success: true, vote })
+  } catch {
+    return NextResponse.json(
+      { error: 'Erro ao salvar voto' },
+      { status: 500 }
+    )
   }
 } 

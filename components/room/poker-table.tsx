@@ -3,22 +3,33 @@
 import { cn } from "@/lib/utils"
 import { VotingCard } from "./voting-card"
 import Image from "next/image";
-interface Participant {
-  id: string
-  name: string
-  hasVoted: boolean
-  vote?: number
-  image?: string | null
-  isAnonymous: boolean
-}
+import { Vote } from "@/types/entities";
+import { Participant } from "@/types/participant";
 
 interface PokerTableProps {
   participants: Participant[]
   revealed: boolean
+  votes: Vote[]
   className?: string
 }
 
-export function PokerTable({ participants, revealed, className }: PokerTableProps) {
+export function PokerTable({ participants, revealed, votes, className }: PokerTableProps) {
+
+  const participantsWithVotes = participants.map(participant => {
+    const vote = votes.find(v => 
+      v.userId === participant.id || 
+      v.userId === participant.userId
+    )
+    
+
+    
+    const finalValue = revealed && vote ? vote.value : "?"    
+    return {
+      ...participant,
+      vote: finalValue
+    }
+  })
+
   return (
     <div
       className={cn(
@@ -45,14 +56,16 @@ export function PokerTable({ participants, revealed, className }: PokerTableProp
           {/* Grid de cartas */}
           <div className="relative w-full h-full flex items-center justify-center">
             <div className="grid grid-cols-4 gap-4">
-              {participants.map((participant) => (
+              {participantsWithVotes.map((participant) => (
                 <div
                   key={participant.id}
                   className="flex flex-col items-center gap-2"
                 >
                   {/* Sempre mostrar a carta, seja virada ou com o valor */}
                   <VotingCard
+                    key={participant.id}
                     value={revealed ? participant.vote ?? "?" : "?"}
+                    selected={false}
                     revealed={revealed}
                     size="lg"
                   />

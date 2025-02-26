@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSession } from "next-auth/react"
+import { useToast } from "@/hooks/useToast"
 
 interface JoinRoomModalProps {
   roomId: string
@@ -20,16 +21,14 @@ export function JoinRoomModal({ roomId, onJoin }: JoinRoomModalProps) {
   const { data: session } = useSession()
   const [name, setName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const { toast } = useToast()
 
-  // Se o usuário estiver logado, não mostra o modal
   if (session?.user) return null
 
   const handleJoin = async () => {
     if (!name.trim()) return
 
     setIsLoading(true)
-    setError("")
 
     try {
       const response = await fetch(`/api/rooms/${roomId}/join`, {
@@ -40,16 +39,22 @@ export function JoinRoomModal({ roomId, onJoin }: JoinRoomModalProps) {
         body: JSON.stringify({ name }),
       })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(errorText || 'Falha ao entrar na sala')
-      }
+      if (!response.ok) throw new Error('Erro ao entrar na sala')
 
-      const { participantId } = await response.json()
-      onJoin(participantId)
+      const data = await response.json()
+      localStorage.setItem('participantId', data.participantId)
+      onJoin(data.participantId)
+      
+      toast({
+        title: "Bem-vindo!",
+        description: "Você entrou na sala com sucesso",
+      })
     } catch (error) {
-      console.error("Erro ao entrar na sala:", error)
-      setError(error instanceof Error ? error.message : 'Erro ao entrar na sala')
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : 'Erro ao entrar na sala',
+        variant: "destructive"
+      })
     } finally {
       setIsLoading(false)
     }
@@ -68,9 +73,6 @@ export function JoinRoomModal({ roomId, onJoin }: JoinRoomModalProps) {
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleJoin()}
           />
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
           <Button 
             onClick={handleJoin} 
             disabled={!name.trim() || isLoading}

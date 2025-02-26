@@ -7,7 +7,7 @@ export async function GET(
   request: Request,
   { params }: { params: { roomId: string } }
 ) {
-  const roomId = await Promise.resolve(params.roomId)
+  const { roomId } = await Promise.resolve(params)
   const session = await getServerSession(authOptions)
 
   try {
@@ -51,8 +51,10 @@ export async function GET(
     }
 
     return NextResponse.json(currentStory)
-  } catch (error) {
-    console.error('Erro ao buscar história atual:', error)
-    return new NextResponse('Erro ao buscar história atual', { status: 500 })
+  } catch {
+    return NextResponse.json(
+      { error: 'Erro ao buscar história atual' },
+      { status: 500 }
+    )
   }
 } 

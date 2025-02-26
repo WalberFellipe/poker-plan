@@ -7,28 +7,36 @@ import { PokerTable } from "@/components/room/poker-table";
 import { Button } from "@/components/ui/button";
 import { Eye, RotateCcw, Loader2 } from "lucide-react";
 import { useRoomVotes } from "@/hooks/useRoomVotes";
-import { Story } from "@prisma/client";
+import { Story, TableParticipant, Vote } from "@/types/entities";
+
 import { useSession } from "next-auth/react";
-import { JoinRoomModal } from "@/components/room/join-room-modal";
 import { InviteButton } from "@/components/room/invite-button";
 import { VotingStats } from "@/components/room/voting-stats";
+import { DEFAULT_CARDS } from "@/types/cards";
+import { useRealtime } from "@/hooks/useRealtime";
+import { useToast } from "@/hooks/useToast";
+import { JoinRoomModal } from "@/components/room/join-room-modal";
+import { useSearchParams } from "next/navigation";
+import { RealtimeParticipantJoinEvent, RealtimeParticipantLeaveEvent } from "@/types/realtime-events";
 
-const CARDS = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, "?"];
 
 interface RoomClientProps {
   roomId: string;
 }
 
-export function RoomClient({ roomId }: RoomClientProps) {
+export default function RoomClient({ roomId }: RoomClientProps) {
   const { data: session } = useSession();
+  const [participants, setParticipants] = useState<TableParticipant[]>([]);
   const [participantId, setParticipantId] = useState<string>();
+  const { toast } = useToast();
   const [currentStory, setCurrentStory] = useState<Story | null>(null);
-  const [participants, setParticipants] = useState<any[]>([]);
+  const searchParams = useSearchParams();
+  const isInvited = searchParams.get('invited') === 'true';
 
   const { 
     votes, 
-    revealed, 
-    loading, 
+    revealed,
+    isLoading,
     isRevealing,
     isResetting,
     localVote,
@@ -38,70 +46,112 @@ export function RoomClient({ roomId }: RoomClientProps) {
     reset 
   } = useRoomVotes(
     currentStory?.id ?? '', 
-    roomId,
-    participantId
+    roomId
   );
 
-  // Recuperar participantId do localStorage ao carregar
   useEffect(() => {
-    const storedParticipantId = localStorage.getItem(`participant_${roomId}`);
-    if (storedParticipantId) {
-      setParticipantId(storedParticipantId);
-    }
-  }, [roomId]);
+    const loadParticipants = async () => {
+      try {
+        const response = await fetch(`/api/rooms/${roomId}/participants`);
+        if (!response.ok) throw new Error('Falha ao carregar participantes');
+        
+        const data = await response.json();
+        setParticipants(data);
+      } catch {
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os participantes",
+          variant: "destructive"
+        });
+      }
+    };
 
-  // Salvar participantId no localStorage quando definido
-  const handleJoin = (newParticipantId: string) => {
-    setParticipantId(newParticipantId);
-    localStorage.setItem(`participant_${roomId}`, newParticipantId);
-  };
+    loadParticipants();
+  }, [roomId, toast]);
 
-  // Carregar história atual
+  useRealtime(roomId, {
+    'participant:join': (data: RealtimeParticipantJoinEvent) => {
+
+      setParticipants(current => {
+        const existingParticipant = current.find(p => 
+          p.id === data.participantId || 
+          p.userId === data.userId
+        )
+        
+        if (existingParticipant) {
+          return current
+        }
+
+        const newParticipant: TableParticipant = {
+          id: data.participantId,
+          userId: data.userId ?? data.participantId,
+          name: data.name ?? 'Anônimo',
+          image: data.image || '',
+          isAnonymous: data.isAnonymous,
+          hasVoted: false,
+          vote: undefined
+        }
+
+        return [...current, newParticipant]
+      })
+    },
+    'participant:leave': (data: RealtimeParticipantLeaveEvent) => {
+      setParticipants(current => 
+        current.filter(p => p.id !== data.participantId)
+      )
+    },
+  });
+
+  useEffect(() => {
+    if (!participantId) return;
+
+    const handleBeforeUnload = () => {
+      const data = JSON.stringify({ 
+        participantId, 
+        isAnonymous: !session?.user 
+      });
+      
+      navigator.sendBeacon(
+        `/api/rooms/${roomId}/leave`,
+        new Blob([data], { type: 'application/json' })
+      );
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      handleBeforeUnload();
+    };
+  }, [roomId, participantId, session?.user]);
+
   useEffect(() => {
     const loadCurrentStory = async () => {
       try {
-        console.log('Carregando história...')
         const response = await fetch(`/api/rooms/${roomId}/current-story`)
         if (!response.ok) throw new Error('Erro ao carregar história')
         const story = await response.json()
-        console.log('História carregada:', story)
         setCurrentStory(story)
-      } catch (error) {
-        console.error('Erro ao carregar história:', error)
+      } catch {
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar a história atual",
+          variant: "destructive"
+        })
       }
     }
 
     loadCurrentStory()
-  }, [roomId])
-
-  // Recarregar participantes quando alguém entrar
-  useEffect(() => {
-    const loadParticipants = async () => {
-      try {
-        console.log('Carregando participantes...')
-        const response = await fetch(`/api/rooms/${roomId}/participants`)
-        if (!response.ok) throw new Error('Erro ao carregar participantes')
-        const data = await response.json()
-        console.log('Participantes carregados:', data)
-        setParticipants(data)
-      } catch (error) {
-        console.error('Erro ao carregar participantes:', error)
-      }
-    }
-
-    loadParticipants()
-  }, [roomId, participantId])
+  }, [roomId, toast])
 
   const handleCardSelect = (value: number) => {
     selectCard(value)
   }
 
-  if (!participantId && !session?.user) {
-    return <JoinRoomModal roomId={roomId} onJoin={handleJoin} />;
+  if (isInvited && !session?.user && !participantId) {
+    return <JoinRoomModal roomId={roomId} onJoin={setParticipantId} />
   }
 
   if (!currentStory) {
-    console.log('Estado atual:', { currentStory, loading, participants })
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -110,28 +160,34 @@ export function RoomClient({ roomId }: RoomClientProps) {
     )
   }
 
-  const participantsWithVotes = participants.map((participant) => {
-    const vote = votes.find((v) => 
-      participant.isAnonymous 
-        ? v.userId === participant.id 
-        : v.userId === participant.userId
+  const tableVotes: Vote[] = votes.map((vote) => ({
+    id: vote.id,
+    storyId: vote.storyId ?? "",
+    value: vote.value,
+    participantId: vote.userId ?? "",
+    userId: vote.userId ?? "",
+    createdAt: vote.createdAt instanceof Date
+      ? vote.createdAt.toISOString()
+      : vote.createdAt ?? new Date().toISOString(),
+  }));
+
+  const participantsWithVotes = participants.map(participant => {
+    const vote = votes.find(v => 
+      v.userId === participant.userId || 
+      v.userId === participant.id ||
+      v.participantId === participant.id
     )
     
+    const finalValue = revealed && vote ? vote.value : "?"    
     return {
-      id: participant.userId,
-      name: participant.name ?? "Anônimo",
-      hasVoted: participant.userId === (participantId || 'user-id') 
-        ? localVote !== null 
-        : !!vote,
-      vote: vote?.value ?? "?",
-      image: participant.image,
-      isAnonymous: participant.isAnonymous
+      ...participant,
+      vote: finalValue
     }
-  });
+  })
 
   return (
     <div className="container mx-auto p-4">
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
           <Loader2 className="h-8 w-8 animate-spin" />
           <span className="ml-2">Carregando votos...</span>
@@ -147,7 +203,10 @@ export function RoomClient({ roomId }: RoomClientProps) {
               </p>
             </div>
             
-            <ParticipantsList participants={participantsWithVotes} />
+            <ParticipantsList participants={participantsWithVotes.map(participant => ({
+              ...participant,
+              vote: typeof participant.vote === 'number' ? participant.vote : "?"
+            }))} />
           </div>
 
           {/* Área Principal */}
@@ -189,6 +248,8 @@ export function RoomClient({ roomId }: RoomClientProps) {
               <PokerTable 
                 participants={participantsWithVotes}
                 revealed={revealed}
+                votes={tableVotes}
+                className="..."
               />
               <VotingStats 
                 votes={votes.map(v => v.value).filter(Boolean)}
@@ -198,7 +259,7 @@ export function RoomClient({ roomId }: RoomClientProps) {
 
             <div className="border rounded-lg p-4">
               <div className="flex justify-center gap-2 flex-wrap">
-                {CARDS.map((value) => (
+                {DEFAULT_CARDS.values.map((value) => (
                   <VotingCard
                     key={value}
                     value={value}

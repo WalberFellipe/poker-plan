@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { pusher } from '@/lib/pusher'
 
 export async function POST(
   request: Request,
@@ -17,28 +18,32 @@ export async function POST(
       return new NextResponse('Usuário não autorizado', { status: 401 })
     }
 
-    // Buscar a sala atual
+    // Buscar a história atual para pegar o roomId
     const currentStory = await prisma.story.findUnique({
-      where: { id: storyId },
-      select: { roomId: true }
+      where: { id: storyId }
     })
 
     if (!currentStory) {
       return new NextResponse('História não encontrada', { status: 404 })
     }
 
-    // Criar nova história na mesma sala
+    // Criar nova história
     const newStory = await prisma.story.create({
       data: {
-        roomId: currentStory.roomId,
         title: 'Nova História',
+        roomId: currentStory.roomId,
         revealed: false
       }
     })
 
+    // Notificar todos os participantes sobre a nova história
+    await pusher.trigger(`room-${currentStory.roomId}`, 'story:reset', {
+      oldStoryId: storyId,
+      newStoryId: newStory.id
+    })
+
     return NextResponse.json(newStory)
-  } catch (error) {
-    console.error('Erro ao resetar história:', error)
+  } catch {
     return new NextResponse('Erro ao resetar história', { status: 500 })
   }
 } 

@@ -5,11 +5,11 @@ export async function GET(
   request: Request,
   { params }: { params: { roomId: string } }
 ) {
-  const roomId = await Promise.resolve(params.roomId);
-
   try {
-    // Buscar participantes registrados
-    const registeredParticipants = await prisma.roomParticipant.findMany({
+    const { roomId } = await Promise.resolve(params);
+
+    // Buscar participantes autenticados
+    const authenticatedParticipants = await prisma.roomParticipant.findMany({
       where: { roomId },
       include: {
         user: {
@@ -25,34 +25,33 @@ export async function GET(
     // Buscar participantes anônimos
     const anonymousParticipants = await prisma.anonymousParticipant.findMany({
       where: { roomId },
-      select: {
-        id: true,
-        name: true,
-        createdAt: true,
-      },
     });
 
-    // Combinar os dois tipos de participantes
-    const allParticipants = [
-      ...registeredParticipants.map((p) => ({
+    // Formatar participantes para o formato esperado pelo frontend
+    const participants = [
+      ...authenticatedParticipants.map((p) => ({
         id: p.id,
-        userId: p.user.id,
-        name: p.user.name,
+        userId: p.userId,
+        name: p.user.name || "Anônimo",
         image: p.user.image,
         isAnonymous: false,
+        hasVoted: false,
       })),
       ...anonymousParticipants.map((p) => ({
         id: p.id,
         userId: p.id,
-        name: p.name,
+        name: p.name || "Anônimo",
         image: null,
         isAnonymous: true,
+        hasVoted: false,
       })),
     ];
 
-    return NextResponse.json(allParticipants);
-  } catch (error) {
-    console.error("Erro ao buscar participantes:", error);
-    return new NextResponse("Erro ao buscar participantes", { status: 500 });
+    return NextResponse.json(participants);
+  } catch {
+    return NextResponse.json(
+      { error: "Erro ao buscar participantes" },
+      { status: 500 }
+    );
   }
 }
