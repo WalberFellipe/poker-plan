@@ -41,7 +41,7 @@ export default function ApiDocs() {
   }, []);
 
   if (!spec) {
-    return <div>Carregando...</div>;
+    return <div>Carregando</div>;
   }
 
   return <SwaggerUI spec={spec} />;
