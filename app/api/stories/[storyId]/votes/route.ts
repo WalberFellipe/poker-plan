@@ -6,11 +6,10 @@ import { pusher } from "@/lib/pusher";
 
 export async function GET(
   request: Request,
-  context: { params: { storyId: string } }
+  props: { params: Promise<{ storyId: string }> }
 ) {
-  const { storyId } = context.params;
+  const { storyId } = await props.params;
   try {
-
     // Buscar a história com todos os votos
     const story = await prisma.story.findUnique({
       where: { id: storyId },
@@ -18,42 +17,42 @@ export async function GET(
         votes: true,
         anonymousVotes: {
           include: {
-            participant: true
-          }
-        }
-      }
-    })
+            participant: true,
+          },
+        },
+      },
+    });
 
     if (!story?.revealed) {
-      return NextResponse.json([])
+      return NextResponse.json([]);
     }
 
     // Combinar votos normais e anônimos
     const allVotes = [
       ...story.votes,
-      ...story.anonymousVotes.map(vote => ({
+      ...story.anonymousVotes.map((vote) => ({
         id: vote.id,
         value: vote.value,
         storyId: vote.storyId,
         userId: vote.participantId,
-        userName: vote.participant.name
-      }))
-    ]
+        userName: vote.participant.name,
+      })),
+    ];
 
-    return NextResponse.json(allVotes)
+    return NextResponse.json(allVotes);
   } catch {
     return NextResponse.json(
-      { error: 'Erro ao buscar votos' },
+      { error: "Erro ao buscar votos" },
       { status: 500 }
-    )
+    );
   }
 }
 
 export async function POST(
   request: Request,
-  context: { params: { storyId: string } }
+  props: { params: Promise<{ storyId: string }> }
 ) {
-  const { storyId } = context.params;
+  const { storyId } = await props.params;
   try {
     const session = await getServerSession(authOptions);
     const { value, participantId } = await request.json();

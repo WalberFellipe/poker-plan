@@ -4,27 +4,27 @@ import { pusher } from '@/lib/pusher'
 
 export async function POST(
   request: Request,
-  context: { params: { roomId: string } }
+  props: { params: Promise<{ roomId: string }> }
 ) {
-  const { roomId } = context.params;
+  const { roomId } = await props.params;
 
   try {
-    const { participantId, isAnonymous } = await request.json()
+    const { participantId, isAnonymous } = await request.json();
 
     if (isAnonymous) {
       await prisma.anonymousParticipant.delete({
         where: {
           id: participantId,
-          roomId
-        }
-      })
+          roomId,
+        },
+      });
     } else {
       await prisma.roomParticipant.delete({
         where: {
           id: participantId,
-          roomId
-        }
-      })
+          roomId,
+        },
+      });
     }
 
     await pusher.trigger(roomId, "participant:leave", {
@@ -32,11 +32,8 @@ export async function POST(
       isAnonymous,
     });
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true });
   } catch {
-    return new NextResponse(
-      'Erro ao sair da sala', 
-      { status: 500 }
-    )
+    return new NextResponse("Erro ao sair da sala", { status: 500 });
   }
 } 

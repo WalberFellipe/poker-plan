@@ -6,23 +6,23 @@ import { pusher } from "@/lib/pusher"
 
 export async function POST(
   request: Request,
-  { params }: { params: { roomId: string } }
+  props: { params: Promise<{ roomId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    const { name } = await request.json()
-    const { roomId } = params
+    const session = await getServerSession(authOptions);
+    const { name } = await request.json();
+    const { roomId } = await props.params;
 
     // Verificar se a sala existe
     const room = await prisma.room.findUnique({
-      where: { id: roomId }
-    })
+      where: { id: roomId },
+    });
 
     if (!room) {
       return NextResponse.json(
         { error: "Sala não encontrada" },
         { status: 404 }
-      )
+      );
     }
 
     let participant;
@@ -32,12 +32,12 @@ export async function POST(
       participant = await prisma.roomParticipant.create({
         data: {
           roomId,
-          userId: session.user.id
+          userId: session.user.id,
         },
         include: {
-          user: true
-        }
-      })
+          user: true,
+        },
+      });
 
       // Notificar outros participantes
       await pusher.trigger(`room-${roomId}`, "participant:join", {
@@ -52,9 +52,9 @@ export async function POST(
       participant = await prisma.anonymousParticipant.create({
         data: {
           roomId,
-          name
-        }
-      })
+          name,
+        },
+      });
 
       // Notificar outros participantes
       await pusher.trigger(`room-${roomId}`, "participant:join", {
@@ -64,11 +64,11 @@ export async function POST(
       });
     }
 
-    return NextResponse.json({ participantId: participant.id })
+    return NextResponse.json({ participantId: participant.id });
   } catch {
     return NextResponse.json(
       { error: "Erro ao entrar na sala" },
       { status: 500 }
-    )
+    );
   }
 } 
