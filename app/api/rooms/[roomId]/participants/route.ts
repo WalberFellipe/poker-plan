@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { roomId: string } }
+  context: { params: { roomId: string } }
 ) {
   try {
-    const { roomId } = await Promise.resolve(params);
+    const { roomId } = context.params;
 
     // Buscar participantes autenticados
     const authenticatedParticipants = await prisma.roomParticipant.findMany({

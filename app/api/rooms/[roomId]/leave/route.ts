@@ -4,10 +4,10 @@ import { pusher } from '@/lib/pusher'
 
 export async function POST(
   request: Request,
-  { params }: { params: { roomId: string } }
+  context: { params: { roomId: string } }
 ) {
-  const roomId = await Promise.resolve(params.roomId)
-  
+  const { roomId } = context.params;
+
   try {
     const { participantId, isAnonymous } = await request.json()
 
