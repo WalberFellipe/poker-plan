@@ -18,7 +18,7 @@ export async function POST(
       include: { room: true },
     });
 
-    
+
     if (!story) {
       return NextResponse.json(
         { error: "História não encontrada" },
@@ -53,9 +53,9 @@ export async function POST(
 
     // Atualizar história
     await prisma.story.update({
-      where: { id: storyId },
-      data: { revealed: true }
-    })
+      where: { id: storyId.storyId },
+      data: { revealed: true },
+    });
 
     // Notificar via Pusher
     await pusher.trigger(`room-${story.roomId}`, "vote:reveal", {
