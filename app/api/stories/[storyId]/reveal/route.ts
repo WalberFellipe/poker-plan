@@ -6,18 +6,19 @@ import { pusher } from '@/lib/pusher'
 
 export async function POST(
   request: Request,
-  { params }: { params: { storyId: string } }
+  props: { params: Promise<{ storyId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
     const body = await request.json()
     const { participantId } = body
-    const storyId = params.storyId
+    const storyId = await props.params
     const story = await prisma.story.findUnique({
-      where: { id: storyId },
-      include: { room: true }
-    })
+      where: { id: storyId.storyId },
+      include: { room: true },
+    });
 
+    
     if (!story) {
       return NextResponse.json(
         { error: "História não encontrada" },
