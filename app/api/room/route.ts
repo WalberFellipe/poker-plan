@@ -34,8 +34,9 @@ export async function POST(req: Request) {
       data: {
         name,
         ownerId,
-      }
-    })
+        expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000),
+      },
+    });
 
     // Criar o participante apropriado
     if (session?.user?.id) {

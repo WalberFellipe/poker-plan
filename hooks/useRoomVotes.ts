@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, Dispatch, SetStateAction } from "react";
 import { useToast } from "@/hooks/useToast";
 import { 
   CardValue, 
@@ -15,6 +15,7 @@ import { voteService } from '@/services/voteService';
 import { useSession } from "next-auth/react";
 import { Participant } from '@/types/participant';
 import { useRealtime } from "@/hooks/useRealtime";
+import { TableParticipant } from "@/types/entities";
 
 declare module './useRealtime' {
   interface EventHandlers {
@@ -24,14 +25,17 @@ declare module './useRealtime' {
   }
 }
 
-export function useRoomVotes(
-  storyId: string,
-  roomId: string,
-) {
+interface UseRoomVotesProps {
+  roomId: string
+  storyId: string | null
+  setParticipants?: Dispatch<SetStateAction<TableParticipant[]>>
+}
+
+export function useRoomVotes({ roomId, storyId, setParticipants }: UseRoomVotesProps) {
   const { data: session } = useSession()
   const { toast } = useToast()
   const [votes, setVotes] = useState<VoteWithUser[]>([])
-  const [participants, setParticipants] = useState<Participant[]>([])
+  const [participants, setParticipantsState] = useState<Participant[]>([])
   const [revealed, setRevealed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isRevealing, setIsRevealing] = useState(false)
@@ -71,6 +75,16 @@ export function useRoomVotes(
         }
         return [...current, newVote]
       })
+
+      if (setParticipants) {
+        setParticipants(current => 
+          current.map(participant => 
+            participant.id === data.participantId || participant.userId === data.userId
+              ? { ...participant, hasVoted: true }
+              : participant
+          )
+        )
+      }
     },
 
     'vote:reveal': () => {
@@ -122,6 +136,12 @@ export function useRoomVotes(
       setLocalVote(null)
       setIsRevealing(false)
       setRevealCountdown(null)
+      
+      if (setParticipants) {
+        setParticipants(current => 
+          current.map(participant => ({ ...participant, hasVoted: false }))
+        )
+      }
     }
   }
 
@@ -205,7 +225,7 @@ export function useRoomVotes(
   */
 
   const reset = async () => {
-    if (isResetting) return
+    if (isResetting || !storyId) return
     setIsResetting(true)
 
     try {
@@ -277,7 +297,7 @@ export function useRoomVotes(
 
     const hasChanges = JSON.stringify(participants) !== JSON.stringify(updatedParticipants)
     if (hasChanges) {
-      setParticipants(updatedParticipants as Participant[])
+      setParticipantsState(updatedParticipants as Participant[])
     }
   }, [participants, session?.user, localStorageParticipantId, revealed])
 

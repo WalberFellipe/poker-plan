@@ -9,6 +9,7 @@ interface RealtimeEvents {
     storyId: string;
     userId: string;
     value: number;
+    participantId: string;
   };
   "vote:reveal": {
     storyId: string;

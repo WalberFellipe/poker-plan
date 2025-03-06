@@ -2,6 +2,7 @@ export interface RealtimeVoteEvent {
   storyId: string;
   userId: string;
   value: number;
+  participantId: string;
 }
 
 export interface RealtimeRevealEvent {

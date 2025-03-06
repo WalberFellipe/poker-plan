@@ -44,10 +44,11 @@ export default function RoomClient({ roomId }: RoomClientProps) {
     selectCard,
     reveal, 
     reset 
-  } = useRoomVotes(
-    currentStory?.id ?? '', 
-    roomId
-  );
+  } = useRoomVotes({
+    roomId,
+    storyId: currentStory?.id ?? null,
+    setParticipants
+  });
 
   useEffect(() => {
     const loadParticipants = async () => {

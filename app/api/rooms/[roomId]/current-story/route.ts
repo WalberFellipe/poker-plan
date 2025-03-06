@@ -11,6 +11,23 @@ export async function GET(
   const session = await getServerSession(authOptions);
 
   try {
+    
+    const room = await prisma.room.findUnique({
+      where: {
+        id: roomId,
+        expiresAt: {
+          gt: new Date()
+        }
+      }
+    });
+
+    if (!room) {
+      return NextResponse.json(
+        { error: "Sala não encontrada ou expirada" },
+        { status: 404 }
+      );
+    }
+
     if (session?.user?.id) {
       await prisma.roomParticipant.upsert({
         where: {

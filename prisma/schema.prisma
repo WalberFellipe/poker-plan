@@ -66,6 +66,7 @@ model Room {
   id                  String               @id @default(cuid())
   name                String
   createdAt          DateTime             @default(now())
+  expiresAt          DateTime             
   stories            Story[]
   participants       RoomParticipant[]
   anonymousParticipants AnonymousParticipant[]
@@ -73,6 +74,7 @@ model Room {
   owner              User                 @relation("RoomHost", fields: [ownerId], references: [id])
 
   @@index([ownerId])
+  @@index([expiresAt])
 }
 
 model Story {
