@@ -9,7 +9,8 @@ import {
 import { 
   RealtimeVoteEvent, 
   RealtimeRevealEvent, 
-  RealtimeResetEvent 
+  RealtimeResetEvent,
+  RealtimeCardSelectedEvent
 } from '@/types/realtime-events';
 import { voteService } from '@/services/voteService';
 import { useSession } from "next-auth/react";
@@ -22,6 +23,7 @@ declare module './useRealtime' {
     'vote:new': (data: RealtimeVoteEvent) => void;
     'vote:reveal': (data: RealtimeRevealEvent) => void;
     'story:reset': (data: RealtimeResetEvent) => void;
+    'card:selected': (data: RealtimeCardSelectedEvent) => void;
   }
 }
 
@@ -142,6 +144,18 @@ export function useRoomVotes({ roomId, storyId, setParticipants }: UseRoomVotesP
           current.map(participant => ({ ...participant, hasVoted: false }))
         )
       }
+    },
+
+    'card:selected': (data: RealtimeCardSelectedEvent) => {
+      if (setParticipants) {
+        setParticipants(current => 
+          current.map(participant => 
+            participant.id === data.participantId || participant.userId === data.userId
+              ? { ...participant, hasVoted: true }
+              : participant
+          )
+        )
+      }
     }
   }
 
@@ -250,9 +264,26 @@ export function useRoomVotes({ roomId, storyId, setParticipants }: UseRoomVotesP
   const selectCard = async (value: CardValue) => {
     setLocalVote(value === "?" ? null : value);
     
+    if (value !== "?") {
+      try {
+        await fetch(`/api/rooms/${roomId}/card-selected`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            participantId: participantIdForVote,
+            storyId
+          })
+        });
+      } catch (error) {
+        console.error('Erro ao notificar seleção de carta:', error);
+      }
+    }
+
     if (revealed && value !== "?") {
       try {
-        await voteService.sendVote(storyId ?? "", Number(value), storyId ?? "")
+        await voteService.sendVote(storyId ?? "", Number(value), participantIdForVote)
       } catch {
         toast({
           title: "Erro",

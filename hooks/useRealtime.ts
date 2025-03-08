@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { pusherClient } from '@/lib/pusher'
-import { RealtimeParticipantJoinEvent, RealtimeParticipantLeaveEvent } from '@/types/realtime-events'
+import { RealtimeParticipantJoinEvent, RealtimeParticipantLeaveEvent, RealtimeCardSelectedEvent } from '@/types/realtime-events'
 
 interface RealtimeEvents {
   "vote:new": {
@@ -30,6 +30,7 @@ interface RealtimeEvents {
   };
   "participant:join": RealtimeParticipantJoinEvent;
   "participant:leave": RealtimeParticipantLeaveEvent;
+  "card:selected": RealtimeCardSelectedEvent;
 }
 
 type EventHandlers = {

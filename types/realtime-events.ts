@@ -26,4 +26,10 @@ export interface RealtimeParticipantLeaveEvent {
   participantId: string;
   userId?: string;
   isAnonymous: boolean;
+}
+
+export interface RealtimeCardSelectedEvent {
+  participantId: string;
+  userId: string;
+  storyId: string;
 } 
