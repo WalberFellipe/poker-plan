@@ -45,4 +45,12 @@ export interface VoteWithUser extends PrismaVote {
   participantId: string;
   value: number;
   
-} 
+}
+
+export interface Room {
+  id: string;
+  name: string;
+  ownerId: string;
+  expiresAt: Date;
+  deckValues: string[];
+}

@@ -6,25 +6,25 @@ import { pusher } from "@/lib/pusher"
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    const { name, participantName } = await req.json()
-    
+    const session = await getServerSession(authOptions);
+    const { name, participantName, deckValues } = await req.json();
+
     if (!name) {
       return NextResponse.json(
         { error: "Nome da sala é obrigatório" },
         { status: 400 }
-      )
+      );
     }
 
     // Primeiro criar um usuário anônimo se não houver sessão
     let ownerId = session?.user?.id;
     let participant;
-    
+
     if (!ownerId) {
       const anonymousUser = await prisma.user.create({
         data: {
-          name: participantName || 'Anônimo',
-        }
+          name: participantName || "Anônimo",
+        },
       });
       ownerId = anonymousUser.id;
     }
@@ -35,6 +35,7 @@ export async function POST(req: Request) {
         name,
         ownerId,
         expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000),
+        deckValues,
       },
     });
 
@@ -43,16 +44,16 @@ export async function POST(req: Request) {
       participant = await prisma.roomParticipant.create({
         data: {
           roomId: room.id,
-          userId: session.user.id
-        }
-      })
+          userId: session.user.id,
+        },
+      });
     } else {
       participant = await prisma.anonymousParticipant.create({
         data: {
           roomId: room.id,
-          name: participantName
-        }
-      })
+          name: participantName,
+        },
+      });
     }
 
     // Notificar outros participantes via Pusher
@@ -63,13 +64,12 @@ export async function POST(req: Request) {
       isAnonymous: !session?.user,
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       room,
       participant,
-      participantId: participant.id
-    })
-
+      participantId: participant.id,
+    });
   } catch {
     return NextResponse.json({ 
       success: false,

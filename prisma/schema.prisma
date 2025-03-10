@@ -52,6 +52,7 @@ model User {
   participatedRooms RoomParticipant[] @relation("RoomParticipation")
   createdRooms      Room[]    @relation("RoomHost")
   votes             Vote[]
+  customDecks        CustomDeck[]
 }
 
 model VerificationToken {
@@ -72,6 +73,7 @@ model Room {
   anonymousParticipants AnonymousParticipant[]
   ownerId            String
   owner              User                 @relation("RoomHost", fields: [ownerId], references: [id])
+  deckValues         String[]
 
   @@index([ownerId])
   @@index([expiresAt])
@@ -145,4 +147,16 @@ model AnonymousVote {
   participant   AnonymousParticipant @relation(fields: [participantId], references: [id])
 
   @@unique([participantId, storyId])
+}
+
+model CustomDeck {
+  id        String   @id @default(cuid())
+  name      String
+  values    String[]
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }

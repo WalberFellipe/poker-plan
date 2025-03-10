@@ -10,6 +10,7 @@ interface VotingCardProps {
   disabled?: boolean
   onClick?: () => void
   size?: "sm" | "lg"
+  hideValue?: boolean
 }
 
 export function VotingCard({
@@ -18,7 +19,8 @@ export function VotingCard({
   revealed = false,
   disabled,
   onClick,
-  size = "sm"
+  size = "sm",
+  hideValue = false
 }: VotingCardProps) {
   return (
     <motion.div
@@ -43,7 +45,7 @@ export function VotingCard({
         animate={{ rotateY: revealed ? 180 : 0 }}
         transition={{ duration: 0.6 }}
       >
-        {revealed ? value : "?"}
+        {hideValue ? (revealed ? value : "?") : value}
       </motion.div>
     </motion.div>
   )

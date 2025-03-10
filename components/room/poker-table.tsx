@@ -68,6 +68,7 @@ export function PokerTable({ participants, revealed, votes, className }: PokerTa
                     selected={false}
                     revealed={revealed}
                     size="lg"
+                    hideValue={true}
                   />
                   <div className="flex items-center gap-2">
                     {participant.image ? (

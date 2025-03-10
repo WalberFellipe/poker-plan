@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/useToast"
 import { useSession } from "next-auth/react"
+import { DeckSelector } from "@/components/room/deck-selector"
 
 export default function CreateRoomPage() {
   const [roomName, setRoomName] = useState("")
   const [participantName, setParticipantName] = useState("")
+  const [selectedDeckValues, setSelectedDeckValues] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
@@ -21,9 +23,12 @@ export default function CreateRoomPage() {
     setIsLoading(true)
     
     try {
-      // Se não estiver autenticado e não tiver nome, mostrar erro
       if (!session && !participantName) {
         throw new Error("Nome do participante é obrigatório")
+      }
+
+      if (selectedDeckValues.length === 0) {
+        throw new Error("Selecione um baralho para a sala")
       }
 
       const response = await fetch("/api/room", {
@@ -33,7 +38,8 @@ export default function CreateRoomPage() {
         },
         body: JSON.stringify({ 
           name: roomName,
-          participantName: session?.user?.name || participantName 
+          participantName: session?.user?.name || participantName,
+          deckValues: selectedDeckValues
         }),
       })
 
@@ -47,7 +53,6 @@ export default function CreateRoomPage() {
         throw new Error("ID da sala não foi gerado")
       }
 
-      // Salvar participantId se não estiver autenticado
       if (!session && data.participant?.id) {
         localStorage.setItem('participantId', data.participant.id)
       }
@@ -103,10 +108,17 @@ export default function CreateRoomPage() {
               </div>
             )}
 
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Baralho da Sala
+              </label>
+              <DeckSelector onDeckSelect={setSelectedDeckValues} />
+            </div>
+
             <Button 
               type="submit" 
               className="w-full"
-              disabled={isLoading || (!session && !participantName)}
+              disabled={isLoading || (!session && !participantName) || selectedDeckValues.length === 0}
             >
               {isLoading ? "Criando..." : "Criar Sala"}
             </Button>

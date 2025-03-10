@@ -65,4 +65,11 @@ export interface VoteWithUser extends Vote {
   user: Pick<User, "id" | "name" | "image">;
   participantId: string;
   value: number;
+}
+
+export interface CustomDeck {
+  id: string;
+  name: string;
+  values: string[];
+  userId?: string;
 } 

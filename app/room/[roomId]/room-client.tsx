@@ -32,6 +32,7 @@ export default function RoomClient({ roomId }: RoomClientProps) {
   const [currentStory, setCurrentStory] = useState<Story | null>(null);
   const searchParams = useSearchParams();
   const isInvited = searchParams.get('invited') === 'true';
+  const [deckValues, setDeckValues] = useState<string[]>([]);
 
   const { 
     votes, 
@@ -143,6 +144,32 @@ export default function RoomClient({ roomId }: RoomClientProps) {
 
     loadCurrentStory()
   }, [roomId, toast])
+
+  useEffect(() => {
+    const loadRoom = async () => {
+      try {
+        const response = await fetch(`/api/room/${roomId}`)
+        const data = await response.json()
+        
+        if (response.ok) {
+          const values = data.deckValues?.length > 0 
+            ? data.deckValues 
+            : DEFAULT_CARDS.values.map(String)
+          
+          console.log("Valores a serem definidos:", JSON.stringify(values, null, 2))
+          setDeckValues(values)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar sala:', error)
+      }
+    }
+
+    loadRoom()
+  }, [roomId])
+
+  useEffect(() => {
+    console.log("deckValues atualizados:", JSON.stringify(deckValues, null, 2))
+  }, [deckValues])
 
   const handleCardSelect = (value: number) => {
     selectCard(value)
@@ -260,17 +287,28 @@ export default function RoomClient({ roomId }: RoomClientProps) {
 
             <div className="border rounded-lg p-4">
               <div className="flex justify-center gap-2 flex-wrap">
-                {DEFAULT_CARDS.values.map((value) => (
-                  <VotingCard
-                    key={value}
-                    value={value}
-                    selected={localVote === value}
-                    revealed={true}
-                    disabled={isRevealing}
-                    onClick={() => typeof value === 'number' && handleCardSelect(value)}
-                    size="sm"
-                  />
-                ))}
+                {deckValues.length > 0 ? (
+                  deckValues.map((value) => (
+                    <VotingCard
+                      key={value}
+                      value={value}
+                      selected={localVote === (value === "?" ? value : Number(value))}
+                      revealed={revealed}
+                      disabled={isRevealing}
+                      hideValue={false}
+                      onClick={() => {
+                        if (value === "?") return
+                        const numValue = Number(value)
+                        if (!isNaN(numValue)) {
+                          handleCardSelect(numValue)
+                        }
+                      }}
+                      size="sm"
+                    />
+                  ))
+                ) : (
+                  <div>Carregando cartas...</div>
+                )}
               </div>
             </div>
           </div>
