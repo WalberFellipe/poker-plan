@@ -60,6 +60,7 @@ export function CustomDeckModal({ open, onClose, onSave }: CustomDeckModalProps)
               value={deckName}
               onChange={(e) => setDeckName(e.target.value)}
               placeholder="Ex: Meu Baralho"
+              required
             />
           </div>
 
@@ -106,5 +107,5 @@ export function CustomDeckModal({ open, onClose, onSave }: CustomDeckModalProps)
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 } 

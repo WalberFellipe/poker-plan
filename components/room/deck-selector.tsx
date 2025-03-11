@@ -12,9 +12,12 @@ interface DeckSelectorProps {
 
 export function DeckSelector({ onDeckSelect }: DeckSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedDeckId, setSelectedDeckId] = useState<string>("")
   const { decks, isLoading, saveDeck } = useDecks()
 
   const handleDeckSelect = (deckId: string) => {
+    setSelectedDeckId(deckId)
+    
     if (deckId === "custom") {
       setIsModalOpen(true)
       return
@@ -26,9 +29,18 @@ export function DeckSelector({ onDeckSelect }: DeckSelectorProps) {
     }
   }
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    // Voltar para a seleção anterior se existir
+    if (selectedDeckId === "custom") {
+      setSelectedDeckId("")
+    }
+  }
+
   const handleSaveCustomDeck = async (deck: { name: string; values: string[] }) => {
     await saveDeck(deck)
     onDeckSelect(deck.values)
+    setIsModalOpen(false)
   }
 
   if (isLoading) {
@@ -42,8 +54,8 @@ export function DeckSelector({ onDeckSelect }: DeckSelectorProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <Select onValueChange={handleDeckSelect}>
-        <SelectTrigger className="w-[200px]">
+      <Select value={selectedDeckId} onValueChange={handleDeckSelect}>
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Escolha um baralho" />
         </SelectTrigger>
         <SelectContent>
@@ -58,7 +70,7 @@ export function DeckSelector({ onDeckSelect }: DeckSelectorProps) {
 
       <CustomDeckModal
         open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onSave={handleSaveCustomDeck}
       />
     </div>
