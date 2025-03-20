@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(
   request: Request,
-  props: { params: Promise<{ roomId: string }> }
+  { params }: { params: { roomId: string } }
 ) {
-  const { roomId } = await props.params;
+  const { roomId } = params;
 
   try {
     const room = await prisma.room.findUnique({
