@@ -1,0 +1,59 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "close": "Fechar",
+    "save": "Salvar"
+  },
+  "auth": {
+    "signIn": "Entrar",
+    "signUp": "Cadastrar",
+    "signOut": "Sair"
+  },
+  "home": {
+    "hero": {
+      "title": "Planning Poker",
+      "subtitle": "Estimativas Ágeis de Forma Simples e Eficiente",
+      "subtitle2": "Crie uma sala e compartilhe com seus colegas para estimar o esforço de cada item do seu backlog.",
+      "subtitle3": "Estamos em desenvolvimento, por favor, use o feedback para melhorar o sistema.",
+      "createRoom": "Criar Sala",
+      "joinRoom": "Entrar na Sala"
+    }
+  },
+  "room": {
+    "create": {
+      "title": "Criar Nova Sala",
+      "description": "Configure sua sala de Planning Poker",
+      "roomName": "Nome da Sala",
+      "roomNamePlaceholder": "Ex: Sprint 23 Planning",
+      "participantName": "Seu Nome",
+      "participantNamePlaceholder": "Como você quer ser chamado?",
+      "deck": "Baralho da Sala",
+      "deckPlaceholder": "Escolha um baralho",
+      "createButton": "Criar Sala",
+      "createSuccess": "Sala criada com sucesso!",
+      "createError": "Erro ao criar sala"
+    },
+    "voting": {
+      "reveal": "Revelar Votos",
+      "reset": "Reiniciar",
+      "average": "Média",
+      "voted": "Votou",
+      "votedSuccess": "Voto registrado com sucesso!",
+      "votedError": "Erro ao registrar voto"
+    },
+    "stats": {
+      "title": "Estatísticas",
+      "averageVote": "Média de Votos",
+      "averageTime": "Tempo Médio",
+      "totalVotes": "Total de Votos",
+      "export": "Exportar Resultados",
+      "exportSuccess": "Resultados exportados com sucesso!",
+      "exportError": "Erro ao exportar resultados"
+    }
+  },
+  "metadata": {
+    "title": "Planning Poker - Estimativas Ágeis",
+    "description": "Organize suas sessões de Planning Poker de forma eficiente e colaborativa"
+  }
+} 

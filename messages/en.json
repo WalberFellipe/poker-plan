@@ -1,0 +1,58 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "close": "Close",
+    "save": "Save"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out"
+  },
+  "home": {
+    "hero": {
+      "title": "Planning Poker",
+      "subtitle": "Agile Estimations in a Simple and Efficient Way",
+      "subtitle2": "Create a room and share with your colleagues to estimate the effort of each item in your backlog.",
+      "createRoom": "Create Room",
+      "joinRoom": "Join Room"
+    }
+  },
+  "room": {
+    "create": {
+      "title": "Create New Room",
+      "description": "Configure your Planning Poker room",
+      "roomName": "Room Name",
+      "roomNamePlaceholder": "Ex: Sprint 23 Planning",
+      "participantName": "Your Name",
+      "participantNamePlaceholder": "How do you want to be called?",
+      "deck": "Room Deck",
+      "deckPlaceholder": "Choose a deck",
+      "createButton": "Create Room",
+      "createSuccess": "Room created successfully!",
+      "createError": "Error creating room"
+    },
+    "voting": {
+      "reveal": "Reveal Votes",
+      "reset": "Reset",
+      "average": "Average",
+      "voted": "Voted",
+      "votedSuccess": "Vote recorded successfully!",
+      "votedError": "Error recording vote"
+    },
+    "stats": {
+      "title": "Statistics",
+      "averageVote": "Average Vote",
+      "averageTime": "Average Time",
+      "totalVotes": "Total Votes",
+      "export": "Export Results",
+      "exportSuccess": "Results exported successfully!",
+      "exportError": "Error exporting results"
+    }
+  },
+  "metadata": {
+    "title": "Planning Poker - Agile Estimations",
+    "description": "Organize your Planning Poker sessions efficiently and collaboratively"
+  }
+} 

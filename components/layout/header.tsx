@@ -12,22 +12,26 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { User } from "lucide-react"
 import Image from "next/image"
+import { useTranslations } from 'next-intl'
+import { LanguageSwitcher } from "@/components/layout/language-switcher"
+
 export function Header() {
   const { data: session, status } = useSession()
+  const t = useTranslations()
 
   return (
     <header className="border-b w-full">
       <div className="flex h-16 items-center justify-between px-8 w-screen max-w-none">
         <div className="flex items-center gap-6">
           <Link href="/" className="font-bold">
-            Planning Poker
+            Poker Plan
           </Link>
           <nav className="hidden gap-6 md:flex">
             <Link 
               href="/room/create" 
               className="text-sm font-medium transition-colors hover:text-primary"
             >
-              Criar Sala
+              {t('room.create.title')}
             </Link>
           </nav>
         </div>
@@ -52,25 +56,26 @@ export function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
-                  Logado como: {session.user?.email}
+                  {t('auth.loggedInAs')}: {session.user?.email}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => signOut()}>
-                  Sair
+                  {t('auth.signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : status === 'loading' ? (
-            <span>Carregando...</span>
+            <span>{t('common.loading')}</span>
           ) : (
             <div className="hidden md:flex gap-4">
               <Button variant="outline" asChild>
-                <Link href="/login">Entrar</Link>
+                <Link href="/login">{t('auth.signIn')}</Link>
               </Button>
               <Button asChild>
-                <Link href="/register">Cadastrar</Link>
+                <Link href="/register">{t('auth.signUp')}</Link>
               </Button>
             </div>
           )}
+          <LanguageSwitcher />
           <ThemeToggle />
         </div>
       </div>
