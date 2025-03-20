@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(
-  request: Request,
-  { params }: { params: { roomId: string } }
+  req: NextRequest,
+  context: { params: { roomId: string } }
 ) {
-  const { roomId } = params;
+  const { roomId } = context.params;
 
   try {
     const room = await prisma.room.findUnique({
