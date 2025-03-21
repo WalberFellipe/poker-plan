@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-interface RouteContext {
-  params: {
-    roomId: string
-  }
-}
-
 export async function GET(
-  request: NextRequest,
-  { params }: RouteContext
+  _request: NextRequest,
+  { params }: { params: { roomId: string } }
 ) {
   const { roomId } = params;
 
