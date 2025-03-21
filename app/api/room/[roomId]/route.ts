@@ -1,11 +1,9 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { roomId: string } }
-) {
-  const { roomId } = params;
+export async function GET(request: Request) {
+  // Pegar o roomId da URL em vez de params
+  const roomId = request.url.split('/').pop();
 
   try {
     const room = await prisma.room.findUnique({
