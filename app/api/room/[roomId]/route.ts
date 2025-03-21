@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+interface RouteContext {
+  params: {
+    roomId: string
+  }
+}
+
 export async function GET(
-  req: NextRequest,
-  context: { params: { roomId: string } }
+  request: NextRequest,
+  { params }: RouteContext
 ) {
-  const { roomId } = context.params;
+  const { roomId } = params;
 
   try {
     const room = await prisma.room.findUnique({
