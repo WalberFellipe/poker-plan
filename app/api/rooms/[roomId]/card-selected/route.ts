@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { pusher } from "@/lib/pusher";
+import { getPusher } from "@/lib/pusher";
 
 export async function POST(
   request: Request,
@@ -12,7 +12,7 @@ export async function POST(
     const session = await getServerSession(authOptions);
     const { participantId, storyId } = await request.json();
 
-    await pusher.trigger(`room-${roomId}`, "card:selected", {
+    await getPusher().trigger(`room-${roomId}`, "card:selected", {
       participantId,
       userId: session?.user?.id,
       storyId,

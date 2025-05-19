@@ -3,7 +3,7 @@ import PusherClient from "pusher-js";
 
 let pusherInstance: Pusher | null = null;
 
-export const pusher = (() => {
+export function getPusher() {
   if (!pusherInstance) {
     if (
       !process.env.PUSHER_APP_ID ||
@@ -24,7 +24,8 @@ export const pusher = (() => {
   }
 
   return pusherInstance;
-})();
+}
+
 
 export const pusherClient = new PusherClient(
   process.env.NEXT_PUBLIC_PUSHER_KEY!,

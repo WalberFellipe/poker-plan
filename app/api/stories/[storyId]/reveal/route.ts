@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { pusher } from '@/lib/pusher'
+import { getPusher } from '@/lib/pusher'
 
 export async function POST(
   request: Request,
@@ -58,7 +58,7 @@ export async function POST(
     });
 
     // Notificar via Pusher
-    await pusher.trigger(`room-${story.roomId}`, "vote:reveal", {
+    await getPusher().trigger(`room-${story.roomId}`, "vote:reveal", {
       storyId,
     });
 

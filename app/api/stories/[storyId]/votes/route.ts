@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { pusher } from "@/lib/pusher";
+import { getPusher } from "@/lib/pusher";
 
 export async function GET(
   request: Request,
@@ -97,7 +97,7 @@ export async function POST(
       }
 
       // Notificar via Pusher
-      await pusher.trigger(`room-${story.roomId}`, "vote:new", {
+      await getPusher().trigger(`room-${story.roomId}`, "vote:new", {
         storyId,
         userId: session.user.id,
         value: story.revealed ? value : undefined,
@@ -143,7 +143,7 @@ export async function POST(
       }
 
       // Notificar via Pusher
-      await pusher.trigger(`room-${story.roomId}`, "vote:new", {
+      await getPusher().trigger(`room-${story.roomId}`, "vote:new", {
         storyId,
         userId: participantId,
         value: story.revealed ? value : undefined,

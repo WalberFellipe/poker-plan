@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { authOptions } from "@/lib/auth"
-import { pusher } from "@/lib/pusher"
+import { getPusher } from "@/lib/pusher"
 
 export async function POST(req: Request) {
   try {
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     }
 
     // Notificar outros participantes via Pusher
-    await pusher.trigger(room.id, "participant:join", {
+    await getPusher().trigger(room.id, "participant:join", {
       participantId: participant.id,
       name: session?.user?.name || participantName,
       image: session?.user?.image || null,

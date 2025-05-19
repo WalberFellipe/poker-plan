@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { pusher } from '@/lib/pusher'
+import { getPusher } from '@/lib/pusher'
 
 export async function POST(
   request: Request,
@@ -27,7 +27,7 @@ export async function POST(
       });
     }
 
-    await pusher.trigger(roomId, "participant:leave", {
+    await getPusher().trigger(roomId, "participant:leave", {
       participantId,
       isAnonymous,
     });
