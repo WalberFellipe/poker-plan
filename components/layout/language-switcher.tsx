@@ -32,8 +32,8 @@ export function LanguageSwitcher() {
   const handleLanguageChange = (locale: string) => {
     localStorage.setItem('locale', locale)
     setCurrentLocale(locale)
-    const newPathname = pathname.replace(/^\/[^\/]+/, `/${locale}`)
-    router.push(newPathname)
+    const newPathname = pathname?.replace(/^\/[^\/]+/, `/${locale}`)
+    router.push(newPathname || '/')
   }
 
   return (

@@ -31,7 +31,7 @@ export default function RoomClient({ roomId }: RoomClientProps) {
   const { toast } = useToast();
   const [currentStory, setCurrentStory] = useState<Story | null>(null);
   const searchParams = useSearchParams();
-  const isInvited = searchParams.get('invited') === 'true';
+  const isInvited = searchParams?.get('invited') === 'true';
   const [deckValues, setDeckValues] = useState<string[]>([]);
 
   const { 
