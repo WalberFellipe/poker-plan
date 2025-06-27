@@ -29,10 +29,13 @@
       "participantName": "Seu Nome",
       "participantNamePlaceholder": "Como você quer ser chamado?",
       "deck": "Baralho da Sala",
-      "deckPlaceholder": "Escolha um baralho",
       "createButton": "Criar Sala",
+      "creatingButton": "Criando...",
       "createSuccess": "Sala criada com sucesso!",
-      "createError": "Erro ao criar sala"
+      "createError": "Erro ao criar sala",
+      "participantNameRequired": "Nome do participante é obrigatório",
+      "deckRequired": "Selecione um baralho para a sala",
+      "roomIdError": "ID da sala não foi gerado"
     },
     "voting": {
       "reveal": "Revelar Votos",
@@ -49,7 +52,49 @@
       "totalVotes": "Total de Votos",
       "export": "Exportar Resultados",
       "exportSuccess": "Resultados exportados com sucesso!",
-      "exportError": "Erro ao exportar resultados"
+      "exportError": "Erro ao exportar resultados",
+      "average": "Média",
+      "mode": "Moda"
+    },
+    "game": {
+      "title": "Planning Poker",
+      "loadingVotes": "Carregando votos...",
+      "loadingCards": "Carregando cartas...",
+      "reveal": "Revelar",
+      "revealing": "Revelando...",
+      "revealingIn": "Revelando em {countdown}...",
+      "reset": "Resetar",
+      "anonymous": "Anônimo",
+      "loadParticipantsError": "Não foi possível carregar os participantes",
+      "loadStoryError": "Não foi possível carregar a história atual",
+      "loadRoomError": "Erro ao carregar sala"
+    },
+    "invite": {
+      "button": "Convidar",
+      "shareTitle": "Planning Poker",
+      "shareText": "Junte-se à nossa sessão de Planning Poker!",
+      "linkCopied": "Link copiado!",
+      "linkCopiedDescription": "O link foi copiado para sua área de transferência",
+      "copyError": "Não foi possível copiar o link"
+    },
+    "participants": {
+      "title": "Participantes",
+      "anonymous": "Anônimo"
+    },
+    "deck": {
+      "loading": "Carregando baralhos...",
+      "placeholder": "Escolha um baralho",
+      "createCustom": "Criar Baralho Personalizado",
+      "customTitle": "Criar Baralho Personalizado",
+      "name": "Nome do Baralho",
+      "namePlaceholder": "Ex: Meu Baralho",
+      "values": "Valores do Baralho",
+      "valuesPlaceholder": "Ex: 1, 2, 3, 5, 8, 13, ?",
+      "valuesHelp": "Insira até 3 caracteres por cartão, separados por vírgulas.",
+      "preview": "Preview",
+      "previewHelp": "Esta é uma prévia de como ficará seu deck.",
+      "nameRequired": "Nome do baralho é obrigatório",
+      "valuesRequired": "Insira pelo menos um valor para o baralho"
     }
   },
   "metadata": {

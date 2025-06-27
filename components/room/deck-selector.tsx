@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CustomDeckModal } from "./custom-deck-modal"
 import { useDecks } from "@/hooks/useDecks"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface DeckSelectorProps {
   onDeckSelect: (values: string[]) => void
@@ -14,6 +15,7 @@ export function DeckSelector({ onDeckSelect }: DeckSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDeckId, setSelectedDeckId] = useState<string>("")
   const { decks, isLoading, saveDeck } = useDecks()
+  const t = useTranslations('room.deck')
 
   const handleDeckSelect = (deckId: string) => {
     setSelectedDeckId(deckId)
@@ -47,7 +49,7 @@ export function DeckSelector({ onDeckSelect }: DeckSelectorProps) {
     return (
       <div className="flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span>Carregando baralhos...</span>
+        <span>{t('loading')}</span>
       </div>
     )
   }
@@ -56,7 +58,7 @@ export function DeckSelector({ onDeckSelect }: DeckSelectorProps) {
     <div className="flex items-center gap-2">
       <Select value={selectedDeckId} onValueChange={handleDeckSelect}>
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="Escolha um baralho" />
+          <SelectValue placeholder={t('placeholder')} />
         </SelectTrigger>
         <SelectContent>
           {decks.map(deck => (
@@ -64,7 +66,7 @@ export function DeckSelector({ onDeckSelect }: DeckSelectorProps) {
               {deck.name}
             </SelectItem>
           ))}
-          <SelectItem value="custom">Criar Baralho Personalizado</SelectItem>
+          <SelectItem value="custom">{t('createCustom')}</SelectItem>
         </SelectContent>
       </Select>
 

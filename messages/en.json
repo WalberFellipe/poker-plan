@@ -28,10 +28,13 @@
       "participantName": "Your Name",
       "participantNamePlaceholder": "How do you want to be called?",
       "deck": "Room Deck",
-      "deckPlaceholder": "Choose a deck",
       "createButton": "Create Room",
+      "creatingButton": "Creating...",
       "createSuccess": "Room created successfully!",
-      "createError": "Error creating room"
+      "createError": "Error creating room",
+      "participantNameRequired": "Participant name is required",
+      "deckRequired": "Please select a deck for the room",
+      "roomIdError": "Room ID was not generated"
     },
     "voting": {
       "reveal": "Reveal Votes",
@@ -48,7 +51,49 @@
       "totalVotes": "Total Votes",
       "export": "Export Results",
       "exportSuccess": "Results exported successfully!",
-      "exportError": "Error exporting results"
+      "exportError": "Error exporting results",
+      "average": "Average",
+      "mode": "Mode"
+    },
+    "game": {
+      "title": "Planning Poker",
+      "loadingVotes": "Loading votes...",
+      "loadingCards": "Loading cards...",
+      "reveal": "Reveal",
+      "revealing": "Revealing...",
+      "revealingIn": "Revealing in {countdown}...",
+      "reset": "Reset",
+      "anonymous": "Anonymous",
+      "loadParticipantsError": "Could not load participants",
+      "loadStoryError": "Could not load current story",
+      "loadRoomError": "Error loading room"
+    },
+    "invite": {
+      "button": "Invite",
+      "shareTitle": "Planning Poker",
+      "shareText": "Join our Planning Poker session!",
+      "linkCopied": "Link copied!",
+      "linkCopiedDescription": "The link was copied to your clipboard",
+      "copyError": "Could not copy the link"
+    },
+    "participants": {
+      "title": "Participants",
+      "anonymous": "Anonymous"
+    },
+    "deck": {
+      "loading": "Loading decks...",
+      "placeholder": "Choose a deck",
+      "createCustom": "Create Custom Deck",
+      "customTitle": "Create Custom Deck",
+      "name": "Deck Name",
+      "namePlaceholder": "Ex: My Deck",
+      "values": "Deck Values",
+      "valuesPlaceholder": "Ex: 1, 2, 3, 5, 8, 13, ?",
+      "valuesHelp": "Enter up to 3 characters per card, separated by commas.",
+      "preview": "Preview",
+      "previewHelp": "This is a preview of how your deck will look.",
+      "nameRequired": "Deck name is required",
+      "valuesRequired": "Please enter at least one value for the deck"
     }
   },
   "metadata": {

@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/useToast";
 import { JoinRoomModal } from "@/components/room/join-room-modal";
 import { useSearchParams } from "next/navigation";
 import { RealtimeParticipantJoinEvent, RealtimeParticipantLeaveEvent } from "@/types/realtime-events";
+import { useTranslations } from "next-intl";
 
 
 interface RoomClientProps {
@@ -33,6 +34,8 @@ export default function RoomClient({ roomId }: RoomClientProps) {
   const searchParams = useSearchParams();
   const isInvited = searchParams?.get('invited') === 'true';
   const [deckValues, setDeckValues] = useState<string[]>([]);
+  const t = useTranslations('room.game');
+  const tCommon = useTranslations('common');
 
   const { 
     votes, 
@@ -61,15 +64,15 @@ export default function RoomClient({ roomId }: RoomClientProps) {
         setParticipants(data);
       } catch {
         toast({
-          title: "Erro",
-          description: "Não foi possível carregar os participantes",
+          title: tCommon('error'),
+          description: t('loadParticipantsError'),
           variant: "destructive"
         });
       }
     };
 
     loadParticipants();
-  }, [roomId, toast]);
+  }, [roomId, toast, t, tCommon]);
 
   useRealtime(roomId, {
     'participant:join': (data: RealtimeParticipantJoinEvent) => {
@@ -87,7 +90,7 @@ export default function RoomClient({ roomId }: RoomClientProps) {
         const newParticipant: TableParticipant = {
           id: data.participantId,
           userId: data.userId ?? data.participantId,
-          name: data.name ?? 'Anônimo',
+          name: data.name ?? t('anonymous'),
           image: data.image || '',
           isAnonymous: data.isAnonymous,
           hasVoted: false,
@@ -135,15 +138,15 @@ export default function RoomClient({ roomId }: RoomClientProps) {
         setCurrentStory(story)
       } catch {
         toast({
-          title: "Erro",
-          description: "Não foi possível carregar a história atual",
+          title: tCommon('error'),
+          description: t('loadStoryError'),
           variant: "destructive"
         })
       }
     }
 
     loadCurrentStory()
-  }, [roomId, toast])
+  }, [roomId, toast, t, tCommon])
 
   useEffect(() => {
     const loadRoom = async () => {
@@ -156,16 +159,15 @@ export default function RoomClient({ roomId }: RoomClientProps) {
             ? data.deckValues 
             : DEFAULT_CARDS.values.map(String)
           
-          console.log("Valores a serem definidos:", JSON.stringify(values, null, 2))
           setDeckValues(values)
         }
       } catch (error) {
-        console.error('Erro ao carregar sala:', error)
+        console.error(t('loadRoomError'), error)
       }
     }
 
     loadRoom()
-  }, [roomId])
+  }, [roomId, t])
 
   useEffect(() => {
     console.log("deckValues atualizados:", JSON.stringify(deckValues, null, 2))
@@ -183,7 +185,7 @@ export default function RoomClient({ roomId }: RoomClientProps) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Carregando...</span>
+        <span className="ml-2">{tCommon('loading')}</span>
       </div>
     )
   }
@@ -218,14 +220,13 @@ export default function RoomClient({ roomId }: RoomClientProps) {
       {isLoading ? (
         <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
           <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">Carregando votos...</span>
+          <span className="ml-2">{t('loadingVotes')}</span>
         </div>
       ) : (
         <div className="grid grid-cols-[250px,1fr] gap-8 h-[calc(100vh-10rem)]">
-          {/* Sidebar Esquerda */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-2xl font-bold">Planning Poker</h1>
+              <h1 className="text-2xl font-bold">{t('title')}</h1>
               <p className="text-sm text-muted-foreground">
                 {currentStory?.title}
               </p>
@@ -248,12 +249,12 @@ export default function RoomClient({ roomId }: RoomClientProps) {
                 {isRevealing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {revealCountdown !== null ? `Revelando em ${revealCountdown}...` : 'Revelando...'}
+                    {revealCountdown !== null ? t('revealingIn', { countdown: revealCountdown }) : t('revealing')}
                   </>
                 ) : (
                   <>
                     <Eye className="mr-2 h-4 w-4" />
-                    Revelar
+                    {t('reveal')}
                   </>
                 )}
               </Button>
@@ -267,7 +268,7 @@ export default function RoomClient({ roomId }: RoomClientProps) {
                 ) : (
                   <RotateCcw className="mr-2 h-4 w-4" />
                 )}
-                Resetar
+                {t('reset')}
               </Button>
               <InviteButton roomId={roomId} />
             </div>
@@ -307,7 +308,7 @@ export default function RoomClient({ roomId }: RoomClientProps) {
                     />
                   ))
                 ) : (
-                  <div>Carregando cartas...</div>
+                  <div>{t('loadingCards')}</div>
                 )}
               </div>
             </div>

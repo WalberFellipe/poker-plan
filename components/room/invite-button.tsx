@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Share2 } from "lucide-react"
 import { useToast } from "@/hooks/useToast"
+import { useTranslations } from "next-intl"
 
 interface InviteButtonProps {
   roomId: string
@@ -10,6 +11,8 @@ interface InviteButtonProps {
 
 export function InviteButton({ roomId }: InviteButtonProps) {
   const { toast } = useToast()
+  const t = useTranslations('room.invite')
+  const tCommon = useTranslations('common')
 
   const handleShare = async () => {
     const url = `${window.location.origin}/room/${roomId}?invited=true`
@@ -17,8 +20,8 @@ export function InviteButton({ roomId }: InviteButtonProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Planning Poker',
-          text: 'Junte-se à nossa sessão de Planning Poker!',
+          title: t('shareTitle'),
+          text: t('shareText'),
           url
         })
       } catch {
@@ -33,13 +36,13 @@ export function InviteButton({ roomId }: InviteButtonProps) {
     try {
       await navigator.clipboard.writeText(text)
       toast({
-        title: "Link copiado!",
-        description: "O link foi copiado para sua área de transferência"
+        title: t('linkCopied'),
+        description: t('linkCopiedDescription')
       })
     } catch {
       toast({
-        title: "Erro",
-        description: "Não foi possível copiar o link",
+        title: tCommon('error'),
+        description: t('copyError'),
         variant: "destructive"
       })
     }
@@ -48,7 +51,7 @@ export function InviteButton({ roomId }: InviteButtonProps) {
   return (
     <Button variant="outline" onClick={handleShare}>
       <Share2 className="mr-2 h-4 w-4" />
-      Convidar
+      {t('button')}
     </Button>
   )
 } 

@@ -21,26 +21,29 @@ export function Header() {
 
   return (
     <header className="border-b w-full">
-      <div className="flex h-16 items-center justify-between px-8 w-screen max-w-none">
+      <div className="flex h-16 items-center justify-between px-8 [width:98vw] max-w-none">
         <div className="flex items-center gap-6">
           <Link href="/" className="font-bold">
             Poker Plan
           </Link>
           <nav className="hidden gap-6 md:flex">
-            <Link 
-              href="/room/create" 
+            <Link
+              href="/room/create"
               className="text-sm font-medium transition-colors hover:text-primary"
             >
-              {t('room.create.title')}
+              {t("room.create.title")}
             </Link>
           </nav>
         </div>
 
         <div className="flex items-center gap-4">
-          {status === 'authenticated' && session ? (
+          {status === "authenticated" && session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button
+                  variant="ghost"
+                  className="relative h-8 w-8 rounded-full"
+                >
                   {session.user?.image ? (
                     <Image
                       src={session.user.image}
@@ -56,22 +59,22 @@ export function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
-                  {t('auth.loggedInAs')}: {session.user?.email}
+                  {t("auth.loggedInAs")}: {session.user?.email}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => signOut()}>
-                  {t('auth.signOut')}
+                  {t("auth.signOut")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : status === 'loading' ? (
-            <span>{t('common.loading')}</span>
+          ) : status === "loading" ? (
+            <span>{t("common.loading")}</span>
           ) : (
             <div className="hidden md:flex gap-4">
               <Button variant="outline" asChild>
-                <Link href="/login">{t('auth.signIn')}</Link>
+                <Link href="/login">{t("auth.signIn")}</Link>
               </Button>
               <Button asChild>
-                <Link href="/register">{t('auth.signUp')}</Link>
+                <Link href="/register">{t("auth.signUp")}</Link>
               </Button>
             </div>
           )}
@@ -80,5 +83,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

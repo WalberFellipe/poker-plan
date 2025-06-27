@@ -1,4 +1,5 @@
 import { motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 
 interface VotingStatsProps {
   votes: number[]
@@ -6,6 +7,8 @@ interface VotingStatsProps {
 }
 
 export function VotingStats({ votes, revealed }: VotingStatsProps) {
+  const t = useTranslations('room.stats')
+
   if (!revealed || votes.length === 0) return null
 
   const numericVotes = votes.filter((v): v is number => typeof v === 'number')
@@ -29,11 +32,11 @@ export function VotingStats({ votes, revealed }: VotingStatsProps) {
     >
       <div className="flex gap-4">
         <div>
-          <span className="text-sm text-muted-foreground">Média:</span>
+          <span className="text-sm text-muted-foreground">{t('average')}:</span>
           <span className="ml-2 font-bold">{average}</span>
         </div>
         <div>
-          <span className="text-sm text-muted-foreground">Moda:</span>
+          <span className="text-sm text-muted-foreground">{t('mode')}:</span>
           <span className="ml-2 font-bold">{mode}</span>
         </div>
       </div>

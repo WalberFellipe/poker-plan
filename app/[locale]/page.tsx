@@ -6,7 +6,7 @@ export default function Home() {
   const t = useTranslations('home')
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col">
+    <div className="min-h-[calc(100vh-5rem)] flex flex-col">
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-20 px-4 md:px-6 space-y-10">

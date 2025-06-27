@@ -51,7 +51,7 @@ export function useDecks() {
   }
 
   const allDecks = [
-    { id: 'fibonacci', name: 'Fibonacci', values: CARD_PRESETS.fibonacci.values },
+    { id: 'fibonacci', name: 'Fibonacci', values: CARD_PRESETS.fibonacci.values.map(String) },
     { id: 'modified-fibonacci', name: 'Modified Fibonacci', values: ['0', '½', '1', '2', '3', '5', '8', '13', '20', '40', '100', '?', '☕'] },
     ...customDecks
   ]

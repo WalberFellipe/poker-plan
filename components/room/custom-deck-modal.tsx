@@ -8,6 +8,7 @@ import { VotingCard } from "./voting-card"
 import { Label } from "@/components/ui/label"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useTranslations } from "next-intl"
 
 interface CustomDeckModalProps {
   open: boolean
@@ -20,6 +21,8 @@ export function CustomDeckModal({ open, onClose, onSave }: CustomDeckModalProps)
   const [deckValues, setDeckValues] = useState("")
   const [previewValues, setPreviewValues] = useState<string[]>([])
   const [error, setError] = useState("")
+  const t = useTranslations('room.deck')
+  const tCommon = useTranslations('common')
 
   useEffect(() => {
     const values = deckValues
@@ -32,12 +35,12 @@ export function CustomDeckModal({ open, onClose, onSave }: CustomDeckModalProps)
 
   const handleSave = () => {
     if (!deckName) {
-      setError("Nome do baralho é obrigatório")
+      setError(t('nameRequired'))
       return
     }
 
     if (previewValues.length === 0) {
-      setError("Insira pelo menos um valor para o baralho")
+      setError(t('valuesRequired'))
       return
     }
 
@@ -49,31 +52,31 @@ export function CustomDeckModal({ open, onClose, onSave }: CustomDeckModalProps)
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Criar Baralho Personalizado</DialogTitle>
+          <DialogTitle>{t('customTitle')}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="deckName">Nome do Baralho</Label>
+            <Label htmlFor="deckName">{t('name')}</Label>
             <Input
               id="deckName"
               value={deckName}
               onChange={(e) => setDeckName(e.target.value)}
-              placeholder="Ex: Meu Baralho"
+              placeholder={t('namePlaceholder')}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="deckValues">Valores do Baralho</Label>
+            <Label htmlFor="deckValues">{t('values')}</Label>
             <Input
               id="deckValues"
               value={deckValues}
               onChange={(e) => setDeckValues(e.target.value)}
-              placeholder="Ex: 1, 2, 3, 5, 8, 13, ?"
+              placeholder={t('valuesPlaceholder')}
             />
             <p className="text-sm text-muted-foreground">
-              Insira até 3 caracteres por cartão, separados por vírgulas.
+              {t('valuesHelp')}
             </p>
           </div>
 
@@ -86,9 +89,9 @@ export function CustomDeckModal({ open, onClose, onSave }: CustomDeckModalProps)
 
           {previewValues.length > 0 && (
             <div className="space-y-2">
-              <Label>Preview</Label>
+              <Label>{t('preview')}</Label>
               <p className="text-sm text-muted-foreground">
-                Esta é uma prévia de como ficará seu deck.
+                {t('previewHelp')}
               </p>
               <div className="flex flex-wrap gap-2">
                 {previewValues.map((value, index) => (
@@ -101,9 +104,9 @@ export function CustomDeckModal({ open, onClose, onSave }: CustomDeckModalProps)
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Fechar
+            {tCommon('close')}
           </Button>
-          <Button onClick={handleSave}>Salvar</Button>
+          <Button onClick={handleSave}>{tCommon('save')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
