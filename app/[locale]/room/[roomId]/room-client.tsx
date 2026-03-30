@@ -274,11 +274,10 @@ export default function RoomClient({ roomId }: RoomClientProps) {
             </div>
 
             <div className="flex-1 flex items-center justify-center relative">
-              <PokerTable 
+              <PokerTable
                 participants={participantsWithVotes}
                 revealed={revealed}
                 votes={tableVotes}
-                className="..."
               />
               <VotingStats 
                 votes={votes.map(v => v.value).filter(Boolean)}

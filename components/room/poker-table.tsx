@@ -47,7 +47,7 @@ export function PokerTable({ participants, revealed, votes, className }: PokerTa
             <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent" />
 
             {/* Reflexo superior */}
-            <div className="absolute inset-0 bg-gradient-radial from-white/10 via-transparent to-transparent -top-1/2" />
+            <div className="absolute inset-0 bg-gradient-radial from-foreground/10 via-transparent to-transparent -top-1/2" />
           </div>
         </div>
 

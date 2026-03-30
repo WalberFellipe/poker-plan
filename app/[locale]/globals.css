@@ -6,78 +6,132 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/**
+ * Tokens semânticos (HSL sem função hsl(), padrão shadcn/Tailwind).
+ * Compatível com dark mode via classe .dark no <html>.
+ */
+
 @layer base {
   :root {
-    /* Cores base do tema claro */
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
-    
-    /* Cores da mesa de poker */
-    --table-bg: 215 25% 27%;
-    --table-border: 215 25% 23%;
-    --table-surface: 215 25% 27%;
-    --elevated-bg: 215 25% 20%;
-    
-    /* Cores de interface */
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 222 84% 5%;
+    /* Camadas de fundo */
+    --background: 218 100% 98.4%;
+    --background-secondary: 219 100% 96.7%;
+
+    /* Superfícies */
+    --surface: 0 0% 100%;
+    --surface-elevated: 216 100% 99%;
+
+    /* Bordas */
+    --border: 217 50% 89.8%;
+    --border-subtle: 220 45% 93%;
+
+    /* Texto */
+    --foreground: 222 47.4% 11.2%;
+    --foreground-secondary: 215 19.3% 34.5%;
+
+    /* Marca / ação primária */
+    --primary: 217 91.2% 59.8%;
+    --primary-hover: 221 83.2% 53.3%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Estados de interface (shadcn) */
+    --secondary: 219 100% 96.7%;
+    --secondary-foreground: 222 47.4% 11.2%;
+    --muted: 220 35% 95%;
+    --muted-foreground: 215 19.3% 34.5%;
+    --accent: 220 45% 94%;
+    --accent-foreground: 222 47.4% 11.2%;
+
+    /* Destrutivo */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Aliases shadcn → tokens semânticos */
+    --card: var(--surface);
+    --card-foreground: var(--foreground);
+    --popover: var(--surface);
+    --popover-foreground: var(--foreground);
+    --input: var(--border);
+    --ring: 217 91.2% 59.8%;
+
+    /* Brilho / hero (mesmo matiz da primária, opacidade via Tailwind) */
+    --accent-glow: 217 91.2% 59.8%;
+    --hero-glow: 217 91.2% 59.8%;
+
+    /* Sombras e overlay */
+    --shadow-card: 220 45% 40%;
+    --overlay: 222 47.4% 11.2%;
+
+    /* Mesa de poker (tom compatível com o app) */
+    --table-bg: 218 42% 16%;
+    --table-border: 218 38% 12%;
+    --table-surface: 218 42% 18%;
+    --elevated-bg: 218 42% 14%;
+
     --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --button-border: var(--primary);
+
+    /* Gráficos (tons frios, legíveis no claro) */
+    --chart-1: 217 91% 55%;
+    --chart-2: 199 89% 48%;
+    --chart-3: 221 83% 53%;
+    --chart-4: 215 25% 45%;
+    --chart-5: 262 83% 58%;
+
+    --button-border: var(--border);
   }
+
   .dark {
-    /* Cores base do tema escuro */
-    --background: 215 35% 15%;
-    --foreground: 210 40% 98%;
-    
-    --table-bg: 215 25% 27%;
-    --table-border: 215 25% 23%;
-    --table-surface: 215 25% 27%;
-    --elevated-bg: 215 25% 20%;
-    
-    /* Cores de interface */
-    --card: 222 84% 5%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 84% 5%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 2.25% 26%;
-    --input: 217 33% 17%;
-    --ring: 213 27% 84%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --button-border: 0 0% 100%;
+    --background: 220 48.8% 8.4%;
+    --background-secondary: 220 48.4% 12.2%;
+
+    --surface: 221 50.6% 15.9%;
+    --surface-elevated: 218 51% 19.2%;
+
+    --border: 220 38.7% 21.8%;
+    --border-subtle: 220 32% 16%;
+
+    --foreground: 220 100% 97.6%;
+    --foreground-secondary: 218 29.3% 73.9%;
+
+    --primary: 219 100% 65.5%;
+    --primary-hover: 220 90.2% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 48.4% 12.2%;
+    --secondary-foreground: 220 100% 97.6%;
+    --muted: 220 42% 11%;
+    --muted-foreground: 218 29.3% 73.9%;
+    --accent: 220 38% 20%;
+    --accent-foreground: 220 100% 97.6%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --card: var(--surface);
+    --card-foreground: var(--foreground);
+    --popover: var(--surface);
+    --popover-foreground: var(--foreground);
+    --input: 220 38.7% 21.8%;
+    --ring: 219 100% 65.5%;
+
+    --accent-glow: 219 100% 65.5%;
+    --hero-glow: 219 100% 65.5%;
+
+    --shadow-card: 220 48% 4%;
+    --overlay: 220 48.8% 4%;
+
+    --table-bg: 218 42% 14%;
+    --table-border: 218 38% 10%;
+    --table-surface: 218 42% 16%;
+    --elevated-bg: 218 42% 12%;
+
+    --chart-1: 219 100% 65%;
+    --chart-2: 199 89% 55%;
+    --chart-3: 220 90% 60%;
+    --chart-4: 218 29% 60%;
+    --chart-5: 262 83% 65%;
+
+    --button-border: var(--border);
   }
 }
 

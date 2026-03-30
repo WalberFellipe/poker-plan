@@ -8,15 +8,116 @@
   "auth": {
     "signIn": "Sign In",
     "signUp": "Sign Up",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "loggedInAs": "Logged in as"
   },
   "home": {
+    "brand": "PokerArchitect",
+    "nav": {
+      "product": "Product",
+      "features": "Features",
+      "methodology": "Methodology",
+      "faq": "FAQ"
+    },
     "hero": {
-      "title": "Planning Poker",
-      "subtitle": "Agile Estimations in a Simple and Efficient Way",
-      "subtitle2": "Create a room and share with your colleagues to estimate the effort of each item in your backlog.",
-      "createRoom": "Create Room",
-      "joinRoom": "Join Room"
+      "badge": "Revolutionize your Planning Poker",
+      "headlineLine1": "Estimate with",
+      "headlineAccent": "precision",
+      "headlineLine2": ", decide",
+      "headlineLine3": "with agility.",
+      "description": "The agile planning tool that turns uncertainty into clarity. Engineering focus for high-performing teams.",
+      "ctaPrimary": "Start free now",
+      "joinRoom": "Join a room",
+      "metricLabel": "Performance",
+      "metricValue": "+40% precision",
+      "illustrationAlt": "Team collaboration illustration"
+    },
+    "joinDialog": {
+      "title": "Join a room",
+      "description": "Paste the room link or enter the room ID to continue.",
+      "placeholder": "Room ID or full URL",
+      "submit": "Go to room",
+      "cancel": "Cancel",
+      "roomIdRequired": "Enter a valid room ID or link."
+    },
+    "highlights": {
+      "sprints": {
+        "title": "2× faster sprints",
+        "description": "Shorten estimation time without losing the quality of technical debate."
+      },
+      "alignment": {
+        "title": "Full alignment",
+        "description": "Make sure every developer understands task complexity."
+      },
+      "data": {
+        "title": "Data-driven decisions",
+        "description": "Use estimation history to improve future planning."
+      }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Three simple steps to transform your planning sessions.",
+      "step1": {
+        "title": "1. Start the session",
+        "description": "Create a room in seconds and pick the stories to estimate."
+      },
+      "step2": {
+        "title": "2. Invite the team",
+        "description": "Share the link with your squad. No complex logins required."
+      },
+      "step3": {
+        "title": "3. Vote and estimate",
+        "description": "Everyone votes at once. Reveal cards and start a productive debate."
+      }
+    },
+    "features": {
+      "realtime": {
+        "title": "Real-time sync",
+        "description": "A latency-free experience. What you see, your team sees instantly."
+      },
+      "jira": {
+        "title": "Jira integration",
+        "description": "Import tickets directly and update story points in one click."
+      },
+      "anonymous": {
+        "title": "Anonymous voting",
+        "description": "Remove the anchoring effect. Every opinion counts without outside influence."
+      },
+      "history": {
+        "title": "Sprint history",
+        "description": "A full dashboard with your team’s velocity over time."
+      }
+    },
+    "showcase": {
+      "title": "The Architect’s Table",
+      "subtitle": "An interface designed to remove distractions and focus on what matters: the decision.",
+      "demoStoryTitle": "US-42: Checkout flow",
+      "previewAria": "Animated Planning Poker room demo",
+      "waitingVotes": "Waiting for votes...",
+      "allVoted": "2/2 votes",
+      "revealing": "Revealing...",
+      "votesRevealed": "Votes revealed",
+      "player1": "Carlos (Dev)",
+      "player2": "Ana (TL)",
+      "cardBack": "?"
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "q1": "What is Planning Poker?",
+      "a1": "Planning Poker is a consensus-based technique used mainly in Scrum to estimate the effort or relative complexity of software development tasks.",
+      "q2": "Is the tool free?",
+      "a2": "We’re evolving continuously and offer access so you can try the full estimation flow with your team.",
+      "q3": "Do I need to install anything?",
+      "a3": "No. Everything runs in the browser — just create or join a room and start.",
+      "q4": "Which voting sequences are available?",
+      "a4": "You can choose ready-made decks or create a custom deck with the values that make sense for your team."
+    },
+    "footer": {
+      "tagline": "© {year} PokerArchitect. Engineered for focus.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "changelog": "Changelog",
+      "support": "Contact Support"
     }
   },
   "room": {

@@ -8,16 +8,116 @@
   "auth": {
     "signIn": "Entrar",
     "signUp": "Cadastrar",
-    "signOut": "Sair"
+    "signOut": "Sair",
+    "loggedInAs": "Conectado como"
   },
   "home": {
+    "brand": "PokerArchitect",
+    "nav": {
+      "product": "Produto",
+      "features": "Funcionalidades",
+      "methodology": "Metodologia",
+      "faq": "FAQ"
+    },
     "hero": {
-      "title": "Planning Poker",
-      "subtitle": "Estimativas Ágeis de Forma Simples e Eficiente",
-      "subtitle2": "Crie uma sala e compartilhe com seus colegas para estimar o esforço de cada item do seu backlog.",
-      "subtitle3": "Estamos em desenvolvimento, por favor, use o feedback para melhorar o sistema.",
-      "createRoom": "Criar Sala",
-      "joinRoom": "Entrar na Sala"
+      "badge": "Revolucione sua Planning Poker",
+      "headlineLine1": "Estime com",
+      "headlineAccent": "precisão",
+      "headlineLine2": ", decida",
+      "headlineLine3": "com agilidade.",
+      "description": "A ferramenta de planejamento ágil que transforma incerteza em clareza. Engenharia de foco para times de alta performance.",
+      "ctaPrimary": "Começar agora gratuitamente",
+      "joinRoom": "Entrar na sala",
+      "metricLabel": "Performance",
+      "metricValue": "+40% Precisão",
+      "illustrationAlt": "Ilustração de equipe colaborando"
+    },
+    "joinDialog": {
+      "title": "Entrar na sala",
+      "description": "Cole o link da sala ou informe o ID para continuar.",
+      "placeholder": "ID da sala ou URL completa",
+      "submit": "Ir para a sala",
+      "cancel": "Cancelar",
+      "roomIdRequired": "Informe o ID da sala ou um link válido."
+    },
+    "highlights": {
+      "sprints": {
+        "title": "Sprints 2x mais rápidas",
+        "description": "Reduza o tempo de estimativa sem perder a qualidade do debate técnico."
+      },
+      "alignment": {
+        "title": "Alinhamento total",
+        "description": "Garanta que todos os desenvolvedores compreendam a complexidade das tarefas."
+      },
+      "data": {
+        "title": "Decisões baseadas em dados",
+        "description": "Use o histórico de estimativas para melhorar seu planejamento futuro."
+      }
+    },
+    "howItWorks": {
+      "title": "Como funciona",
+      "subtitle": "Três passos simples para transformar suas sessões de planejamento.",
+      "step1": {
+        "title": "1. Inicie a partida",
+        "description": "Crie uma sala em segundos e selecione as histórias que serão estimadas."
+      },
+      "step2": {
+        "title": "2. Convide o time",
+        "description": "Compartilhe o link com sua squad. Sem necessidade de logins complexos."
+      },
+      "step3": {
+        "title": "3. Vote e estime",
+        "description": "Todos votam simultaneamente. Revele as cartas e inicie o debate produtivo."
+      }
+    },
+    "features": {
+      "realtime": {
+        "title": "Sincronização em tempo real",
+        "description": "Experiência sem latência perceptível. O que você vê, seu time vê instantaneamente."
+      },
+      "jira": {
+        "title": "Integração com Jira",
+        "description": "Importe tickets diretamente e atualize pontos de história com um clique."
+      },
+      "anonymous": {
+        "title": "Votação anônima",
+        "description": "Elimine o efeito âncora. Cada opinião conta sem influências externas."
+      },
+      "history": {
+        "title": "Histórico de sprints",
+        "description": "Dashboard completo com a evolução da velocidade do seu time."
+      }
+    },
+    "showcase": {
+      "title": "A Mesa do Arquiteto",
+      "subtitle": "Interface projetada para eliminar distrações e focar no que importa: a decisão.",
+      "demoStoryTitle": "US-42: Fluxo de checkout",
+      "previewAria": "Demonstração animada da sala de Planning Poker",
+      "waitingVotes": "Aguardando votos...",
+      "allVoted": "2/2 votos",
+      "revealing": "Revelando...",
+      "votesRevealed": "Votos revelados",
+      "player1": "Carlos (Dev)",
+      "player2": "Ana (TL)",
+      "cardBack": "?"
+    },
+    "faq": {
+      "title": "Dúvidas frequentes",
+      "q1": "O que é Planning Poker?",
+      "a1": "Planning Poker é uma técnica baseada em consenso, usada principalmente no Scrum para estimar o esforço ou a complexidade relativa das tarefas de desenvolvimento de software.",
+      "q2": "A ferramenta é gratuita?",
+      "a2": "Estamos em evolução contínua e oferecemos acesso para você experimentar o fluxo completo de estimativas com seu time.",
+      "q3": "Preciso instalar algo?",
+      "a3": "Não. Tudo roda no navegador — basta criar ou entrar em uma sala e começar.",
+      "q4": "Quais sequências de voto estão disponíveis?",
+      "a4": "Você pode escolher baralhos prontos ou criar um baralho personalizado com os valores que fizer sentido para o seu time."
+    },
+    "footer": {
+      "tagline": "© {year} PokerArchitect. Engenharia de foco.",
+      "privacy": "Política de privacidade",
+      "terms": "Termos de serviço",
+      "changelog": "Changelog",
+      "support": "Suporte"
     }
   },
   "room": {

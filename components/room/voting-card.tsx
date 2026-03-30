@@ -28,7 +28,7 @@ export function VotingCard({
       animate={{ rotateY: revealed ? 180 : 0 }}
       transition={{ duration: 0.6 }}
       className={cn(
-        "rounded-lg border bg-card text-card-foreground shadow-sm",
+        "rounded-lg border border-border/80 bg-card text-card-foreground shadow-card",
         "flex items-center justify-center cursor-pointer transition-all select-none",
         "hover:scale-105",
         selected && "ring-2 ring-primary",
