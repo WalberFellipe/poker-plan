@@ -89,37 +89,32 @@ export function useRoomVotes({ roomId, storyId, setParticipants }: UseRoomVotesP
       }
     },
 
-    'vote:reveal': () => {
+    'vote:reveal': (data: RealtimeRevealEvent) => {
       setIsRevealing(true)
       setRevealCountdown(3)
 
-      const submitLocalVote = async () => {
-       
-
-        const currentUserId = session?.user?.id ?? localStorageParticipantId
-        const currentVote = localVote ?? votes.find(v => 
-          v.userId === currentUserId
-        )?.value
-
-        if (currentVote !== null && currentVote !== undefined) {
-          try {
-            await voteService.sendVote(
-              storyId ?? "",
-              currentVote,
-              participantIdForVote
-            );
-          } catch {
-            toast({
-              title: "Erro",
-              description: "Não foi possível carregar a história atual",
-              variant: "destructive",
-            });
-          }
-        }
+      if (data?.votes && Array.isArray(data.votes)) {
+        setVotes(
+          data.votes.map((v) => ({
+            id: v.id,
+            storyId: v.storyId,
+            userId: v.userId,
+            participantId: v.participantId ?? v.userId,
+            value: v.value,
+            createdAt: new Date(v.createdAt),
+            updatedAt: v.updatedAt ? new Date(v.updatedAt) : new Date(),
+            user: {
+              id: v.user?.id ?? v.userId,
+              name: v.user?.name ?? "Anônimo",
+              image: v.user?.image ?? null,
+            },
+          })) as VoteWithUser[]
+        )
+      } else {
+        loadVotes()
       }
 
       const countdown = async () => {
-        await submitLocalVote()
         for (let i = 3; i > 0; i--) {
           setRevealCountdown(i)
           await new Promise(resolve => setTimeout(resolve, 1000))
@@ -263,43 +258,35 @@ export function useRoomVotes({ roomId, storyId, setParticipants }: UseRoomVotesP
 
   const selectCard = async (value: CardValue) => {
     setLocalVote(value === "?" ? null : value);
-    
-    if (value !== "?") {
-      try {
-        await fetch(`/api/rooms/${roomId}/card-selected`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            participantId: participantIdForVote,
-            storyId
-          })
-        });
-      } catch (error) {
-        console.error('Erro ao notificar seleção de carta:', error);
-      }
+
+    if (value === "?" || !storyId) return;
+    try {
+      await voteService.sendVote(storyId, Number(value), participantIdForVote);
+    } catch {
+      toast({
+        title: "Erro",
+        description: "Não foi possível enviar seu voto",
+        variant: "destructive",
+      });
+      return;
     }
 
-    if (revealed && value !== "?") {
-      try {
-        await voteService.sendVote(storyId ?? "", Number(value), participantIdForVote)
-      } catch {
-        toast({
-          title: "Erro",
-          description: "Não foi possível enviar seu voto",
-          variant: "destructive"
-        })
-      }
+    try {
+      await fetch(`/api/rooms/${roomId}/card-selected`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participantId: participantIdForVote,
+          storyId,
+        }),
+      });
+    } catch (error) {
+      console.error("Erro ao notificar seleção de carta:", error);
     }
-  }
+  };
 
-  /*
-  // Atualizar participantes com votos
-  */
 
   const updateParticipantsWithVotes = useCallback((currentVotes: VoteWithUser[]) => {
-    // Garantir que temos pelo menos o participante atual
     const currentParticipant = {
       id: session?.user?.id ?? localStorageParticipantId ?? "",
       userId: session?.user?.id ?? localStorageParticipantId ?? "",
@@ -308,7 +295,6 @@ export function useRoomVotes({ roomId, storyId, setParticipants }: UseRoomVotesP
       isAnonymous: !session?.user
     }
 
-    // Combinar participantes existentes com o atual
     const allParticipants = participants.length > 0 
       ? participants 
       : [currentParticipant]
@@ -338,15 +324,11 @@ export function useRoomVotes({ roomId, storyId, setParticipants }: UseRoomVotesP
     }
   }, [votes, updateParticipantsWithVotes])
 
-  /*
-  // Retornar votos combinados
-  */
 
   const combinedVotes = useMemo(() => {
     const existingVotes = votes || []
     const currentUserId = session?.user?.id ?? localStorageParticipantId
 
-    // Verifica se o usuário atual já tem um voto
     const hasUserVote = existingVotes.some(
       (v) => v.userId === currentUserId
     )
@@ -373,11 +355,6 @@ export function useRoomVotes({ roomId, storyId, setParticipants }: UseRoomVotesP
 
     return existingVotes
   }, [votes, session?.user, localStorageParticipantId, localVote, currentStoryId])
-
-
-  /*
-  // Retornar valores
-  */
 
   return {
     votes: combinedVotes,

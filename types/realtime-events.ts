@@ -5,8 +5,24 @@ export interface RealtimeVoteEvent {
   participantId: string;
 }
 
+export interface RealtimeRevealEventVote {
+  id: string;
+  storyId: string;
+  userId: string;
+  participantId: string;
+  value: number;
+  createdAt: string;
+  updatedAt?: string;
+  user: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+}
+
 export interface RealtimeRevealEvent {
   storyId: string;
+  votes: RealtimeRevealEventVote[];
 }
 
 export interface RealtimeResetEvent {

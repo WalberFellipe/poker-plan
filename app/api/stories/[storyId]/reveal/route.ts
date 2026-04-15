@@ -12,9 +12,9 @@ export async function POST(
     const session = await getServerSession(authOptions)
     const body = await request.json()
     const { participantId } = body
-    const storyId = await props.params
+    const { storyId } = await props.params
     const story = await prisma.story.findUnique({
-      where: { id: storyId.storyId },
+      where: { id: storyId },
       include: { room: true },
     });
 
@@ -35,7 +35,6 @@ export async function POST(
     }
 
     if (participantId) {
-      // Verificar se o participante anônimo existe e pertence à sala
       const participant = await prisma.anonymousParticipant.findFirst({
         where: {
           id: participantId,
@@ -53,13 +52,58 @@ export async function POST(
 
     // Atualizar história
     await prisma.story.update({
-      where: { id: storyId.storyId },
+      where: { id: storyId },
       data: { revealed: true },
     });
 
-    // Notificar via Pusher
+    const storyWithVotes = await prisma.story.findUnique({
+      where: { id: storyId },
+      include: {
+        votes: {
+          include: {
+            user: { select: { id: true, name: true, image: true } },
+          },
+        },
+        anonymousVotes: {
+          include: { participant: true },
+        },
+      },
+    });
+
+    const votes = [
+      ...(storyWithVotes?.votes ?? []).map((v) => ({
+        id: v.id,
+        storyId: v.storyId,
+        userId: v.userId,
+        participantId: v.userId,
+        value: v.value,
+        createdAt: v.createdAt.toISOString(),
+        updatedAt: v.updatedAt.toISOString(),
+        user: {
+          id: v.user.id,
+          name: v.user.name ?? "Anônimo",
+          image: v.user.image ?? null,
+        },
+      })),
+      ...(storyWithVotes?.anonymousVotes ?? []).map((v) => ({
+        id: v.id,
+        storyId: v.storyId,
+        userId: v.participantId,
+        participantId: v.participantId,
+        value: v.value,
+        createdAt: v.createdAt.toISOString(),
+        updatedAt: v.updatedAt.toISOString(),
+        user: {
+          id: v.participantId,
+          name: v.participant.name ?? "Anônimo",
+          image: null,
+        },
+      })),
+    ];
+
     await getPusher().trigger(`room-${story.roomId}`, "vote:reveal", {
       storyId,
+      votes,
     });
 
     return NextResponse.json({ success: true })
