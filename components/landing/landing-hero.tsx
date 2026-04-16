@@ -61,8 +61,7 @@ export function LandingHero() {
 
             <div className="relative flex w-full max-w-lg flex-1 justify-center lg:max-w-none">
               <div className="relative w-full max-w-[min(100%,28rem)] rotate-2 scale-[0.98] overflow-hidden rounded-3xl shadow-card">
-                <span className="sr-only">{t("illustrationAlt")}</span>
-                <HeroIllustration className="object-cover" />
+                <HeroIllustration className="object-cover" alt={t("illustrationAlt")} />
               </div>
               <div className="absolute -bottom-6 -left-2 max-w-[14rem] rounded-2xl border border-border/60 bg-card/95 p-4 shadow-card backdrop-blur-sm dark:bg-card/90 md:-left-4">
                 <div className="flex items-center gap-3">
