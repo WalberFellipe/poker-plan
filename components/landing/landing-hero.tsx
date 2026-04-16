@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { JoinRoomDialog } from "@/components/landing/join-room-dialog";
+import { HeroIllustration } from "@/components/landing/hero-illustration";
 
 export function LandingHero() {
   const t = useTranslations("home.hero");
@@ -60,16 +61,8 @@ export function LandingHero() {
 
             <div className="relative flex w-full max-w-lg flex-1 justify-center lg:max-w-none">
               <div className="relative w-full max-w-[min(100%,28rem)] rotate-2 scale-[0.98] overflow-hidden rounded-3xl shadow-card">
-                {/* SVG local em /public — não depende de URL temporária do Figma */}
-                <img
-                  src="/landing/hero.svg"
-                  alt={t("illustrationAlt")}
-                  width={800}
-                  height={640}
-                  className="h-auto w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                />
+                <span className="sr-only">{t("illustrationAlt")}</span>
+                <HeroIllustration className="object-cover" />
               </div>
               <div className="absolute -bottom-6 -left-2 max-w-[14rem] rounded-2xl border border-border/60 bg-card/95 p-4 shadow-card backdrop-blur-sm dark:bg-card/90 md:-left-4">
                 <div className="flex items-center gap-3">
