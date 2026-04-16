@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Sparkles, TrendingUp } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { JoinRoomDialog } from "@/components/landing/join-room-dialog";
-import { LANDING_HERO_ILLUSTRATION } from "@/lib/landing-assets";
 
 export function LandingHero() {
   const t = useTranslations("home.hero");
@@ -62,14 +60,15 @@ export function LandingHero() {
 
             <div className="relative flex w-full max-w-lg flex-1 justify-center lg:max-w-none">
               <div className="relative w-full max-w-[min(100%,28rem)] rotate-2 scale-[0.98] overflow-hidden rounded-3xl shadow-card">
-                <Image
-                  src={LANDING_HERO_ILLUSTRATION}
+                {/* SVG local em /public — não depende de URL temporária do Figma */}
+                <img
+                  src="/landing/hero.svg"
                   alt={t("illustrationAlt")}
                   width={800}
-                  height={800}
+                  height={640}
                   className="h-auto w-full object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 480px"
+                  loading="eager"
+                  decoding="async"
                 />
               </div>
               <div className="absolute -bottom-6 -left-2 max-w-[14rem] rounded-2xl border border-border/60 bg-card/95 p-4 shadow-card backdrop-blur-sm dark:bg-card/90 md:-left-4">
