@@ -12,8 +12,17 @@ export const getApiDocs = () => {
       description: 'API de gerenciamento de salas de Planning Poker',
     },
     tags: [
-      { name: 'Salas', description: 'Operações relacionadas a salas' },
-      { name: 'Votos', description: 'Operações relacionadas a votos' }
+      { name: 'Salas', description: 'Criação e configuração de salas' },
+      {
+        name: 'Tempo real',
+        description:
+          'Snapshot versionado da sala. O servidor é dono do estado e publica o estado inteiro a cada mutação; o cliente aplica apenas versões mais novas e reconcilia por GET.',
+      },
+      { name: 'Participantes', description: 'Entrar, sair e presença' },
+      { name: 'Votação', description: 'Votos, revelação e nova rodada' },
+      { name: 'Mesa', description: 'Fichas e fechamento da estimativa' },
+      { name: 'Fila', description: 'Fila de tarefas da sessão' },
+      { name: 'Integrações', description: 'Escrita dos pontos no board' },
     ],
     paths: {
       ...roomPaths,

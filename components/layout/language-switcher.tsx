@@ -1,59 +1,60 @@
-'use client'
+"use client";
 
-import { usePathname, useRouter } from 'next/navigation'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useEffect, useState } from 'react'
-import { Globe } from 'lucide-react'
-import * as Flags from 'country-flag-icons/react/3x2'
+import { useLocale } from "next-intl";
+import { usePathname, useRouter } from "@/src/i18n/navigation";
+import { useTransition } from "react";
+import { cn } from "@/lib/utils";
 
-const languages = [
-  { 
-    code: 'pt', 
-    name: 'Português', 
-    flag: <Flags.BR className="h-4 w-6" /> 
-  },
-  { 
-    code: 'en', 
-    name: 'English', 
-    flag: <Flags.US className="h-4 w-6" /> 
-  }
-]
+const LOCALES = ["pt", "en"] as const;
 
-export function LanguageSwitcher() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const [currentLocale, setCurrentLocale] = useState('pt')
+/**
+ * Toggle PT/EN do handoff: dois segmentos, o ativo com fill ciano e texto
+ * escuro. Substitui o `Select` anterior, que não cabia no chrome do header.
+ */
+export function LanguageSwitcher({ className }: { className?: string }) {
+  const locale = useLocale();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    const savedLocale = localStorage.getItem('locale') || 'pt'
-    setCurrentLocale(savedLocale)
-  }, [])
-
-  const handleLanguageChange = (locale: string) => {
-    localStorage.setItem('locale', locale)
-    setCurrentLocale(locale)
-    const newPathname = pathname?.replace(/^\/[^\/]+/, `/${locale}`)
-    router.push(newPathname || '/')
-  }
+  const change = (next: string) => {
+    if (next === locale) return;
+    startTransition(() => {
+      // `pathname` do next-intl já vem resolvido e sem o prefixo de locale
+      // (ex.: "/room/abc123"), então basta reemiti-lo no outro idioma.
+      router.replace(pathname, { locale: next });
+    });
+  };
 
   return (
-    <Select value={currentLocale} onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-[150px]">
-        <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4" />
-          <SelectValue />
-        </div>
-      </SelectTrigger>
-      <SelectContent>
-        {languages.map(lang => (
-          <SelectItem key={lang.code} value={lang.code}>
-            <div className="flex items-center gap-2">
-              <span>{lang.flag}</span>
-              <span>{lang.name}</span>
-            </div>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
-} 
+    <div
+      className={cn(
+        "flex items-center rounded-sm border border-pa-text/14 p-0.5",
+        isPending && "opacity-60",
+        className
+      )}
+      role="group"
+      aria-label="Idioma"
+    >
+      {LOCALES.map((code) => {
+        const active = code === locale;
+        return (
+          <button
+            key={code}
+            type="button"
+            onClick={() => change(code)}
+            aria-pressed={active}
+            className={cn(
+              "rounded-[1px] px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[.14em] transition-colors",
+              active
+                ? "bg-cy text-cy-ink"
+                : "text-pa-dim hover:text-pa-text"
+            )}
+          >
+            {code}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

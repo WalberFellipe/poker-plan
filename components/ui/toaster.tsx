@@ -3,7 +3,6 @@
 import { useToast } from "@/hooks/useToast"
 import {
   Toast,
-  ToastClose,
   ToastDescription,
   ToastProvider,
   ToastTitle,
@@ -13,17 +12,17 @@ import {
 export function Toaster() {
   const { toasts } = useToast()
 
+  // 2,4s: a confirmação some sozinha, como no handoff.
   return (
-    <ToastProvider duration={5000}>
+    <ToastProvider duration={2400} swipeDirection="down">
       {toasts.map(function ({ id, title, description, action, variant, ...props }) {
         return (
           <Toast key={id} {...props} variant={variant}>
-            <div>
+            <div className="flex items-baseline gap-2">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && <ToastDescription>{description}</ToastDescription>}
             </div>
             {action}
-            <ToastClose />
           </Toast>
         )
       })}

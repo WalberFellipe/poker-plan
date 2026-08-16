@@ -1,319 +1,344 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { VotingCard } from "@/components/room/voting-card";
-import { ParticipantsList } from "@/components/room/participants-list";
-import { PokerTable } from "@/components/room/poker-table";
-import { Button } from "@/components/ui/button";
-import { Eye, RotateCcw, Loader2 } from "lucide-react";
-import { useRoomVotes } from "@/hooks/useRoomVotes";
-import { Story, TableParticipant, Vote } from "@/types/entities";
-
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
-import { InviteButton } from "@/components/room/invite-button";
-import { VotingStats } from "@/components/room/voting-stats";
-import { DEFAULT_CARDS } from "@/types/cards";
-import { useRealtime } from "@/hooks/useRealtime";
-import { useToast } from "@/hooks/useToast";
+
+import { useRoom } from "@/hooks/useRoom";
+import { getStoredName } from "@/lib/client-id";
+import { computeAverage, computeConsensus, consensusBand } from "@/lib/vote-stats";
+import { Button } from "@/components/ui/button";
+import { Dot } from "@/components/ui/neon";
+import { PokerTable } from "@/components/room/poker-table";
+import { Hand } from "@/components/room/hand";
+import { ResultPanel } from "@/components/room/result-panel";
+import { SidePanel } from "@/components/room/side-panel";
 import { JoinRoomModal } from "@/components/room/join-room-modal";
-import { useSearchParams } from "next/navigation";
-import { RealtimeParticipantJoinEvent, RealtimeParticipantLeaveEvent } from "@/types/realtime-events";
-import { useTranslations } from "next-intl";
+import { InviteButton } from "@/components/room/invite-button";
+import { useToast } from "@/hooks/useToast";
+import { apiFetch } from "@/lib/client-id";
+import type { ChipKind } from "@/types/room-state";
 
-
-interface RoomClientProps {
-  roomId: string;
+interface IntegrationSummary {
+  id: string;
+  connected: boolean;
+  board: string | null;
 }
 
-export default function RoomClient({ roomId }: RoomClientProps) {
-  const { data: session } = useSession();
-  const [participants, setParticipants] = useState<TableParticipant[]>([]);
-  const [participantId, setParticipantId] = useState<string>();
+function formatClock(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+/** Jitter do pouso: ±7,5% em x e ±6% em y, como no protótipo. */
+function randomJitter() {
+  return {
+    jitterX: Math.random() * 15 - 7.5,
+    jitterY: Math.random() * 12 - 6,
+    rot: Math.round(Math.random() * 40 - 20),
+  };
+}
+
+export default function RoomClient({ roomId }: { roomId: string }) {
+  const t = useTranslations("room");
+  const tToast = useTranslations("toast");
+  const locale = useLocale();
+  const { data: session, status: authStatus } = useSession();
   const { toast } = useToast();
-  const [currentStory, setCurrentStory] = useState<Story | null>(null);
-  const searchParams = useSearchParams();
-  const isInvited = searchParams?.get('invited') === 'true';
-  const [deckValues, setDeckValues] = useState<string[]>([]);
-  const t = useTranslations('room.game');
-  const tCommon = useTranslations('common');
 
-  const { 
-    votes, 
-    revealed,
+  const room = useRoom(roomId);
+  const {
+    snapshot,
+    meId,
+    myVote,
     isLoading,
-    isRevealing,
-    isResetting,
-    localVote,
-    revealCountdown,
+    error,
+    revealed,
+    countdown,
+    elapsedSeconds,
+    isBusy,
+    join,
     selectCard,
-    reveal, 
-    reset 
-  } = useRoomVotes({
-    roomId,
-    storyId: currentStory?.id ?? null,
-    setParticipants
-  });
+    reveal,
+    reset,
+    throwChip,
+    acceptEstimate,
+  } = room;
+
+  const [needsName, setNeedsName] = useState(false);
+  const [integrations, setIntegrations] = useState<IntegrationSummary[]>([]);
+  const autoJoinAttempted = useRef(false);
 
   useEffect(() => {
-    const loadParticipants = async () => {
-      try {
-        const response = await fetch(`/api/rooms/${roomId}/participants`);
-        if (!response.ok) throw new Error('Falha ao carregar participantes');
-        
-        const data = await response.json();
-        setParticipants(data);
-      } catch {
-        toast({
-          title: tCommon('error'),
-          description: t('loadParticipantsError'),
-          variant: "destructive"
-        });
-      }
-    };
+    fetch("/api/integrations", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : []))
+      .then((data) => setIntegrations(data ?? []))
+      .catch(() => setIntegrations([]));
+  }, []);
 
-    loadParticipants();
-  }, [roomId, toast, t, tCommon]);
-
-  useRealtime(roomId, {
-    'participant:join': (data: RealtimeParticipantJoinEvent) => {
-
-      setParticipants(current => {
-        const existingParticipant = current.find(p => 
-          p.id === data.participantId || 
-          p.userId === data.userId
-        )
-        
-        if (existingParticipant) {
-          return current
-        }
-
-        const newParticipant: TableParticipant = {
-          id: data.participantId,
-          userId: data.userId ?? data.participantId,
-          name: data.name ?? t('anonymous'),
-          image: data.image || '',
-          isAnonymous: data.isAnonymous,
-          hasVoted: false,
-          vote: undefined
-        }
-
-        return [...current, newParticipant]
-      })
-    },
-    'participant:leave': (data: RealtimeParticipantLeaveEvent) => {
-      setParticipants(current => 
-        current.filter(p => p.id !== data.participantId)
-      )
-    },
-  });
-
+  /**
+   * Entrada automática: se já temos identidade (sessão ou nome lembrado), a
+   * pessoa senta direto. O modal só aparece quando realmente não sabemos quem
+   * é — e nunca de novo depois disso, porque o `clientId` é estável.
+   */
   useEffect(() => {
-    if (!participantId) return;
+    if (autoJoinAttempted.current) return;
+    if (isLoading || authStatus === "loading") return;
+    if (meId) return;
 
-    const handleBeforeUnload = () => {
-      const data = JSON.stringify({ 
-        participantId, 
-        isAnonymous: !session?.user 
-      });
-      
-      navigator.sendBeacon(
-        `/api/rooms/${roomId}/leave`,
-        new Blob([data], { type: 'application/json' })
-      );
-    };
+    autoJoinAttempted.current = true;
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      handleBeforeUnload();
-    };
-  }, [roomId, participantId, session?.user]);
+    const known = session?.user?.name ?? getStoredName();
 
-  useEffect(() => {
-    const loadCurrentStory = async () => {
-      try {
-        const response = await fetch(`/api/rooms/${roomId}/current-story`)
-        if (!response.ok) throw new Error('Erro ao carregar história')
-        const story = await response.json()
-        setCurrentStory(story)
-      } catch {
-        toast({
-          title: tCommon('error'),
-          description: t('loadStoryError'),
-          variant: "destructive"
-        })
-      }
+    if (known) {
+      void join(known);
+    } else {
+      setNeedsName(true);
     }
-
-    loadCurrentStory()
-  }, [roomId, toast, t, tCommon])
+  }, [isLoading, authStatus, meId, session?.user?.name, join]);
 
   useEffect(() => {
-    const loadRoom = async () => {
-      try {
-        const response = await fetch(`/api/room/${roomId}`)
-        const data = await response.json()
-        
-        if (response.ok) {
-          const values = data.deckValues?.length > 0 
-            ? data.deckValues 
-            : DEFAULT_CARDS.values.map(String)
-          
-          setDeckValues(values)
-        }
-      } catch (error) {
-        console.error(t('loadRoomError'), error)
-      }
-    }
+    if (meId) setNeedsName(false);
+  }, [meId]);
 
-    loadRoom()
-  }, [roomId, t])
+  const participants = useMemo(
+    () => snapshot?.participants ?? [],
+    [snapshot?.participants]
+  );
+  const deckValues = snapshot?.room.deckValues ?? [];
 
-  useEffect(() => {
-    console.log("deckValues atualizados:", JSON.stringify(deckValues, null, 2))
-  }, [deckValues])
+  const revealedVotes = useMemo(
+    () =>
+      participants
+        .map((participant) => participant.vote)
+        .filter((vote): vote is string => vote !== null),
+    [participants]
+  );
 
-  const handleCardSelect = (value: number) => {
-    selectCard(value)
-  }
+  const statusLine = useMemo(() => {
+    if (!revealed) return { text: t("idle"), tone: "muted" as const };
 
-  if (isInvited && !session?.user && !participantId) {
-    return <JoinRoomModal roomId={roomId} onJoin={setParticipantId} />
-  }
+    const average = computeAverage(revealedVotes);
+    const consensus = computeConsensus(revealedVotes);
+    const band = consensusBand(consensus);
+    const label = t(
+      band === "strong"
+        ? "consensusStrong"
+        : band === "ok"
+          ? "consensusOk"
+          : "consensusWeak"
+    );
 
-  if (!currentStory) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">{tCommon('loading')}</span>
-      </div>
-    )
-  }
-
-  const tableVotes: Vote[] = votes.map((vote) => ({
-    id: vote.id,
-    storyId: vote.storyId ?? "",
-    value: vote.value,
-    participantId: vote.userId ?? "",
-    userId: vote.userId ?? "",
-    createdAt: vote.createdAt instanceof Date
-      ? vote.createdAt.toISOString()
-      : vote.createdAt ?? new Date().toISOString(),
-  }));
-
-  const participantsWithVotes = participants.map(participant => {
-    const vote = votes.find(v => 
-      v.userId === participant.userId || 
-      v.userId === participant.id ||
-      v.participantId === participant.id
-    )
-    
-    const finalValue = revealed && vote ? vote.value : "?"    
     return {
-      ...participant,
-      vote: finalValue
-    }
-  })
+      text: t("revealedStatus", {
+        average:
+          average === null
+            ? "—"
+            : new Intl.NumberFormat(locale, {
+                maximumFractionDigits: 1,
+              }).format(average),
+        consensusLabel: label,
+      }),
+      tone: "accent" as const,
+    };
+  }, [revealed, revealedVotes, t, locale]);
+
+  const react = useCallback(
+    (kind: Exclude<ChipKind, "call">) => {
+      void throwChip({ kind, ...randomJitter() });
+    },
+    [throwChip]
+  );
+
+  const call = useCallback(
+    (targetId: string) => {
+      // O pouso do "call" fica a 46% do caminho até o alvo; aqui só sorteamos
+      // o desvio, que é o que precisa ser igual em todas as telas.
+      void throwChip({
+        kind: "call",
+        targetId,
+        jitterX: Math.random() * 8 - 4,
+        jitterY: Math.random() * 6 - 3,
+        rot: Math.round(Math.random() * 40 - 20),
+      });
+    },
+    [throwChip]
+  );
+
+  // A tarefa em jogo só pode voltar ao board se veio de um, e se a integração
+  // daquele provedor estiver conectada nesta conta.
+  const activeTask = snapshot?.queue.find(
+    (task) => task.id === snapshot.story?.taskId
+  );
+  const pushTarget =
+    activeTask && activeTask.source !== "manual"
+      ? integrations.find(
+          (item) => item.id === activeTask.source && item.connected
+        )
+      : undefined;
+
+  const onPush = useCallback(
+    async (points: string) => {
+      if (!activeTask) return;
+
+      const response = await apiFetch(`/api/rooms/${roomId}/push`, {
+        method: "POST",
+        body: JSON.stringify({ taskId: activeTask.id, points }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      toast(
+        response.ok
+          ? { description: tToast("pushed") }
+          : {
+              variant: "destructive",
+              description: payload?.error ?? tToast("pushed"),
+            }
+      );
+    },
+    [roomId, activeTask, toast, tToast]
+  );
+
+  const onAccept = useCallback(
+    async (points: string) => {
+      const ok = await acceptEstimate(points);
+      if (ok) toast({ description: tToast("accepted") });
+    },
+    [acceptEstimate, toast, tToast]
+  );
+
+  if (needsName && !meId) {
+    return (
+      <JoinRoomModal
+        defaultName={getStoredName()}
+        onJoin={async (name) => {
+          const ok = await join(name);
+          if (ok) setNeedsName(false);
+          return ok;
+        }}
+      />
+    );
+  }
+
+  if (isLoading && !snapshot) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center gap-3">
+        <Dot />
+        <span className="pa-label">{t("loading")}</span>
+      </div>
+    );
+  }
+
+  if (error && !snapshot) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-[17px] text-pa-muted">{error}</p>
+      </div>
+    );
+  }
+
+  if (!snapshot) return null;
 
   return (
-    <div className="container mx-auto p-4">
-      {isLoading ? (
-        <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">{t('loadingVotes')}</span>
-        </div>
-      ) : (
-        <div className="grid grid-cols-[250px,1fr] gap-8 h-[calc(100vh-10rem)]">
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold">{t('title')}</h1>
-              <p className="text-sm text-muted-foreground">
-                {currentStory?.title}
-              </p>
-            </div>
-            
-            <ParticipantsList participants={participantsWithVotes.map(participant => ({
-              ...participant,
-              vote: typeof participant.vote === 'number' ? participant.vote : "?"
-            }))} />
+    <div className="mx-auto grid max-w-[1560px] animate-rise gap-9 px-5 pb-16 pt-6 md:px-10 lg:grid-cols-[1fr_320px]">
+      <div className="flex min-w-0 flex-col gap-5">
+        <header className="flex flex-wrap items-end gap-5">
+          <div className="flex min-w-0 flex-1 basis-[260px] flex-col gap-1">
+            <span className="pa-label">{snapshot.room.name}</span>
+            <h1 className="text-[28px] leading-tight text-pa-text">
+              {snapshot.story?.title}
+            </h1>
+            <span
+              className={
+                statusLine.tone === "accent"
+                  ? "text-[15px] text-mg-soft"
+                  : "text-[15px] text-pa-dim"
+              }
+            >
+              {statusLine.text}
+            </span>
           </div>
 
-          {/* Área Principal */}
-          <div className="flex flex-col gap-6">
-            <div className="flex justify-center space-x-4">
-              <Button
-                variant="outline"
-                onClick={reveal}
-                disabled={votes.length === 0 || isRevealing}
-              >
-                {isRevealing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {revealCountdown !== null ? t('revealingIn', { countdown: revealCountdown }) : t('revealing')}
-                  </>
-                ) : (
-                  <>
-                    <Eye className="mr-2 h-4 w-4" />
-                    {t('reveal')}
-                  </>
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={reset}
-                disabled={isResetting}
-              >
-                {isResetting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                )}
-                {t('reset')}
-              </Button>
-              <InviteButton roomId={roomId} />
+          <div className="ml-auto flex flex-wrap items-center gap-2.5">
+            <div className="flex items-center gap-2 rounded-sm border border-cy/30 px-3.5 py-2">
+              <Dot size={7} />
+              <span className="pa-numeric text-[15px] text-cy">
+                {formatClock(elapsedSeconds)}
+              </span>
             </div>
 
-            <div className="flex-1 flex items-center justify-center relative">
-              <PokerTable
-                participants={participantsWithVotes}
-                revealed={revealed}
-                votes={tableVotes}
-              />
-              <VotingStats 
-                votes={votes.map(v => v.value).filter(Boolean)}
-                revealed={revealed}
-              />
-            </div>
+            {revealed ? (
+              <Button variant="call" onClick={reset} disabled={isBusy}>
+                {t("newRound")}
+              </Button>
+            ) : (
+              <Button onClick={reveal} disabled={isBusy}>
+                {t("reveal")}
+              </Button>
+            )}
 
-            <div className="border rounded-lg p-4">
-              <div className="flex justify-center gap-2 flex-wrap">
-                {deckValues.length > 0 ? (
-                  deckValues.map((value) => (
-                    <VotingCard
-                      key={value}
-                      value={value}
-                      selected={localVote === (value === "?" ? value : Number(value))}
-                      revealed={revealed}
-                      disabled={isRevealing}
-                      hideValue={false}
-                      onClick={() => {
-                        if (value === "?") return
-                        const numValue = Number(value)
-                        if (!isNaN(numValue)) {
-                          handleCardSelect(numValue)
-                        }
-                      }}
-                      size="sm"
-                    />
-                  ))
-                ) : (
-                  <div>{t('loadingCards')}</div>
-                )}
-              </div>
-            </div>
+            <Button variant="secondary" size="sm" onClick={reset} disabled={isBusy}>
+              {t("reset")}
+            </Button>
+
+            <InviteButton roomId={roomId} />
           </div>
-        </div>
-      )}
+        </header>
+
+        <PokerTable
+          participants={participants}
+          chips={snapshot.chips}
+          meId={meId}
+          revealed={revealed}
+          countdown={countdown}
+          onCall={call}
+          callHint={t("callHint")}
+          youLabel={t("you")}
+        />
+
+        {revealed ? (
+          <ResultPanel
+            votes={revealedVotes}
+            onAccept={onAccept}
+            isBusy={isBusy}
+            pushProvider={
+              pushTarget
+                ? {
+                    id: pushTarget.id,
+                    name: pushTarget.id[0].toUpperCase() + pushTarget.id.slice(1),
+                  }
+                : null
+            }
+            onPush={onPush}
+          />
+        ) : (
+          <Hand
+            deckValues={deckValues}
+            myVote={myVote}
+            disabled={countdown !== null}
+            onSelect={selectCard}
+            onReact={react}
+          />
+        )}
+      </div>
+
+      <SidePanel
+        roomId={roomId}
+        participants={participants}
+        queue={snapshot.queue}
+        meId={meId}
+        connectedProvider={
+          pushTarget
+            ? {
+                id: pushTarget.id,
+                name: pushTarget.id[0].toUpperCase() + pushTarget.id.slice(1),
+                board: pushTarget.board,
+              }
+            : null
+        }
+      />
     </div>
   );
 }

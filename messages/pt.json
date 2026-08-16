@@ -3,7 +3,10 @@
     "loading": "Carregando...",
     "error": "Erro",
     "close": "Fechar",
-    "save": "Salvar"
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "back": "Voltar",
+    "retry": "Tentar de novo"
   },
   "auth": {
     "signIn": "Entrar",
@@ -11,106 +14,83 @@
     "signOut": "Sair",
     "loggedInAs": "Conectado como"
   },
-  "home": {
-    "brand": "PokerArchitect",
-    "nav": {
-      "product": "Produto",
-      "features": "Funcionalidades",
-      "methodology": "Metodologia",
-      "faq": "FAQ"
+  "nav": {
+    "brandFirst": "POKER",
+    "brandSecond": "ARCHITECT",
+    "product": "Produto",
+    "features": "Recursos",
+    "method": "Método",
+    "faq": "FAQ",
+    "signIn": "Entrar",
+    "newRoom": "Nova sala",
+    "tabs": {
+      "table": "Mesa",
+      "tasks": "Tarefas",
+      "decks": "Baralhos",
+      "estimates": "Estimativas",
+      "integrations": "Integrações"
+    }
+  },
+  "landing": {
+    "heroKicker": "Planning poker em tempo real",
+    "heroA": "Vire as cartas.",
+    "heroB": "Feche o número.",
+    "heroSub": "Estimativa sem âncora, sem reunião infinita e sem achismo. O time joga, a mesa revela, o histórico aprende.",
+    "ctaPrimary": "Criar sala grátis",
+    "ctaSecondary": "Entrar em uma sala",
+    "stat1Value": "90s",
+    "stat1": "por rodada",
+    "stat2Value": "2×",
+    "stat2": "sprints mais rápidas",
+    "stat3Value": "+40%",
+    "stat3": "precisão na estimativa",
+    "livePreview": "Mesa ao vivo",
+    "pillars": {
+      "round": {
+        "kicker": "Rodada",
+        "title": "Noventa segundos por história",
+        "body": "Timer na mesa, cartas fechadas e revelação simultânea. A conversa acontece depois do número, não antes."
+      },
+      "alignment": {
+        "kicker": "Alinhamento",
+        "title": "Ninguém ancora ninguém",
+        "body": "Voto oculto até a revelação. O sênior não define o número do time sem querer."
+      },
+      "memory": {
+        "kicker": "Memória",
+        "title": "Histórico que ensina",
+        "body": "Cada rodada vira dado. O time vê onde subestimou e calibra a próxima sprint."
+      }
     },
-    "hero": {
-      "badge": "Revolucione sua Planning Poker",
-      "headlineLine1": "Estime com",
-      "headlineAccent": "precisão",
-      "headlineLine2": ", decida",
-      "headlineLine3": "com agilidade.",
-      "description": "A ferramenta de planejamento ágil que transforma incerteza em clareza. Engenharia de foco para times de alta performance.",
-      "ctaPrimary": "Começar agora gratuitamente",
-      "joinRoom": "Entrar na sala",
-      "metricLabel": "Performance",
-      "metricValue": "+40% Precisão",
-      "illustrationAlt": "Ilustração de equipe colaborando"
+    "featuresTitle": "O que entra na mesa",
+    "features": {
+      "timer": {
+        "title": "Timer de rodada",
+        "body": "Cronômetro visível para todo mundo, com alerta suave ao passar do combinado."
+      },
+      "chips": {
+        "title": "Fichas na mesa",
+        "body": "Concordo, explica melhor, tem risco — a ficha fica apostada até o fim da rodada."
+      },
+      "call": {
+        "title": "Pagar pra ver",
+        "body": "Achou que é blefe? Jogue uma ficha em quem votou e registre o seu discordo."
+      },
+      "consensus": {
+        "title": "Consenso e dispersão",
+        "body": "Indicador de acordo do time e destaque para os votos extremos."
+      },
+      "boards": {
+        "title": "Boards conectados",
+        "body": "Jira, IzzyPlan, Trello e GitHub: puxe a tarefa e devolva os pontos."
+      }
     },
     "joinDialog": {
-      "title": "Entrar na sala",
+      "title": "Entrar em uma sala",
       "description": "Cole o link da sala ou informe o ID para continuar.",
       "placeholder": "ID da sala ou URL completa",
       "submit": "Ir para a sala",
-      "cancel": "Cancelar",
       "roomIdRequired": "Informe o ID da sala ou um link válido."
-    },
-    "highlights": {
-      "sprints": {
-        "title": "Sprints 2x mais rápidas",
-        "description": "Reduza o tempo de estimativa sem perder a qualidade do debate técnico."
-      },
-      "alignment": {
-        "title": "Alinhamento total",
-        "description": "Garanta que todos os desenvolvedores compreendam a complexidade das tarefas."
-      },
-      "data": {
-        "title": "Decisões baseadas em dados",
-        "description": "Use o histórico de estimativas para melhorar seu planejamento futuro."
-      }
-    },
-    "howItWorks": {
-      "title": "Como funciona",
-      "subtitle": "Três passos simples para transformar suas sessões de planejamento.",
-      "step1": {
-        "title": "1. Inicie a partida",
-        "description": "Crie uma sala em segundos e selecione as histórias que serão estimadas."
-      },
-      "step2": {
-        "title": "2. Convide o time",
-        "description": "Compartilhe o link com sua squad. Sem necessidade de logins complexos."
-      },
-      "step3": {
-        "title": "3. Vote e estime",
-        "description": "Todos votam simultaneamente. Revele as cartas e inicie o debate produtivo."
-      }
-    },
-    "features": {
-      "realtime": {
-        "title": "Sincronização em tempo real",
-        "description": "Experiência sem latência perceptível. O que você vê, seu time vê instantaneamente."
-      },
-      "jira": {
-        "title": "Integração com Jira",
-        "description": "Importe tickets diretamente e atualize pontos de história com um clique."
-      },
-      "anonymous": {
-        "title": "Votação anônima",
-        "description": "Elimine o efeito âncora. Cada opinião conta sem influências externas."
-      },
-      "history": {
-        "title": "Histórico de sprints",
-        "description": "Dashboard completo com a evolução da velocidade do seu time."
-      }
-    },
-    "showcase": {
-      "title": "A Mesa do Arquiteto",
-      "subtitle": "Interface projetada para eliminar distrações e focar no que importa: a decisão.",
-      "demoStoryTitle": "US-42: Fluxo de checkout",
-      "previewAria": "Demonstração animada da sala de Planning Poker",
-      "waitingVotes": "Aguardando votos...",
-      "allVoted": "2/2 votos",
-      "revealing": "Revelando...",
-      "votesRevealed": "Votos revelados",
-      "player1": "Carlos (Dev)",
-      "player2": "Ana (TL)",
-      "cardBack": "?"
-    },
-    "faq": {
-      "title": "Dúvidas frequentes",
-      "q1": "O que é Planning Poker?",
-      "a1": "Planning Poker é uma técnica baseada em consenso, usada principalmente no Scrum para estimar o esforço ou a complexidade relativa das tarefas de desenvolvimento de software.",
-      "q2": "A ferramenta é gratuita?",
-      "a2": "Estamos em evolução contínua e oferecemos acesso para você experimentar o fluxo completo de estimativas com seu time.",
-      "q3": "Preciso instalar algo?",
-      "a3": "Não. Tudo roda no navegador — basta criar ou entrar em uma sala e começar.",
-      "q4": "Quais sequências de voto estão disponíveis?",
-      "a4": "Você pode escolher baralhos prontos ou criar um baralho personalizado com os valores que fizer sentido para o seu time."
     },
     "footer": {
       "tagline": "© {year} PokerArchitect. Engenharia de foco.",
@@ -120,85 +100,209 @@
       "support": "Suporte"
     }
   },
+  "create": {
+    "kicker": "Nova mesa",
+    "title": "Criar sala",
+    "subtitle": "Configure em quinze segundos e mande o link.",
+    "roomName": "Nome da sala",
+    "roomNamePlaceholder": "Ex: Sprint 23",
+    "yourName": "Seu nome",
+    "yourNamePlaceholder": "Como querem te chamar?",
+    "deck": "Baralho",
+    "customDeckCta": "Criar baralho customizado",
+    "seeAllDecks": "Ver baralhos salvos",
+    "submit": "Abrir a mesa",
+    "submitting": "Abrindo...",
+    "roomNameRequired": "Dê um nome à sala",
+    "nameRequired": "Diga como querem te chamar",
+    "deckRequired": "Escolha um baralho",
+    "createError": "Não foi possível criar a sala"
+  },
   "room": {
-    "create": {
-      "title": "Criar Nova Sala",
-      "description": "Configure sua sala de Planning Poker",
-      "roomName": "Nome da Sala",
-      "roomNamePlaceholder": "Ex: Sprint 23 Planning",
-      "participantName": "Seu Nome",
-      "participantNamePlaceholder": "Como você quer ser chamado?",
-      "deck": "Baralho da Sala",
-      "createButton": "Criar Sala",
-      "creatingButton": "Criando...",
-      "createSuccess": "Sala criada com sucesso!",
-      "createError": "Erro ao criar sala",
-      "participantNameRequired": "Nome do participante é obrigatório",
-      "deckRequired": "Selecione um baralho para a sala",
-      "roomIdError": "ID da sala não foi gerado"
+    "reveal": "Revelar",
+    "newRound": "Nova rodada",
+    "reset": "Resetar",
+    "tasks": "Tarefas",
+    "tasksSub": "Cole a lista ou importe do board conectado.",
+    "yourHand": "Sua mão",
+    "idle": "Aguardando os votos",
+    "revealedStatus": "Média {average} · {consensusLabel}",
+    "callHintLine": "Clique no nome de alguém para pagar pra ver — a ficha bate na pessoa e cai na mesa como um discordo.",
+    "you": "Você",
+    "callHint": "Pagar pra ver",
+    "voted": "votou",
+    "waiting": "pensando",
+    "offline": "ausente",
+    "participants": "Participantes",
+    "queue": "Fila de votação",
+    "manage": "Gerenciar",
+    "invite": "Convidar",
+    "linkCopied": "Link copiado.",
+    "copyError": "Não foi possível copiar o link",
+    "joinTitle": "Entre na mesa",
+    "joinSubtitle": "Escolha como querem te chamar nesta sala.",
+    "joinSubmit": "Sentar à mesa",
+    "joinPlaceholder": "Seu nome",
+    "expired": "Esta sala expirou.",
+    "notFound": "Sala não encontrada.",
+    "loading": "Abrindo a mesa...",
+    "reactions": {
+      "agree": "concordo",
+      "explain": "explica melhor",
+      "risk": "tem risco"
     },
-    "voting": {
-      "reveal": "Revelar Votos",
-      "reset": "Reiniciar",
+    "result": {
+      "kicker": "Cartas na mesa",
       "average": "Média",
-      "voted": "Votou",
-      "votedSuccess": "Voto registrado com sucesso!",
-      "votedError": "Erro ao registrar voto"
+      "median": "Mediana",
+      "consensus": "Consenso",
+      "distribution": "Distribuição",
+      "accept": "Aceitar · {points}",
+      "pushTo": "Enviar para {provider}",
+      "noNumericVotes": "Nenhum voto numérico nesta rodada."
     },
-    "stats": {
-      "title": "Estatísticas",
-      "averageVote": "Média de Votos",
-      "averageTime": "Tempo Médio",
-      "totalVotes": "Total de Votos",
-      "export": "Exportar Resultados",
-      "exportSuccess": "Resultados exportados com sucesso!",
-      "exportError": "Erro ao exportar resultados",
-      "average": "Média",
-      "mode": "Moda"
+    "consensusStrong": "Consenso forte",
+    "consensusOk": "Quase lá",
+    "consensusWeak": "Time dividido",
+    "dispersionStrong": "O time está junto. Feche o número e siga.",
+    "dispersionOk": "Dois blocos de opinião. Vale um minuto de conversa antes de fechar.",
+    "dispersionWeak": "Dispersão alta: quem votou nos extremos explica primeiro, depois vocês repetem a rodada."
+  },
+  "tasks": {
+    "kicker": "Sessão",
+    "title": "Adicionar tarefas",
+    "fromBoard": "Importar do board",
+    "manual": "Colar manualmente",
+    "pastePlaceholder": "CHK-201 · Salvar cartão\nCHK-202 · Split de pagamento\nAjustar e-mail de confirmação",
+    "pasteHint": "Uma tarefa por linha. Se tiver chave, use “CHAVE · título”.",
+    "addToQueue": "Adicionar à fila",
+    "queue": "Fila de votação",
+    "queueEmpty": "A fila está vazia. Importe do board ou cole a lista ao lado.",
+    "voteNow": "Votar agora",
+    "onTable": "Na mesa",
+    "estimated": "Estimado",
+    "remove": "Remover da fila",
+    "connectNow": "Conectar agora",
+    "importSelected": "Importar selecionadas ({count})",
+    "nothingPicked": "Selecione ao menos uma",
+    "notConnected": "Conecte {provider} para importar as issues do board.",
+    "loadingIssues": "Buscando issues...",
+    "noIssues": "Nenhuma issue aberta encontrada neste board."
+  },
+  "decks": {
+    "kicker": "Biblioteca",
+    "title": "Baralhos salvos",
+    "subtitle": "Os baralhos disponíveis para qualquer sala do time.",
+    "newDeck": "Novo baralho",
+    "inUse": "Em uso",
+    "custom": "Customizado",
+    "standard": "Padrão",
+    "use": "Usar nesta sala",
+    "duplicate": "Duplicar",
+    "edit": "Editar",
+    "remove": "Excluir",
+    "cardsCount": "{count} cartas",
+    "modalTitle": "Baralho customizado",
+    "modalSubtitle": "Suas próprias cartas para esta sala.",
+    "editTitle": "Editar baralho",
+    "editSubtitle": "Ajuste o nome e as cartas deste baralho.",
+    "name": "Nome do baralho",
+    "namePlaceholder": "Ex: Baralho do time",
+    "values": "Valores",
+    "valuesPlaceholder": "0, 1, 2, 3, 5, 8, 13, ?",
+    "hint": "Até 3 caracteres por carta, separados por vírgula.",
+    "preview": "Prévia",
+    "nameRequired": "Dê um nome ao baralho",
+    "valuesRequired": "Insira ao menos um valor",
+    "signInRequired": "Entre na sua conta para salvar baralhos."
+  },
+  "estimates": {
+    "kicker": "Registro",
+    "title": "Estimativas realizadas",
+    "exportCsv": "Exportar CSV",
+    "exportJson": "Exportar JSON",
+    "exportBoard": "Enviar ao board",
+    "head": {
+      "key": "Chave",
+      "task": "Tarefa",
+      "source": "Fonte",
+      "points": "Pontos",
+      "consensus": "Consenso",
+      "date": "Data"
     },
-    "game": {
-      "title": "Planning Poker",
-      "loadingVotes": "Carregando votos...",
-      "loadingCards": "Carregando cartas...",
-      "reveal": "Revelar",
-      "revealing": "Revelando...",
-      "revealingIn": "Revelando em {countdown}...",
-      "reset": "Resetar",
-      "anonymous": "Anônimo",
-      "loadParticipantsError": "Não foi possível carregar os participantes",
-      "loadStoryError": "Não foi possível carregar a história atual",
-      "loadRoomError": "Erro ao carregar sala"
+    "totalPoints": "pontos no total",
+    "storiesDone": "tarefas estimadas",
+    "avgConsensus": "consenso médio",
+    "avgTime": "por tarefa",
+    "empty": "Nenhuma estimativa fechada ainda. Revele uma rodada e aceite o número."
+  },
+  "integrations": {
+    "kicker": "Conexões",
+    "title": "Integrações",
+    "subtitle": "Puxe as tarefas do lugar onde o time já trabalha e devolva os pontos para lá quando a estimativa fechar.",
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "sync": "Sincronizar agora",
+    "workspace": "Workspace",
+    "board": "Board",
+    "lastSync": "Última sync",
+    "scope": "Permissões",
+    "connected": "Conectado",
+    "notConnected": "Desconectado",
+    "unavailable": "Indisponível",
+    "unavailableHint": "Credenciais OAuth deste provedor não estão configuradas no servidor.",
+    "never": "nunca",
+    "manage": "Gerenciar integrações",
+    "notes": {
+      "in": {
+        "kicker": "Ida",
+        "body": "As tarefas entram na fila com chave, título e tipo — sem copiar e colar."
+      },
+      "out": {
+        "kicker": "Volta",
+        "body": "Ao aceitar a estimativa, os pontos são escritos de volta no card ou na issue."
+      },
+      "record": {
+        "kicker": "Registro",
+        "body": "Cada rodada guarda consenso e duração, e sai em CSV ou JSON quando você quiser."
+      }
     },
-    "invite": {
-      "button": "Convidar",
-      "shareTitle": "Planning Poker",
-      "shareText": "Junte-se à nossa sessão de Planning Poker!",
-      "linkCopied": "Link copiado!",
-      "linkCopiedDescription": "O link foi copiado para sua área de transferência",
-      "copyError": "Não foi possível copiar o link"
+    "providers": {
+      "jira": {
+        "name": "Jira",
+        "description": "Issues do seu projeto Jira Cloud, com os pontos escritos de volta no campo de estimativa."
+      },
+      "trello": {
+        "name": "Trello",
+        "description": "Cards de uma lista do Trello, com os pontos anexados ao card."
+      },
+      "github": {
+        "name": "GitHub",
+        "description": "Issues abertas de um repositório, com os pontos comentados na issue."
+      },
+      "izzyplan": {
+        "name": "IzzyPlan",
+        "description": "Conector interno. Ainda não disponível publicamente."
+      }
     },
-    "participants": {
-      "title": "Participantes",
-      "anonymous": "Anônimo"
-    },
-    "deck": {
-      "loading": "Carregando baralhos...",
-      "placeholder": "Escolha um baralho",
-      "createCustom": "Criar Baralho Personalizado",
-      "customTitle": "Criar Baralho Personalizado",
-      "name": "Nome do Baralho",
-      "namePlaceholder": "Ex: Meu Baralho",
-      "values": "Valores do Baralho",
-      "valuesPlaceholder": "Ex: 1, 2, 3, 5, 8, 13, ?",
-      "valuesHelp": "Insira até 3 caracteres por cartão, separados por vírgulas.",
-      "preview": "Preview",
-      "previewHelp": "Esta é uma prévia de como ficará seu deck.",
-      "nameRequired": "Nome do baralho é obrigatório",
-      "valuesRequired": "Insira pelo menos um valor para o baralho"
-    }
+    "signInRequired": "Entre na sua conta para conectar um board — o acesso fica vinculado ao seu usuário.",
+    "connectError": "Não foi possível concluir a conexão."
+  },
+  "toast": {
+    "deckUsed": "Baralho aplicado à sala.",
+    "deckSaved": "Baralho salvo na biblioteca.",
+    "deckRemoved": "Baralho excluído.",
+    "connected": "Integração conectada.",
+    "disconnected": "Integração desconectada.",
+    "synced": "Board sincronizado.",
+    "imported": "{count} tarefas na fila.",
+    "exported": "Arquivo exportado.",
+    "pushed": "Pontos enviados ao board.",
+    "accepted": "Estimativa registrada.",
+    "joined": "Você entrou na sala."
   },
   "metadata": {
-    "title": "Planning Poker - Estimativas Ágeis",
-    "description": "Organize suas sessões de Planning Poker de forma eficiente e colaborativa"
+    "title": "PokerArchitect — Planning poker em tempo real",
+    "description": "Estimativa sem âncora, sem reunião infinita e sem achismo. O time joga, a mesa revela, o histórico aprende."
   }
-} 
+}

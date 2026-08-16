@@ -1,49 +1,52 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { getPusher } from '@/lib/pusher'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { resolveParticipant } from "@/lib/participant";
+import { publishRoomState } from "@/lib/room-state";
 
+/**
+ * Nova rodada sobre a mesma tarefa: zera votos, fichas e cronômetro.
+ *
+ * Cria uma história nova em vez de limpar a atual, para que o histórico de
+ * rodadas anteriores continue no banco.
+ */
 export async function POST(
   request: Request,
   props: { params: Promise<{ storyId: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  const { participantId } = await request.json();
-  const storyId = await props.params;
+  const { storyId } = await props.params;
 
   try {
-    // Verificar se é um usuário autenticado ou um participante anônimo
-    if (!session?.user?.id && !participantId) {
-      return new NextResponse("Usuário não autorizado", { status: 401 });
-    }
-
-    // Buscar a história atual para pegar o roomId
-    const currentStory = await prisma.story.findUnique({
-      where: { id: storyId.storyId },
+    const story = await prisma.story.findUnique({
+      where: { id: storyId },
+      select: { id: true, roomId: true, title: true, taskId: true },
     });
 
-    if (!currentStory) {
-      return new NextResponse("História não encontrada", { status: 404 });
+    if (!story) {
+      return NextResponse.json({ error: "História não encontrada" }, { status: 404 });
     }
 
-    // Criar nova história
+    const participant = await resolveParticipant(request, story.roomId);
+
+    if (!participant) {
+      return NextResponse.json(
+        { error: "Entre na sala antes de resetar" },
+        { status: 401 }
+      );
+    }
+
     const newStory = await prisma.story.create({
       data: {
-        title: "Nova História",
-        roomId: currentStory.roomId,
-        revealed: false,
+        roomId: story.roomId,
+        title: story.title,
+        taskId: story.taskId,
       },
     });
 
-    // Notificar todos os participantes sobre a nova história
-    await getPusher().trigger(`room-${currentStory.roomId}`, "story:reset", {
-      oldStoryId: storyId,
-      newStoryId: newStory.id,
-    });
+    const snapshot = await publishRoomState(story.roomId);
 
-    return NextResponse.json(newStory);
-  } catch {
-    return new NextResponse("Erro ao resetar história", { status: 500 });
+    return NextResponse.json({ success: true, storyId: newStory.id, snapshot });
+  } catch (error) {
+    console.error("[reset] erro ao resetar rodada", error);
+    return NextResponse.json({ error: "Erro ao resetar rodada" }, { status: 500 });
   }
-} 
+}

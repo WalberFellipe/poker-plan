@@ -1,74 +1,51 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { getPusher } from "@/lib/pusher"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { ensureParticipant } from "@/lib/participant";
+import {
+  buildRoomSnapshot,
+  ensureCurrentStory,
+  publishRoomState,
+} from "@/lib/room-state";
 
+/**
+ * Entrar na sala. Idempotente por (roomId, clientId): chamar de novo depois de
+ * um reload devolve a mesma cadeira em vez de criar uma duplicata.
+ */
 export async function POST(
   request: Request,
   props: { params: Promise<{ roomId: string }> }
 ) {
-  try {
-    const session = await getServerSession(authOptions);
-    const { name } = await request.json();
-    const { roomId } = await props.params;
+  const { roomId } = await props.params;
 
-    // Verificar se a sala existe
-    const room = await prisma.room.findUnique({
-      where: { id: roomId },
-    });
+  try {
+    const body = await request.json().catch(() => ({}));
+    const name: string | undefined = body?.name;
+
+    const room = await prisma.room.findUnique({ where: { id: roomId } });
 
     if (!room) {
+      return NextResponse.json({ error: "Sala não encontrada" }, { status: 404 });
+    }
+
+    if (room.expiresAt < new Date()) {
+      return NextResponse.json({ error: "Sala expirada" }, { status: 410 });
+    }
+
+    const participant = await ensureParticipant(request, roomId, name);
+
+    if (!participant) {
       return NextResponse.json(
-        { error: "Sala não encontrada" },
-        { status: 404 }
+        { error: "Identificação do participante ausente" },
+        { status: 400 }
       );
     }
 
-    let participant;
+    await ensureCurrentStory(roomId);
+    const snapshot = (await publishRoomState(roomId)) ?? (await buildRoomSnapshot(roomId));
 
-    if (session?.user?.id) {
-      // Usuário autenticado
-      participant = await prisma.roomParticipant.create({
-        data: {
-          roomId,
-          userId: session.user.id,
-        },
-        include: {
-          user: true,
-        },
-      });
-
-      // Notificar outros participantes
-      await getPusher().trigger(`room-${roomId}`, "participant:join", {
-        participantId: participant.id,
-        userId: session.user.id,
-        name: session.user.name,
-        image: session.user.image,
-        isAnonymous: false,
-      });
-    } else {
-      // Usuário anônimo
-      participant = await prisma.anonymousParticipant.create({
-        data: {
-          roomId,
-          name,
-        },
-      });
-
-      // Notificar outros participantes
-      await getPusher().trigger(`room-${roomId}`, "participant:join", {
-        participantId: participant.id,
-        name: participant.name,
-        isAnonymous: true,
-      });
-    }
-
-    return NextResponse.json({ participantId: participant.id });
-  } catch {
-    return NextResponse.json(
-      { error: "Erro ao entrar na sala" },
-      { status: 500 }
-    );
+    return NextResponse.json({ participantId: participant.id, snapshot });
+  } catch (error) {
+    console.error("[join] erro ao entrar na sala", error);
+    return NextResponse.json({ error: "Erro ao entrar na sala" }, { status: 500 });
   }
-} 
+}

@@ -2,154 +2,357 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 /**
- * Tokens semânticos (HSL sem função hsl(), padrão shadcn/Tailwind).
- * Compatível com dark mode via classe .dark no <html>.
+ * Direção neon: fundo quase preto com dois acentos.
+ *
+ * Regra de uso dos acentos (do handoff): ciano é o que é interativo e o que é
+ * consenso; magenta é raro — você mesmo, dispersão, discordância e as fichas de
+ * "pagar pra ver". Nunca os dois no mesmo componente pequeno.
+ *
+ * O visual é assumidamente escuro: não há par claro destes tokens.
  */
 
 @layer base {
   :root {
-    /* Camadas de fundo */
-    --background: 218 100% 98.4%;
-    --background-secondary: 219 100% 96.7%;
-
-    /* Superfícies */
-    --surface: 0 0% 100%;
-    --surface-elevated: 216 100% 99%;
-
-    /* Bordas */
-    --border: 217 50% 89.8%;
-    --border-subtle: 220 45% 93%;
+    /* Fundo e brilhos */
+    --pa-bg: 7 7 13;
+    --pa-bg-elevated: 13 14 24;
+    --pa-bg-sunken: 10 10 18;
 
     /* Texto */
-    --foreground: 222 47.4% 11.2%;
-    --foreground-secondary: 215 19.3% 34.5%;
+    --pa-text: 236 235 245;
+    --pa-text-muted: 154 153 179;
+    --pa-text-dim: 141 140 166;
+    --pa-text-faint: 123 122 147;
+    --pa-text-ghost: 93 92 114;
 
-    /* Marca / ação primária */
-    --primary: 217 91.2% 59.8%;
-    --primary-hover: 221 83.2% 53.3%;
-    --primary-foreground: 0 0% 100%;
+    /* Acento primário: ciano */
+    --pa-cy: 63 232 255;
+    --pa-cy-deep: 18 180 214;
+    --pa-cy-ink: 4 19 26;
+    --pa-cy-soft: 157 246 255;
 
-    /* Estados de interface (shadcn) */
-    --secondary: 219 100% 96.7%;
-    --secondary-foreground: 222 47.4% 11.2%;
-    --muted: 220 35% 95%;
-    --muted-foreground: 215 19.3% 34.5%;
-    --accent: 220 45% 94%;
-    --accent-foreground: 222 47.4% 11.2%;
+    /* Acento secundário: magenta */
+    --pa-mg: 255 47 160;
+    --pa-mg-soft: 255 108 187;
 
-    /* Destrutivo */
-    --destructive: 0 72% 51%;
+    --pa-radius: 2px;
+
+    /* Tokens shadcn mapeados para a paleta neon, para que os componentes
+       existentes (dialog, select, toast) continuem funcionando sem reescrita. */
+    --background: 240 30% 4%;
+    --foreground: 246 26% 94%;
+    --card: 236 29% 7%;
+    --card-foreground: 246 26% 94%;
+    --popover: 236 29% 7%;
+    --popover-foreground: 246 26% 94%;
+    --primary: 189 100% 62%;
+    --primary-foreground: 200 73% 6%;
+    --secondary: 240 20% 12%;
+    --secondary-foreground: 246 26% 94%;
+    --muted: 240 20% 12%;
+    --muted-foreground: 245 12% 65%;
+    --accent: 189 100% 62%;
+    --accent-foreground: 200 73% 6%;
+    --destructive: 328 100% 59%;
     --destructive-foreground: 0 0% 100%;
-
-    /* Aliases shadcn → tokens semânticos */
-    --card: var(--surface);
-    --card-foreground: var(--foreground);
-    --popover: var(--surface);
-    --popover-foreground: var(--foreground);
-    --input: var(--border);
-    --ring: 217 91.2% 59.8%;
-
-    /* Brilho / hero (mesmo matiz da primária, opacidade via Tailwind) */
-    --accent-glow: 217 91.2% 59.8%;
-    --hero-glow: 217 91.2% 59.8%;
-
-    /* Sombras e overlay */
-    --shadow-card: 220 45% 40%;
-    --overlay: 222 47.4% 11.2%;
-
-    /* Mesa de poker (tom compatível com o app) */
-    --table-bg: 218 42% 16%;
-    --table-border: 218 38% 12%;
-    --table-surface: 218 42% 18%;
-    --elevated-bg: 218 42% 14%;
-
-    --radius: 0.5rem;
-
-    /* Gráficos (tons frios, legíveis no claro) */
-    --chart-1: 217 91% 55%;
-    --chart-2: 199 89% 48%;
-    --chart-3: 221 83% 53%;
-    --chart-4: 215 25% 45%;
-    --chart-5: 262 83% 58%;
-
-    --button-border: var(--border);
+    --border: 246 26% 94%;
+    --input: 246 26% 94%;
+    --ring: 189 100% 62%;
+    --radius: 2px;
   }
 
-  .dark {
-    --background: 220 48.8% 8.4%;
-    --background-secondary: 220 48.4% 12.2%;
-
-    --surface: 221 50.6% 15.9%;
-    --surface-elevated: 218 51% 19.2%;
-
-    --border: 220 38.7% 21.8%;
-    --border-subtle: 220 32% 16%;
-
-    --foreground: 220 100% 97.6%;
-    --foreground-secondary: 218 29.3% 73.9%;
-
-    --primary: 219 100% 65.5%;
-    --primary-hover: 220 90.2% 60%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 48.4% 12.2%;
-    --secondary-foreground: 220 100% 97.6%;
-    --muted: 220 42% 11%;
-    --muted-foreground: 218 29.3% 73.9%;
-    --accent: 220 38% 20%;
-    --accent-foreground: 220 100% 97.6%;
-
-    --destructive: 0 62% 45%;
-    --destructive-foreground: 0 0% 100%;
-
-    --card: var(--surface);
-    --card-foreground: var(--foreground);
-    --popover: var(--surface);
-    --popover-foreground: var(--foreground);
-    --input: 220 38.7% 21.8%;
-    --ring: 219 100% 65.5%;
-
-    --accent-glow: 219 100% 65.5%;
-    --hero-glow: 219 100% 65.5%;
-
-    --shadow-card: 220 48% 4%;
-    --overlay: 220 48.8% 4%;
-
-    --table-bg: 218 42% 14%;
-    --table-border: 218 38% 10%;
-    --table-surface: 218 42% 16%;
-    --elevated-bg: 218 42% 12%;
-
-    --chart-1: 219 100% 65%;
-    --chart-2: 199 89% 55%;
-    --chart-3: 220 90% 60%;
-    --chart-4: 218 29% 60%;
-    --chart-5: 262 83% 65%;
-
-    --button-border: var(--border);
-  }
-}
-
-@layer base {
   * {
-    @apply border-border;
+    box-sizing: border-box;
   }
+
+  html,
   body {
-    @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background:
+      radial-gradient(
+        1100px 620px at 78% -10%,
+        rgb(var(--pa-cy) / 0.1),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 560px at 8% 108%,
+        rgb(var(--pa-mg) / 0.09),
+        transparent 62%
+      ),
+      rgb(var(--pa-bg));
+    background-attachment: fixed;
+    color: rgb(var(--pa-text));
+    font-family: var(--font-source-serif), Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-orbitron), var(--font-source-serif), sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+
+  ::selection {
+    background: rgb(var(--pa-cy) / 0.28);
+  }
+
+  /* Nunca o anel padrão do browser. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--pa-cy));
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgb(var(--pa-bg));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--pa-text) / 0.12);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--pa-cy) / 0.3);
   }
 }
 
 @layer components {
-  .app-layout {
-    @apply h-[95vh] flex flex-col bg-background overflow-hidden;
+  /* Kicker: rótulo curto em caixa alta acima de um título. */
+  .pa-kicker {
+    font-family: var(--font-orbitron), sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(var(--pa-text-dim));
   }
 
-  .app-container {
-    @apply bg-muted/50;
+  .pa-label {
+    font-family: var(--font-orbitron), sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--pa-text-dim));
+  }
+
+  /* Filete que separa um bloco do seguinte. */
+  .pa-rule {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgb(var(--pa-text) / 0.16),
+      transparent
+    );
+  }
+
+  .pa-surface {
+    background: rgb(var(--pa-text) / 0.03);
+    border: 1px solid rgb(var(--pa-text) / 0.08);
+    border-radius: 3px;
+  }
+
+  .pa-surface-interactive {
+    transition:
+      border-color 0.18s ease,
+      background 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  .pa-surface-interactive:hover {
+    background: rgb(var(--pa-cy) / 0.05);
+    border-color: rgb(var(--pa-cy) / 0.24);
+  }
+}
+
+@layer utilities {
+  .pa-glow-cy {
+    box-shadow: 0 0 26px rgb(var(--pa-cy) / 0.35);
+  }
+
+  .pa-glow-cy-strong {
+    box-shadow: 0 0 44px rgb(var(--pa-cy) / 0.6);
+  }
+
+  .pa-glow-mg {
+    box-shadow: 0 0 30px rgb(var(--pa-mg) / 0.35);
+  }
+
+  .pa-text-glow-cy {
+    text-shadow: 0 0 22px rgb(var(--pa-cy) / 0.55);
+  }
+
+  /* Números, valores de carta e relógio pedem tabular para não "pular". */
+  .pa-numeric {
+    font-family: var(--font-orbitron), sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Animações do protótipo. As de ficha usam variáveis --fx/--fy/--hx/--hy/--rot
+   definidas inline por instância, e `both` para que a ficha permaneça
+   exatamente onde parou. */
+@keyframes pa-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pa-flip {
+  from {
+    transform: translate(-50%, -50%) rotateY(180deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotateY(0deg);
+  }
+}
+
+@keyframes pa-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes pa-count {
+  0% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+}
+
+@keyframes pa-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes pa-land {
+  0% {
+    transform: translate(var(--fx), var(--fy)) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  70% {
+    transform: translate(calc(var(--fx) * 0.06), calc(var(--fy) * 0.06 - 30px))
+      scale(1.14) rotate(300deg);
+  }
+  86% {
+    transform: translate(0, 0) scale(0.93) rotate(350deg);
+  }
+  100% {
+    transform: translate(0, 0) scale(1) rotate(var(--rot));
+    opacity: 1;
+  }
+}
+
+@keyframes pa-call {
+  0% {
+    transform: translate(var(--fx), var(--fy)) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  48% {
+    transform: translate(var(--hx), var(--hy)) scale(1.28) rotate(420deg);
+  }
+  60% {
+    transform: translate(calc(var(--hx) * 0.74), calc(var(--hy) * 0.74 - 16px))
+      scale(1) rotate(500deg);
+  }
+  78% {
+    transform: translate(calc(var(--hx) * 0.3), calc(var(--hy) * 0.3)) scale(1.04)
+      rotate(540deg);
+  }
+  89% {
+    transform: translate(0, -9px) scale(1) rotate(556deg);
+  }
+  100% {
+    transform: translate(0, 0) scale(1) rotate(var(--rot));
+    opacity: 1;
+  }
+}
+
+@keyframes pa-shake {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  18% {
+    transform: translate(-57%, -52%) rotate(-5deg);
+  }
+  42% {
+    transform: translate(-43%, -48%) rotate(5deg);
+  }
+  68% {
+    transform: translate(-53%, -51%) rotate(-2deg);
+  }
+}
+
+@keyframes pa-toast {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

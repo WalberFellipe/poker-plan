@@ -1,81 +1,75 @@
-import { getServerSession } from "next-auth"
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { authOptions } from "@/lib/auth"
-import { getPusher } from "@/lib/pusher"
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
+import { readClientId } from "@/lib/participant";
+import { ensureCurrentStory } from "@/lib/room-state";
 
-export async function POST(req: Request) {
+const ROOM_TTL_MS = 4 * 60 * 60 * 1000;
+
+const DEFAULT_DECK = ["0", "½", "1", "2", "3", "5", "8", "13", "20", "40", "?", "∞"];
+
+/** Cria a sala e já senta quem criou à mesa. */
+export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const { name, participantName, deckValues } = await req.json();
+    const clientId = readClientId(request);
+    const { name, participantName, deckValues } = await request.json();
 
-    if (!name) {
+    if (typeof name !== "string" || name.trim() === "") {
       return NextResponse.json(
         { error: "Nome da sala é obrigatório" },
         { status: 400 }
       );
     }
 
-    // Primeiro criar um usuário anônimo se não houver sessão
+    const ownerName = session?.user?.name ?? participantName ?? "Anônimo";
+
+    // Sem sessão ainda precisamos de um User para ser dono da sala; ele existe
+    // só para satisfazer a relação e não aparece em lugar nenhum da interface.
     let ownerId = session?.user?.id;
-    let participant;
 
     if (!ownerId) {
-      const anonymousUser = await prisma.user.create({
-        data: {
-          name: participantName || "Anônimo",
-        },
+      const guestOwner = await prisma.user.create({
+        data: { name: ownerName },
       });
-      ownerId = anonymousUser.id;
+      ownerId = guestOwner.id;
     }
 
-    // Criar sala com o ownerId válido
+    const values =
+      Array.isArray(deckValues) && deckValues.length > 0
+        ? deckValues.map(String)
+        : DEFAULT_DECK;
+
     const room = await prisma.room.create({
       data: {
-        name,
+        name: name.trim(),
         ownerId,
-        expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000),
-        deckValues,
+        expiresAt: new Date(Date.now() + ROOM_TTL_MS),
+        deckValues: values,
       },
     });
 
-    // Criar o participante apropriado
-    if (session?.user?.id) {
-      participant = await prisma.roomParticipant.create({
+    if (clientId) {
+      await prisma.participant.create({
         data: {
           roomId: room.id,
-          userId: session.user.id,
-        },
-      });
-    } else {
-      participant = await prisma.anonymousParticipant.create({
-        data: {
-          roomId: room.id,
-          name: participantName,
+          userId: session?.user?.id ?? null,
+          clientId,
+          name: ownerName,
+          image: session?.user?.image ?? null,
         },
       });
     }
 
-    // Notificar outros participantes via Pusher
-    await getPusher().trigger(room.id, "participant:join", {
-      participantId: participant.id,
-      name: session?.user?.name || participantName,
-      image: session?.user?.image || null,
-      isAnonymous: !session?.user,
-    });
+    await ensureCurrentStory(room.id);
 
-    return NextResponse.json({
-      success: true,
-      room,
-      participant,
-      participantId: participant.id,
-    });
-  } catch {
-    return NextResponse.json({ 
-      success: false,
-      error: "Erro ao criar sala" 
-    }, { 
-      status: 500 
-    })
+    return NextResponse.json({ success: true, room, roomId: room.id });
+  } catch (error) {
+    console.error("[room] erro ao criar sala", error);
+    return NextResponse.json(
+      { success: false, error: "Erro ao criar sala" },
+      { status: 500 }
+    );
   }
-} 
+}

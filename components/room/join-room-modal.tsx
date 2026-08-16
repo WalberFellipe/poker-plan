@@ -1,87 +1,70 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useSession } from "next-auth/react"
-import { useToast } from "@/hooks/useToast"
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FieldLabel } from "@/components/ui/neon";
 
 interface JoinRoomModalProps {
-  roomId: string
-  onJoin: (participantId: string) => void
+  defaultName?: string;
+  onJoin: (name: string) => Promise<boolean> | boolean;
 }
 
-export function JoinRoomModal({ roomId, onJoin }: JoinRoomModalProps) {
-  const { data: session } = useSession()
-  const [name, setName] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+/**
+ * Perguntado uma única vez por browser.
+ *
+ * A versão anterior reaparecia a cada reload — o cliente nunca relia o id que
+ * já tinha guardado — e cada resposta criava um participante novo. Agora só
+ * aparece quando de fato não existe cadeira para este `clientId` na sala.
+ */
+export function JoinRoomModal({ defaultName = "", onJoin }: JoinRoomModalProps) {
+  const t = useTranslations("room");
+  const [name, setName] = useState(defaultName);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (session?.user) return null
+  const submit = async () => {
+    const trimmed = name.trim();
+    if (!trimmed || isSubmitting) return;
 
-  const handleJoin = async () => {
-    if (!name.trim()) return
-
-    setIsLoading(true)
-
-    try {
-      const response = await fetch(`/api/rooms/${roomId}/join`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name }),
-      })
-
-      if (!response.ok) throw new Error('Erro ao entrar na sala')
-
-      const data = await response.json()
-      localStorage.setItem('participantId', data.participantId)
-      onJoin(data.participantId)
-      
-      toast({
-        title: "Bem-vindo!",
-        description: "Você entrou na sala com sucesso",
-      })
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : 'Erro ao entrar na sala',
-        variant: "destructive"
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    setIsSubmitting(true);
+    const ok = await onJoin(trimmed);
+    if (!ok) setIsSubmitting(false);
+  };
 
   return (
-    <Dialog open={true}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Entre na sala</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <Input
-            placeholder="Seu nome"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleJoin()}
-          />
-          <Button 
-            onClick={handleJoin} 
-            disabled={!name.trim() || isLoading}
-            className="w-full"
-          >
-            {isLoading ? 'Entrando...' : 'Entrar'}
-          </Button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgb(4_4_9/.78)] p-5 backdrop-blur-[6px]">
+      <div className="flex w-full max-w-[480px] animate-rise flex-col gap-5 rounded-lg border border-cy/28 bg-[linear-gradient(180deg,#0e0f1a,#0a0a12)] p-7 shadow-[0_40px_100px_rgba(0,0,0,.7),0_0_60px_rgb(var(--pa-cy)/.1)]">
+        <div className="flex flex-col gap-1.5">
+          <h2 className="font-display text-[22px] text-pa-text">
+            {t("joinTitle")}
+          </h2>
+          <p className="text-[15px] leading-relaxed text-pa-muted">
+            {t("joinSubtitle")}
+          </p>
         </div>
-      </DialogContent>
-    </Dialog>
-  )
-} 
+
+        <div className="flex flex-col gap-2">
+          <FieldLabel htmlFor="join-name">{t("joinPlaceholder")}</FieldLabel>
+          <Input
+            id="join-name"
+            autoFocus
+            value={name}
+            maxLength={40}
+            placeholder={t("joinPlaceholder")}
+            onChange={(event) => setName(event.target.value)}
+            onKeyDown={(event) => event.key === "Enter" && submit()}
+          />
+        </div>
+
+        <Button
+          onClick={submit}
+          disabled={!name.trim() || isSubmitting}
+          className="w-full"
+        >
+          {t("joinSubmit")}
+        </Button>
+      </div>
+    </div>
+  );
+}

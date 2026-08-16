@@ -1,5 +1,8 @@
 import type { Config } from "tailwindcss";
 
+/** Cor da paleta neon, com suporte a opacidade (`text-cy/40`). */
+const rgb = (variable: string) => `rgb(var(${variable}) / <alpha-value>)`;
+
 export default {
   darkMode: ["class"],
   content: [
@@ -11,26 +14,37 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-Geist-sans)", "Arial", "Helvetica", "sans-serif"],
-        mono: ["var(--font-Geist-mono)", "ui-monospace", "monospace"],
+        // Display / chrome: logo, títulos, botões, números, cartas.
+        display: ["var(--font-orbitron)", "sans-serif"],
+        // Corpo: parágrafos, títulos de tarefa, nomes de pessoas.
+        sans: ["var(--font-source-serif)", "Georgia", "serif"],
+        serif: ["var(--font-source-serif)", "Georgia", "serif"],
       },
       colors: {
-        background: {
-          DEFAULT: "hsl(var(--background))",
-          secondary: "hsl(var(--background-secondary))",
+        pa: {
+          bg: rgb("--pa-bg"),
+          elevated: rgb("--pa-bg-elevated"),
+          sunken: rgb("--pa-bg-sunken"),
+          text: rgb("--pa-text"),
+          muted: rgb("--pa-text-muted"),
+          dim: rgb("--pa-text-dim"),
+          faint: rgb("--pa-text-faint"),
+          ghost: rgb("--pa-text-ghost"),
         },
-        foreground: {
-          DEFAULT: "hsl(var(--foreground))",
-          secondary: "hsl(var(--foreground-secondary))",
+        cy: {
+          DEFAULT: rgb("--pa-cy"),
+          deep: rgb("--pa-cy-deep"),
+          ink: rgb("--pa-cy-ink"),
+          soft: rgb("--pa-cy-soft"),
         },
-        surface: {
-          DEFAULT: "hsl(var(--surface))",
-          elevated: "hsl(var(--surface-elevated))",
+        mg: {
+          DEFAULT: rgb("--pa-mg"),
+          soft: rgb("--pa-mg-soft"),
         },
-        border: {
-          DEFAULT: "hsl(var(--border))",
-          subtle: "hsl(var(--border-subtle))",
-        },
+
+        // Aliases shadcn, para os componentes de UI existentes.
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -42,7 +56,6 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          hover: "hsl(var(--primary-hover))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -56,47 +69,54 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        "accent-glow": "hsl(var(--accent-glow) / <alpha-value>)",
-        "hero-glow": "hsl(var(--hero-glow) / <alpha-value>)",
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        overlay: "hsl(var(--overlay) / <alpha-value>)",
-        chart: {
-          1: "hsl(var(--chart-1))",
-          2: "hsl(var(--chart-2))",
-          3: "hsl(var(--chart-3))",
-          4: "hsl(var(--chart-4))",
-          5: "hsl(var(--chart-5))",
-        },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        // O handoff usa raios muito pequenos: 2px em botões/campos/badges,
+        // 3px em cards, 4px em cartas e modais.
+        DEFAULT: "2px",
+        sm: "2px",
+        md: "3px",
+        lg: "4px",
+        card: "3px",
+        chip: "999px",
+      },
+      boxShadow: {
+        elevated: "0 30px 80px rgba(0,0,0,.55)",
+        modal: "0 40px 100px rgba(0,0,0,.7)",
+        "glow-cy": "0 0 26px rgb(var(--pa-cy) / .35)",
+        "glow-cy-strong": "0 0 44px rgb(var(--pa-cy) / .6)",
+        "glow-mg": "0 0 30px rgb(var(--pa-mg) / .35)",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-      },
-      boxShadow: {
-        card: "0 4px 24px -4px hsl(var(--shadow-card) / 0.14), 0 0 0 1px hsl(var(--border) / 0.08)",
-      },
-      keyframes: {
-        "slide-down": {
-          "0%": { transform: "translateY(-100%)", opacity: "0" },
-          "100%": { transform: "translateY(0)", opacity: "1" },
-        },
-        "slide-up": {
-          "0%": { transform: "translateY(0)", opacity: "1" },
-          "100%": { transform: "translateY(-100%)", opacity: "0" },
-        },
+        "cy-fill":
+          "linear-gradient(180deg, rgb(var(--pa-cy)), rgb(var(--pa-cy-deep)))",
+        // Verso da carta: listras diagonais ciano.
+        "card-back":
+          "repeating-linear-gradient(135deg, rgb(var(--pa-cy) / .16) 0 6px, rgba(10,10,20,.9) 6px 12px)",
       },
       animation: {
-        "slide-down": "slide-down 0.3s ease-out",
-        "slide-up": "slide-up 0.3s ease-out",
+        rise: "pa-rise .4s ease both",
+        "rise-slow": "pa-rise .5s ease both",
+        flip: "pa-flip .5s ease both",
+        pulse: "pa-pulse 1.8s ease-in-out infinite",
+        "pulse-fast": "pa-pulse 1.6s ease-in-out infinite",
+        count: "pa-count .8s ease-in-out infinite",
+        float: "pa-float 7s ease-in-out infinite",
+        land: "pa-land 1s cubic-bezier(.2,.7,.3,1) both",
+        call: "pa-call 1.25s cubic-bezier(.2,.7,.3,1) both",
+        shake: "pa-shake .5s ease both",
+        toast: "pa-toast .25s ease both",
+      },
+      transitionTimingFunction: {
+        chip: "cubic-bezier(.2,.7,.3,1)",
       },
     },
   },

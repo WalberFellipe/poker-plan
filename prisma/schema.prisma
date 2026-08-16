@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -41,18 +38,18 @@ model Session {
 }
 
 model User {
-  id                String    @id @default(cuid())
-  name              String?
-  email             String?   @unique
-  emailVerified     DateTime?
-  image             String?
-  accounts          Account[]
-  sessions          Session[]
-  customCards       Card[]
-  participatedRooms RoomParticipant[] @relation("RoomParticipation")
-  createdRooms      Room[]    @relation("RoomHost")
-  votes             Vote[]
-  customDecks        CustomDeck[]
+  id            String        @id @default(cuid())
+  name          String?
+  email         String?       @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  customCards   Card[]
+  createdRooms  Room[]        @relation("RoomHost")
+  customDecks   CustomDeck[]
+  participations Participant[]
+  integrations  Integration[]
 }
 
 model VerificationToken {
@@ -64,89 +61,190 @@ model VerificationToken {
 }
 
 model Room {
-  id                  String               @id @default(cuid())
-  name                String
-  createdAt          DateTime             @default(now())
-  expiresAt          DateTime             
-  stories            Story[]
-  participants       RoomParticipant[]
-  anonymousParticipants AnonymousParticipant[]
-  ownerId            String
-  owner              User                 @relation("RoomHost", fields: [ownerId], references: [id])
-  deckValues         String[]
+  id         String        @id @default(cuid())
+  name       String
+  createdAt  DateTime      @default(now())
+  expiresAt  DateTime
+  ownerId    String
+  owner      User          @relation("RoomHost", fields: [ownerId], references: [id])
+  deckValues String[]
+
+  /// Contador monotônico do estado da sala. Toda mutação que afeta o snapshot
+  /// incrementa este valor; os clientes descartam snapshots com version menor
+  /// que a última aplicada. É o que impede que um evento Pusher fora de ordem
+  /// (ou reentregue) faça a UI regredir.
+  version Int @default(0)
+
+  stories      Story[]
+  participants Participant[]
+  tasks        Task[]
+  estimates    Estimate[]
+  chips        Chip[]
 
   @@index([ownerId])
   @@index([expiresAt])
 }
 
+/// Participante unificado: autenticado (userId preenchido) ou convidado
+/// (userId nulo). `clientId` é gerado no browser e guardado em localStorage,
+/// então recarregar a página ou sair e voltar reencontra a mesma linha em vez
+/// de criar uma duplicata.
+model Participant {
+  id       String  @id @default(cuid())
+  roomId   String
+  room     Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId String
+  name     String
+  image    String?
+  role     String  @default("player")
+
+  isOnline   Boolean  @default(true)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  votes Vote[]
+  chips Chip[] @relation("ChipAuthor")
+  callsReceived Chip[] @relation("ChipTarget")
+
+  @@unique([roomId, clientId])
+  @@unique([roomId, userId])
+  @@index([roomId])
+}
+
 model Story {
-  id          String    @id @default(cuid())
-  title       String
-  roomId      String
-  room        Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  votes       Vote[]
-  finalScore  Float?
-  createdAt   DateTime  @default(now())
-  revealed    Boolean   @default(false)
-  anonymousVotes AnonymousVote[]
+  id      String @id @default(cuid())
+  title   String
+  roomId  String
+  room    Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  taskId  String?
+  task    Task?  @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  revealed Boolean @default(false)
+
+  /// Instante absoluto em que as cartas viram. O servidor grava `agora + N ms`
+  /// e todos os clientes agendam a virada contra este timestamp, então a
+  /// revelação acontece no mesmo momento para todo mundo, independente de
+  /// quando cada um recebeu o evento.
+  revealAt DateTime?
+
+  /// Início da rodada, usado para derivar o cronômetro no cliente em vez de
+  /// contar segundos localmente (que dessincroniza).
+  startedAt DateTime @default(now())
+
+  finalScore Float?
+  createdAt  DateTime @default(now())
+
+  votes Vote[]
+  chips Chip[]
+
+  @@index([roomId])
 }
 
 model Vote {
   id            String   @id @default(cuid())
-  value         Int
-  userId        String
+  /// String, não Int: o baralho pode conter emoji, "?", "XS", "☕".
+  /// A leitura numérica para média/mediana é feita na aplicação.
+  value         String
   storyId       String
+  participantId String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  story         Story    @relation(fields: [storyId], references: [id])
-  user          User     @relation(fields: [userId], references: [id])
 
-  @@unique([userId, storyId])
+  story       Story       @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, storyId])
+  @@index([storyId])
+}
+
+/// Ficha apostada na mesa.
+///
+/// Cada participante se vê sentado embaixo ao centro, então a mesa é rotacionada
+/// de forma diferente em cada cliente e uma posição absoluta não faria sentido.
+/// O que é persistido é apenas a parte *sorteada* do pouso (jitter e rotação
+/// final); a trajetória — de qual cadeira sai, em quem bate — cada cliente
+/// deriva do próprio layout. Assim a ficha cai no mesmo ponto relativo da mesa
+/// para todo mundo, saindo sempre da cadeira certa.
+model Chip {
+  id      String @id @default(cuid())
+  roomId  String
+  room    Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  storyId String
+  story   Story  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   Participant @relation("ChipAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  targetId String?
+  target   Participant? @relation("ChipTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  /// agree | explain | risk | call
+  kind String
+  /// land | call
+  mode String
+
+  /// Deslocamento aleatório do pouso, em pontos percentuais da mesa.
+  jitterX Float
+  jitterY Float
+  /// Rotação final da ficha, em graus.
+  rot     Float
+
+  createdAt DateTime @default(now())
+
+  @@index([storyId])
+}
+
+/// Fila de votação da sala.
+model Task {
+  id     String @id @default(cuid())
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  key    String
+  title  String
+  /// manual | jira | trello | github | izzyplan
+  source String @default("manual")
+  /// Id da issue no provedor externo, para escrever os pontos de volta.
+  externalId  String?
+  externalUrl String?
+  type        String?
+
+  order  Int
+  /// queued | active | estimated
+  status String @default("queued")
+
+  createdAt DateTime @default(now())
+  stories   Story[]
+
+  @@index([roomId, order])
+}
+
+/// Registro das estimativas fechadas.
+model Estimate {
+  id     String @id @default(cuid())
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  key       String
+  title     String
+  source    String @default("manual")
+  points    String
+  /// 0–100, calculado a partir da dispersão dos votos.
+  consensus Int
+  /// Duração da rodada, para a estatística de tempo médio por tarefa.
+  durationSeconds Int?
+  createdAt DateTime @default(now())
+
+  @@index([roomId])
 }
 
 model Card {
-  id          String    @id @default(cuid())
-  value       Float
-  label       String?   
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model RoomParticipant {
-  id        String   @id @default(cuid())
-  roomId    String
-  userId    String
-  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user      User     @relation("RoomParticipation", fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@unique([roomId, userId])
-  @@index([roomId])
-  @@index([userId])
-}
-
-model AnonymousParticipant {
-  id            String   @id @default(cuid())
-  roomId        String
-  name          String?
-  room          Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  votes         AnonymousVote[]
-  createdAt     DateTime @default(now())
-
-  @@index([roomId])
-}
-
-model AnonymousVote {
-  id            String   @id @default(cuid())
-  value         Int
-  participantId String
-  storyId       String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  story         Story    @relation(fields: [storyId], references: [id])
-  participant   AnonymousParticipant @relation(fields: [participantId], references: [id])
-
-  @@unique([participantId, storyId])
+  id     String  @id @default(cuid())
+  value  Float
+  label  String?
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model CustomDeck {
@@ -158,5 +256,32 @@ model CustomDeck {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([userId])
+}
+
+/// Conexão OAuth com um board externo, por usuário e provedor.
+model Integration {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// jira | trello | github | izzyplan
+  provider String
+
+  accessToken  String    @db.Text
+  refreshToken String?   @db.Text
+  expiresAt    DateTime?
+  scope        String?
+
+  /// Identificadores legíveis exibidos no card da integração.
+  workspace   String?
+  workspaceId String?
+  board       String?
+  boardId     String?
+  lastSyncAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, provider])
   @@index([userId])
 }

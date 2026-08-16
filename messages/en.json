@@ -3,202 +3,306 @@
     "loading": "Loading...",
     "error": "Error",
     "close": "Close",
-    "save": "Save"
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "retry": "Try again"
   },
   "auth": {
-    "signIn": "Sign In",
-    "signUp": "Sign Up",
-    "signOut": "Sign Out",
-    "loggedInAs": "Logged in as"
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "loggedInAs": "Signed in as"
   },
-  "home": {
-    "brand": "PokerArchitect",
-    "nav": {
-      "product": "Product",
-      "features": "Features",
-      "methodology": "Methodology",
-      "faq": "FAQ"
+  "nav": {
+    "brandFirst": "POKER",
+    "brandSecond": "ARCHITECT",
+    "product": "Product",
+    "features": "Features",
+    "method": "Method",
+    "faq": "FAQ",
+    "signIn": "Sign in",
+    "newRoom": "New room",
+    "tabs": {
+      "table": "Table",
+      "tasks": "Tasks",
+      "decks": "Decks",
+      "estimates": "Estimates",
+      "integrations": "Integrations"
+    }
+  },
+  "landing": {
+    "heroKicker": "Real-time planning poker",
+    "heroA": "Flip the cards.",
+    "heroB": "Close the number.",
+    "heroSub": "Estimation with no anchoring, no endless meeting and no guessing. The team plays, the table reveals, the history learns.",
+    "ctaPrimary": "Create a free room",
+    "ctaSecondary": "Join a room",
+    "stat1Value": "90s",
+    "stat1": "per round",
+    "stat2Value": "2×",
+    "stat2": "faster sprints",
+    "stat3Value": "+40%",
+    "stat3": "estimation accuracy",
+    "livePreview": "Live table",
+    "pillars": {
+      "round": {
+        "kicker": "Round",
+        "title": "Ninety seconds per story",
+        "body": "Timer on the table, cards face down, simultaneous reveal. The debate happens after the number, not before."
+      },
+      "alignment": {
+        "kicker": "Alignment",
+        "title": "Nobody anchors anybody",
+        "body": "Votes stay hidden until reveal, so the senior voice doesn't set the team's number by accident."
+      },
+      "memory": {
+        "kicker": "Memory",
+        "title": "History that teaches",
+        "body": "Every round becomes data. The team sees where it underestimated and calibrates the next sprint."
+      }
     },
-    "hero": {
-      "badge": "Revolutionize your Planning Poker",
-      "headlineLine1": "Estimate with",
-      "headlineAccent": "precision",
-      "headlineLine2": ", decide",
-      "headlineLine3": "with agility.",
-      "description": "The agile planning tool that turns uncertainty into clarity. Engineering focus for high-performing teams.",
-      "ctaPrimary": "Start free now",
-      "joinRoom": "Join a room",
-      "metricLabel": "Performance",
-      "metricValue": "+40% precision",
-      "illustrationAlt": "Team collaboration illustration"
+    "featuresTitle": "What's on the table",
+    "features": {
+      "timer": {
+        "title": "Round timer",
+        "body": "A clock everyone can see, with a soft nudge once you pass the agreed limit."
+      },
+      "chips": {
+        "title": "Chips on the table",
+        "body": "Agreed, explain it, risky — the chip stays bet until the round ends."
+      },
+      "call": {
+        "title": "Call the bluff",
+        "body": "Think someone is bluffing? Toss a chip at them and put your disagreement on record."
+      },
+      "consensus": {
+        "title": "Consensus & spread",
+        "body": "An agreement meter that highlights the outlying votes."
+      },
+      "boards": {
+        "title": "Connected boards",
+        "body": "Jira, IzzyPlan, Trello and GitHub: pull the task in, push the points back."
+      }
     },
     "joinDialog": {
       "title": "Join a room",
-      "description": "Paste the room link or enter the room ID to continue.",
+      "description": "Paste the room link or enter the ID to continue.",
       "placeholder": "Room ID or full URL",
-      "submit": "Go to room",
-      "cancel": "Cancel",
-      "roomIdRequired": "Enter a valid room ID or link."
-    },
-    "highlights": {
-      "sprints": {
-        "title": "2× faster sprints",
-        "description": "Shorten estimation time without losing the quality of technical debate."
-      },
-      "alignment": {
-        "title": "Full alignment",
-        "description": "Make sure every developer understands task complexity."
-      },
-      "data": {
-        "title": "Data-driven decisions",
-        "description": "Use estimation history to improve future planning."
-      }
-    },
-    "howItWorks": {
-      "title": "How it works",
-      "subtitle": "Three simple steps to transform your planning sessions.",
-      "step1": {
-        "title": "1. Start the session",
-        "description": "Create a room in seconds and pick the stories to estimate."
-      },
-      "step2": {
-        "title": "2. Invite the team",
-        "description": "Share the link with your squad. No complex logins required."
-      },
-      "step3": {
-        "title": "3. Vote and estimate",
-        "description": "Everyone votes at once. Reveal cards and start a productive debate."
-      }
-    },
-    "features": {
-      "realtime": {
-        "title": "Real-time sync",
-        "description": "A latency-free experience. What you see, your team sees instantly."
-      },
-      "jira": {
-        "title": "Jira integration",
-        "description": "Import tickets directly and update story points in one click."
-      },
-      "anonymous": {
-        "title": "Anonymous voting",
-        "description": "Remove the anchoring effect. Every opinion counts without outside influence."
-      },
-      "history": {
-        "title": "Sprint history",
-        "description": "A full dashboard with your team’s velocity over time."
-      }
-    },
-    "showcase": {
-      "title": "The Architect’s Table",
-      "subtitle": "An interface designed to remove distractions and focus on what matters: the decision.",
-      "demoStoryTitle": "US-42: Checkout flow",
-      "previewAria": "Animated Planning Poker room demo",
-      "waitingVotes": "Waiting for votes...",
-      "allVoted": "2/2 votes",
-      "revealing": "Revealing...",
-      "votesRevealed": "Votes revealed",
-      "player1": "Carlos (Dev)",
-      "player2": "Ana (TL)",
-      "cardBack": "?"
-    },
-    "faq": {
-      "title": "Frequently asked questions",
-      "q1": "What is Planning Poker?",
-      "a1": "Planning Poker is a consensus-based technique used mainly in Scrum to estimate the effort or relative complexity of software development tasks.",
-      "q2": "Is the tool free?",
-      "a2": "We’re evolving continuously and offer access so you can try the full estimation flow with your team.",
-      "q3": "Do I need to install anything?",
-      "a3": "No. Everything runs in the browser — just create or join a room and start.",
-      "q4": "Which voting sequences are available?",
-      "a4": "You can choose ready-made decks or create a custom deck with the values that make sense for your team."
+      "submit": "Go to the room",
+      "roomIdRequired": "Enter a room ID or a valid link."
     },
     "footer": {
-      "tagline": "© {year} PokerArchitect. Engineered for focus.",
-      "privacy": "Privacy Policy",
-      "terms": "Terms of Service",
+      "tagline": "© {year} PokerArchitect. Focus engineering.",
+      "privacy": "Privacy policy",
+      "terms": "Terms of service",
       "changelog": "Changelog",
-      "support": "Contact Support"
+      "support": "Support"
     }
+  },
+  "create": {
+    "kicker": "New table",
+    "title": "Create room",
+    "subtitle": "Set it up in fifteen seconds and share the link.",
+    "roomName": "Room name",
+    "roomNamePlaceholder": "Ex: Sprint 23",
+    "yourName": "Your name",
+    "yourNamePlaceholder": "What should we call you?",
+    "deck": "Deck",
+    "customDeckCta": "Create a custom deck",
+    "seeAllDecks": "See saved decks",
+    "submit": "Open the table",
+    "submitting": "Opening...",
+    "roomNameRequired": "Give the room a name",
+    "nameRequired": "Tell us what to call you",
+    "deckRequired": "Pick a deck",
+    "createError": "Couldn't create the room"
   },
   "room": {
-    "create": {
-      "title": "Create New Room",
-      "description": "Configure your Planning Poker room",
-      "roomName": "Room Name",
-      "roomNamePlaceholder": "Ex: Sprint 23 Planning",
-      "participantName": "Your Name",
-      "participantNamePlaceholder": "How do you want to be called?",
-      "deck": "Room Deck",
-      "createButton": "Create Room",
-      "creatingButton": "Creating...",
-      "createSuccess": "Room created successfully!",
-      "createError": "Error creating room",
-      "participantNameRequired": "Participant name is required",
-      "deckRequired": "Please select a deck for the room",
-      "roomIdError": "Room ID was not generated"
+    "reveal": "Reveal",
+    "newRound": "New round",
+    "reset": "Reset",
+    "tasks": "Tasks",
+    "tasksSub": "Paste the list or import from a connected board.",
+    "yourHand": "Your hand",
+    "idle": "Waiting for votes",
+    "revealedStatus": "Average {average} · {consensusLabel}",
+    "callHintLine": "Click someone's name to call their bluff — the chip hits them and drops on the table as a disagree.",
+    "you": "You",
+    "callHint": "Call the bluff",
+    "voted": "voted",
+    "waiting": "thinking",
+    "offline": "away",
+    "participants": "Participants",
+    "queue": "Voting queue",
+    "manage": "Manage",
+    "invite": "Invite",
+    "linkCopied": "Link copied.",
+    "copyError": "Couldn't copy the link",
+    "joinTitle": "Take a seat",
+    "joinSubtitle": "Choose what the table should call you.",
+    "joinSubmit": "Sit at the table",
+    "joinPlaceholder": "Your name",
+    "expired": "This room has expired.",
+    "notFound": "Room not found.",
+    "loading": "Opening the table...",
+    "reactions": {
+      "agree": "agreed",
+      "explain": "explain it",
+      "risk": "risky"
     },
-    "voting": {
-      "reveal": "Reveal Votes",
-      "reset": "Reset",
+    "result": {
+      "kicker": "Cards on the table",
       "average": "Average",
-      "voted": "Voted",
-      "votedSuccess": "Vote recorded successfully!",
-      "votedError": "Error recording vote"
+      "median": "Median",
+      "consensus": "Consensus",
+      "distribution": "Distribution",
+      "accept": "Accept · {points}",
+      "pushTo": "Push to {provider}",
+      "noNumericVotes": "No numeric votes in this round."
     },
-    "stats": {
-      "title": "Statistics",
-      "averageVote": "Average Vote",
-      "averageTime": "Average Time",
-      "totalVotes": "Total Votes",
-      "export": "Export Results",
-      "exportSuccess": "Results exported successfully!",
-      "exportError": "Error exporting results",
-      "average": "Average",
-      "mode": "Mode"
+    "consensusStrong": "Strong consensus",
+    "consensusOk": "Almost there",
+    "consensusWeak": "Team is split",
+    "dispersionStrong": "The team is aligned. Close the number and move on.",
+    "dispersionOk": "Two camps here. One minute of debate before you close it.",
+    "dispersionWeak": "High spread: the extreme votes explain first, then run the round again."
+  },
+  "tasks": {
+    "kicker": "Session",
+    "title": "Add tasks",
+    "fromBoard": "Import from board",
+    "manual": "Paste manually",
+    "pastePlaceholder": "CHK-201 · Save card\nCHK-202 · Split payment\nTweak the confirmation email",
+    "pasteHint": "One task per line. If it has a key, use “KEY · title”.",
+    "addToQueue": "Add to queue",
+    "queue": "Voting queue",
+    "queueEmpty": "The queue is empty. Import from a board or paste the list.",
+    "voteNow": "Vote now",
+    "onTable": "On the table",
+    "estimated": "Estimated",
+    "remove": "Remove from queue",
+    "connectNow": "Connect now",
+    "importSelected": "Import selected ({count})",
+    "nothingPicked": "Pick at least one",
+    "notConnected": "Connect {provider} to import issues from the board.",
+    "loadingIssues": "Fetching issues...",
+    "noIssues": "No open issues found on this board."
+  },
+  "decks": {
+    "kicker": "Library",
+    "title": "Saved decks",
+    "subtitle": "Every deck available to any room in the team.",
+    "newDeck": "New deck",
+    "inUse": "In use",
+    "custom": "Custom",
+    "standard": "Standard",
+    "use": "Use in this room",
+    "duplicate": "Duplicate",
+    "edit": "Edit",
+    "remove": "Delete",
+    "cardsCount": "{count} cards",
+    "modalTitle": "Custom deck",
+    "modalSubtitle": "Your own cards for this room.",
+    "editTitle": "Edit deck",
+    "editSubtitle": "Adjust the name and the cards of this deck.",
+    "name": "Deck name",
+    "namePlaceholder": "Ex: Team deck",
+    "values": "Values",
+    "valuesPlaceholder": "0, 1, 2, 3, 5, 8, 13, ?",
+    "hint": "Up to 3 characters per card, comma separated.",
+    "preview": "Preview",
+    "nameRequired": "Give the deck a name",
+    "valuesRequired": "Enter at least one value",
+    "signInRequired": "Sign in to save decks."
+  },
+  "estimates": {
+    "kicker": "Record",
+    "title": "Estimates completed",
+    "exportCsv": "Export CSV",
+    "exportJson": "Export JSON",
+    "exportBoard": "Push to board",
+    "head": {
+      "key": "Key",
+      "task": "Task",
+      "source": "Source",
+      "points": "Points",
+      "consensus": "Consensus",
+      "date": "Date"
     },
-    "game": {
-      "title": "Planning Poker",
-      "loadingVotes": "Loading votes...",
-      "loadingCards": "Loading cards...",
-      "reveal": "Reveal",
-      "revealing": "Revealing...",
-      "revealingIn": "Revealing in {countdown}...",
-      "reset": "Reset",
-      "anonymous": "Anonymous",
-      "loadParticipantsError": "Could not load participants",
-      "loadStoryError": "Could not load current story",
-      "loadRoomError": "Error loading room"
+    "totalPoints": "points total",
+    "storiesDone": "tasks estimated",
+    "avgConsensus": "average consensus",
+    "avgTime": "per task",
+    "empty": "No estimates closed yet. Reveal a round and accept the number."
+  },
+  "integrations": {
+    "kicker": "Connections",
+    "title": "Integrations",
+    "subtitle": "Pull tasks from wherever the team already works and push the points back once the estimate closes.",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "sync": "Sync now",
+    "workspace": "Workspace",
+    "board": "Board",
+    "lastSync": "Last sync",
+    "scope": "Scopes",
+    "connected": "Connected",
+    "notConnected": "Disconnected",
+    "unavailable": "Unavailable",
+    "unavailableHint": "OAuth credentials for this provider are not configured on the server.",
+    "never": "never",
+    "manage": "Manage integrations",
+    "notes": {
+      "in": {
+        "kicker": "In",
+        "body": "Tasks land in the queue with key, title and type — no copy and paste."
+      },
+      "out": {
+        "kicker": "Out",
+        "body": "Accept the estimate and the points are written back to the card or issue."
+      },
+      "record": {
+        "kicker": "Record",
+        "body": "Every round keeps consensus and duration, and exports as CSV or JSON whenever you want."
+      }
     },
-    "invite": {
-      "button": "Invite",
-      "shareTitle": "Planning Poker",
-      "shareText": "Join our Planning Poker session!",
-      "linkCopied": "Link copied!",
-      "linkCopiedDescription": "The link was copied to your clipboard",
-      "copyError": "Could not copy the link"
+    "providers": {
+      "jira": {
+        "name": "Jira",
+        "description": "Issues from your Jira Cloud project, with points written back to the estimate field."
+      },
+      "trello": {
+        "name": "Trello",
+        "description": "Cards from a Trello list, with the points attached to the card."
+      },
+      "github": {
+        "name": "GitHub",
+        "description": "Open issues from a repository, with the points commented on the issue."
+      },
+      "izzyplan": {
+        "name": "IzzyPlan",
+        "description": "Internal connector. Not publicly available yet."
+      }
     },
-    "participants": {
-      "title": "Participants",
-      "anonymous": "Anonymous"
-    },
-    "deck": {
-      "loading": "Loading decks...",
-      "placeholder": "Choose a deck",
-      "createCustom": "Create Custom Deck",
-      "customTitle": "Create Custom Deck",
-      "name": "Deck Name",
-      "namePlaceholder": "Ex: My Deck",
-      "values": "Deck Values",
-      "valuesPlaceholder": "Ex: 1, 2, 3, 5, 8, 13, ?",
-      "valuesHelp": "Enter up to 3 characters per card, separated by commas.",
-      "preview": "Preview",
-      "previewHelp": "This is a preview of how your deck will look.",
-      "nameRequired": "Deck name is required",
-      "valuesRequired": "Please enter at least one value for the deck"
-    }
+    "signInRequired": "Sign in to connect a board — the access is tied to your account.",
+    "connectError": "Couldn't complete the connection."
+  },
+  "toast": {
+    "deckUsed": "Deck applied to the room.",
+    "deckSaved": "Deck saved to the library.",
+    "deckRemoved": "Deck deleted.",
+    "connected": "Integration connected.",
+    "disconnected": "Integration disconnected.",
+    "synced": "Board synced.",
+    "imported": "{count} tasks in the queue.",
+    "exported": "File exported.",
+    "pushed": "Points pushed to the board.",
+    "accepted": "Estimate recorded.",
+    "joined": "You joined the room."
   },
   "metadata": {
-    "title": "Planning Poker - Agile Estimations",
-    "description": "Organize your Planning Poker sessions efficiently and collaboratively"
+    "title": "PokerArchitect — Real-time planning poker",
+    "description": "Estimation with no anchoring, no endless meeting and no guessing. The team plays, the table reveals, the history learns."
   }
-} 
+}

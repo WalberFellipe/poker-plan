@@ -1,70 +1,70 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/src/i18n/navigation";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/src/i18n/navigation";
 import { parseRoomIdFromInput } from "@/lib/parse-room-id";
-import { useToast } from "@/hooks/useToast";
 
-interface JoinRoomDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export function JoinRoomDialog({ open, onOpenChange }: JoinRoomDialogProps) {
-  const t = useTranslations("home.joinDialog");
-  const tCommon = useTranslations("common");
+export function JoinRoomDialog({ trigger }: { trigger: React.ReactNode }) {
+  const t = useTranslations("landing.joinDialog");
   const router = useRouter();
-  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    const id = parseRoomIdFromInput(value);
-    if (!id) {
-      toast({
-        title: tCommon("error"),
-        description: t("roomIdRequired"),
-        variant: "destructive",
-      });
+  const submit = () => {
+    const roomId = parseRoomIdFromInput(value);
+
+    if (!roomId) {
+      setError(t("roomIdRequired"));
       return;
     }
-    onOpenChange(false);
-    setValue("");
-    router.push(`/room/${id}`);
+
+    setOpen(false);
+    router.push(`/room/${roomId}`);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
-        </DialogHeader>
-        <Input
-          placeholder={t("placeholder")}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-        />
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            {t("cancel")}
-          </Button>
-          <Button type="button" onClick={handleSubmit}>
+    <>
+      <span onClick={() => setOpen(true)}>{trigger}</span>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription>{t("description")}</DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-2">
+            <Input
+              autoFocus
+              value={value}
+              placeholder={t("placeholder")}
+              onChange={(event) => {
+                setValue(event.target.value);
+                setError(null);
+              }}
+              onKeyDown={(event) => event.key === "Enter" && submit()}
+            />
+            {error ? (
+              <span className="text-[13px] text-mg-soft">{error}</span>
+            ) : null}
+          </div>
+
+          <Button onClick={submit} disabled={!value.trim()}>
             {t("submit")}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -1,116 +1,63 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { getPusher } from '@/lib/pusher'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { resolveParticipant } from "@/lib/participant";
+import { publishRoomState } from "@/lib/room-state";
+import { REVEAL_COUNTDOWN_MS } from "@/types/room-state";
 
+/**
+ * Revelar as cartas.
+ *
+ * O servidor grava `revealAt = agora + contagem regressiva` e todos os clientes
+ * agendam a virada contra esse instante absoluto, corrigido pelo offset de
+ * relógio que vem no snapshot. Antes cada cliente contava 3-2-1 localmente a
+ * partir do momento em que recebia o evento, então quem tinha rede mais lenta
+ * virava a carta depois — o "reveal não é simultâneo".
+ */
 export async function POST(
   request: Request,
   props: { params: Promise<{ storyId: string }> }
 ) {
+  const { storyId } = await props.params;
+
   try {
-    const session = await getServerSession(authOptions)
-    const body = await request.json()
-    const { participantId } = body
-    const { storyId } = await props.params
     const story = await prisma.story.findUnique({
       where: { id: storyId },
-      include: { room: true },
+      select: { id: true, roomId: true, revealed: true },
     });
-
 
     if (!story) {
-      return NextResponse.json(
-        { error: "História não encontrada" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "História não encontrada" }, { status: 404 });
     }
 
-    // Verificar autorização
-    if (!session?.user?.id && !participantId) {
+    const participant = await resolveParticipant(request, story.roomId);
+
+    if (!participant) {
       return NextResponse.json(
-        { error: "Usuário não autorizado" },
+        { error: "Entre na sala antes de revelar" },
         { status: 401 }
-      )
+      );
     }
 
-    if (participantId) {
-      const participant = await prisma.anonymousParticipant.findFirst({
-        where: {
-          id: participantId,
-          roomId: story.roomId
-        }
-      })
-
-      if (!participant) {
-        return NextResponse.json(
-          { error: "Participante não autorizado" },
-          { status: 401 }
-        )
-      }
+    // Já revelada: devolve sucesso sem reagendar. Dois cliques simultâneos em
+    // "Revelar" não podem empurrar o revealAt para frente e reiniciar a
+    // contagem de quem já estava vendo.
+    if (story.revealed) {
+      return NextResponse.json({ success: true, alreadyRevealed: true });
     }
 
-    // Atualizar história
     await prisma.story.update({
       where: { id: storyId },
-      data: { revealed: true },
-    });
-
-    const storyWithVotes = await prisma.story.findUnique({
-      where: { id: storyId },
-      include: {
-        votes: {
-          include: {
-            user: { select: { id: true, name: true, image: true } },
-          },
-        },
-        anonymousVotes: {
-          include: { participant: true },
-        },
+      data: {
+        revealed: true,
+        revealAt: new Date(Date.now() + REVEAL_COUNTDOWN_MS),
       },
     });
 
-    const votes = [
-      ...(storyWithVotes?.votes ?? []).map((v) => ({
-        id: v.id,
-        storyId: v.storyId,
-        userId: v.userId,
-        participantId: v.userId,
-        value: v.value,
-        createdAt: v.createdAt.toISOString(),
-        updatedAt: v.updatedAt.toISOString(),
-        user: {
-          id: v.user.id,
-          name: v.user.name ?? "Anônimo",
-          image: v.user.image ?? null,
-        },
-      })),
-      ...(storyWithVotes?.anonymousVotes ?? []).map((v) => ({
-        id: v.id,
-        storyId: v.storyId,
-        userId: v.participantId,
-        participantId: v.participantId,
-        value: v.value,
-        createdAt: v.createdAt.toISOString(),
-        updatedAt: v.updatedAt.toISOString(),
-        user: {
-          id: v.participantId,
-          name: v.participant.name ?? "Anônimo",
-          image: null,
-        },
-      })),
-    ];
+    const snapshot = await publishRoomState(story.roomId);
 
-    await getPusher().trigger(`room-${story.roomId}`, "vote:reveal", {
-      storyId,
-      votes,
-    });
-
-    return NextResponse.json({ success: true })
-  } catch {
-    return NextResponse.json(
-      { error: "Erro ao revelar votos" },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: true, snapshot });
+  } catch (error) {
+    console.error("[reveal] erro ao revelar votos", error);
+    return NextResponse.json({ error: "Erro ao revelar votos" }, { status: 500 });
   }
-} 
+}

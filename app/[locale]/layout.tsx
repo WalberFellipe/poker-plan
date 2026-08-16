@@ -1,91 +1,48 @@
-import localFont from "next/font/local";
+import { Orbitron, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
-import { Providers } from '@/app/providers'
-import { AuthProvider } from '@/app/providers/auth-provider'
-import { Header } from '@/components/layout/header'
-import { Toaster } from "@/components/ui/toaster"
+import { AuthProvider } from "@/app/providers/auth-provider";
+import { Header } from "@/components/layout/header";
+import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/react";
-import { NextIntlClientProvider } from 'next-intl';
-import { getTranslations } from 'next-intl/server'
-import { notFound } from 'next/navigation';
-import { routing } from '@/src/i18n/routing';
-import { hasLocale } from 'next-intl';
+import { NextIntlClientProvider } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { routing } from "@/src/i18n/routing";
+import { hasLocale } from "next-intl";
 
-const geistSans = localFont({
-  src: [
-    { path: "../fonts/Geist/Geist-Thin.woff2", weight: "100", style: "normal" },
-    { path: "../fonts/Geist/Geist-ExtraLight.woff2", weight: "200", style: "normal" },
-    { path: "../fonts/Geist/Geist-Light.woff2", weight: "300", style: "normal" },
-    { path: "../fonts/Geist/Geist-Regular.woff2", weight: "400", style: "normal" },
-    { path: "../fonts/Geist/Geist-Medium.woff2", weight: "500", style: "normal" },
-    { path: "../fonts/Geist/Geist-SemiBold.woff2", weight: "600", style: "normal" },
-    { path: "../fonts/Geist/Geist-Bold.woff2", weight: "700", style: "normal" },
-    { path: "../fonts/Geist/Geist-ExtraBold.woff2", weight: "800", style: "normal" },
-    { path: "../fonts/Geist/Geist-Black.woff2", weight: "900", style: "normal" },
-  ],
-  variable: "--font-Geist-sans",
+/**
+ * Orbitron para display/chrome e Source Serif 4 para corpo, conforme o handoff.
+ *
+ * A fonte pedida originalmente (Circuit Forem) não tem versão web hospedada;
+ * Orbitron é o substituto indicado no próprio handoff. Para trocar depois basta
+ * mudar a família aqui — todo o resto do app referencia --font-orbitron.
+ */
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "900"],
+  variable: "--font-orbitron",
   display: "swap",
 });
 
-const GeistMono = localFont({
-  src: [
-    {
-      path: "../fonts/GeistMono/GeistMono-Thin.woff2",
-      weight: "100",
-      style: "normal",
-    },
-    {
-      path: "../fonts/GeistMono/GeistMono-ExtraLight.woff2",
-      weight: "200",
-      style: "normal",
-    },
-    {
-      path: "../fonts/GeistMono/GeistMono-Light.woff2",
-      weight: "300",
-      style: "normal",
-    },
-    {
-      path: "../fonts/GeistMono/GeistMono-Regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../fonts/GeistMono/GeistMono-Medium.woff2",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../fonts/GeistMono/GeistMono-SemiBold.woff2",
-      weight: "600",
-      style: "normal",
-    },
-    {
-      path: "../fonts/GeistMono/GeistMono-Bold.woff2",
-      weight: "700",
-      style: "normal",
-    },
-    {
-      path: "../fonts/GeistMono/GeistMono-ExtraBold.woff2",
-      weight: "800",
-      style: "normal",
-    },
-    {
-      path: "../fonts/GeistMono/GeistMono-Black.woff2",
-      weight: "900",
-      style: "normal",
-    },
-  ],
-  variable: "--font-Geist-mono",
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  weight: ["300", "400", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-source-serif",
   display: "swap",
 });
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'metadata' })
+  const t = await getTranslations({ locale, namespace: "metadata" });
   return {
-    title: t('title'),
-    description: t('description'),
-  }
+    title: t("title"),
+    description: t("description"),
+  };
 }
 
 export default async function RootLayout({
@@ -111,19 +68,15 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${GeistMono.variable} antialiased`}
+        className={`${orbitron.variable} ${sourceSerif.variable} antialiased`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
-            <Providers>
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-1">
-                  {children}
-                  <Analytics />
-                </main>
-              </div>
-            </Providers>
+            <div className="flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-1">{children}</main>
+            </div>
+            <Analytics />
           </AuthProvider>
         </NextIntlClientProvider>
         <Toaster />
