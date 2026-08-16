@@ -115,6 +115,7 @@ export default {
         land: "pa-land 1s cubic-bezier(.2,.7,.3,1) both",
         call: "pa-call 1.25s cubic-bezier(.2,.7,.3,1) both",
         shake: "pa-shake .5s ease both",
+        sweep: "pa-sweep .7s cubic-bezier(.35,.1,.4,1) both",
         toast: "pa-toast .25s ease both",
       },
       transitionTimingFunction: {

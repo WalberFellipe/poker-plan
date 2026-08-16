@@ -20,6 +20,31 @@ export function AutoHideHeader({ children }: { children: React.ReactNode }) {
   const [hidden, setHidden] = useState(false);
   const [hasFocus, setHasFocus] = useState(false);
   const lastScroll = useRef(0);
+  const shellRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Publica a altura real do header em `--pa-header-h`.
+   *
+   * A mesa se dimensiona a partir dela para caber na janela sem rolagem. Um
+   * valor chutado no CSS erraria: o header quebra em duas linhas em telas
+   * estreitas, e a diferença aparece como uma barra de rolagem teimosa.
+   */
+  useEffect(() => {
+    const element = shellRef.current;
+    if (!element) return;
+
+    const publish = () => {
+      document.documentElement.style.setProperty(
+        "--pa-header-h",
+        `${element.offsetHeight}px`
+      );
+    };
+
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -59,6 +84,7 @@ export function AutoHideHeader({ children }: { children: React.ReactNode }) {
       />
 
       <div
+        ref={shellRef}
         onFocusCapture={() => setHasFocus(true)}
         onBlurCapture={() => setHasFocus(false)}
         className={cn(

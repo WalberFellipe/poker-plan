@@ -11,11 +11,16 @@ import { Button } from "@/components/ui/button";
 import { Dot } from "@/components/ui/neon";
 import { PokerTable } from "@/components/room/poker-table";
 import { Hand, Reactions } from "@/components/room/hand";
-import { ResultPanel } from "@/components/room/result-panel";
+import { Eraser } from "lucide-react";
+import {
+  ResultDistribution,
+  ResultSummary,
+} from "@/components/room/result-panel";
 import { SidePanel } from "@/components/room/side-panel";
 import { JoinRoomModal } from "@/components/room/join-room-modal";
 import { InviteButton } from "@/components/room/invite-button";
 import { useToast } from "@/hooks/useToast";
+import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/client-id";
 import type { ChipKind } from "@/types/room-state";
 
@@ -65,6 +70,7 @@ export default function RoomClient({ roomId }: { roomId: string }) {
     reveal,
     reset,
     throwChip,
+    clearChips,
     acceptEstimate,
     promoteTask,
   } = room;
@@ -256,19 +262,29 @@ export default function RoomClient({ roomId }: { roomId: string }) {
   if (!snapshot) return null;
 
   return (
-    <div className="mx-auto grid max-w-[1560px] animate-rise gap-9 px-5 pb-16 pt-6 md:px-10 lg:grid-cols-[1fr_320px]">
-      <div className="flex min-w-0 flex-col gap-5">
+    /*
+      A mesa cabe inteira na janela: nada de rolagem vertical no meio de uma
+      rodada. A altura restante depois do header é dividida entre cabeçalho da
+      história, mesa (que estica) e mão; o painel lateral rola por dentro.
+    */
+    <div
+      className={cn(
+        "mx-auto grid w-full max-w-[1560px] animate-rise gap-6 px-5 pb-5 pt-4 md:px-10",
+        "lg:h-[calc(100dvh-var(--pa-header-h,69px))] lg:grid-cols-[1fr_320px] lg:overflow-hidden"
+      )}
+    >
+      <div className="flex min-h-0 min-w-0 flex-col gap-4">
         <header className="flex flex-wrap items-end gap-5">
-          <div className="flex min-w-0 flex-1 basis-[260px] flex-col gap-1">
+          <div className="flex min-w-0 flex-1 basis-[260px] flex-col gap-0.5">
             <span className="pa-label">{snapshot.room.name}</span>
-            <h1 className="text-[28px] leading-tight text-pa-text">
+            <h1 className="truncate text-[26px] leading-tight text-pa-text">
               {snapshot.story?.title}
             </h1>
             <span
               className={
                 statusLine.tone === "accent"
-                  ? "text-[17px] text-mg-soft"
-                  : "text-[17px] text-pa-dim"
+                  ? "text-[16px] text-mg-soft"
+                  : "text-[16px] text-pa-dim"
               }
             >
               {statusLine.text}
@@ -297,48 +313,73 @@ export default function RoomClient({ roomId }: { roomId: string }) {
               {t("reset")}
             </Button>
 
+            {/* Varrer as fichas sem encerrar a rodada: uma discussão longa
+                acaba enterrando a mesa em fichas. */}
+            {chips.length > 0 ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={clearChips}
+                title={t("clearChips")}
+              >
+                <Eraser className="h-3.5 w-3.5" aria-hidden />
+                {t("clearChips")}
+              </Button>
+            ) : null}
+
             <InviteButton roomId={roomId} />
           </div>
         </header>
 
-        <PokerTable
-          participants={participants}
-          chips={chips}
-          meId={meId}
-          revealed={revealed}
-          countdown={countdown}
-          onCall={call}
-          callHint={t("callHint")}
-          youLabel={t("you")}
-        />
-
-        {/* As reações ficam disponíveis o tempo todo: a ficha vale até o reset
-            da rodada, e é na discussão do resultado que elas mais servem. */}
-        <Reactions onReact={react} />
-
-        {revealed ? (
-          <ResultPanel
-            votes={revealedVotes}
-            onAccept={onAccept}
-            isBusy={isBusy}
-            pushProvider={
-              pushTarget
-                ? {
-                    id: pushTarget.id,
-                    name: pushTarget.id[0].toUpperCase() + pushTarget.id.slice(1),
+        <div className="flex min-h-0 flex-1 items-center">
+          <PokerTable
+            participants={participants}
+            chips={chips}
+            meId={meId}
+            revealed={revealed}
+            countdown={countdown}
+            onCall={call}
+            callHint={t("callHint")}
+            youLabel={t("you")}
+            overlay={
+              revealed ? (
+                <ResultSummary
+                  votes={revealedVotes}
+                  onAccept={onAccept}
+                  isBusy={isBusy}
+                  pushProvider={
+                    pushTarget
+                      ? {
+                          id: pushTarget.id,
+                          name:
+                            pushTarget.id[0].toUpperCase() +
+                            pushTarget.id.slice(1),
+                        }
+                      : null
                   }
-                : null
+                  onPush={onPush}
+                />
+              ) : null
             }
-            onPush={onPush}
           />
-        ) : (
-          <Hand
-            deckValues={deckValues}
-            myVote={myVote}
-            disabled={countdown !== null}
-            onSelect={selectCard}
-          />
-        )}
+        </div>
+
+        <div className="flex shrink-0 flex-col gap-3">
+          {/* As reações ficam disponíveis o tempo todo: a ficha vale até o
+              reset, e é na discussão do resultado que elas mais servem. */}
+          <Reactions onReact={react} />
+
+          {revealed ? (
+            <ResultDistribution votes={revealedVotes} />
+          ) : (
+            <Hand
+              deckValues={deckValues}
+              myVote={myVote}
+              disabled={countdown !== null}
+              onSelect={selectCard}
+            />
+          )}
+        </div>
       </div>
 
       <SidePanel

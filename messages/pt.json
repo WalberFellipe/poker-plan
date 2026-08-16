@@ -180,7 +180,8 @@
     "dispersionStrong": "O time está junto. Feche o número e siga.",
     "dispersionOk": "Dois blocos de opinião. Vale um minuto de conversa antes de fechar.",
     "dispersionWeak": "Dispersão alta: quem votou nos extremos explica primeiro, depois vocês repetem a rodada.",
-    "loadError": "Não foi possível carregar a sala."
+    "loadError": "Não foi possível carregar a sala.",
+    "clearChips": "Limpar fichas"
   },
   "tasks": {
     "kicker": "Sessão",

@@ -82,6 +82,8 @@ interface PokerTableProps {
   onCall: (targetId: string) => void;
   callHint: string;
   youLabel: string;
+  /** Painel de resultado, sobreposto ao centro da mesa após a revelação. */
+  overlay?: React.ReactNode;
 }
 
 export function PokerTable({
@@ -93,6 +95,7 @@ export function PokerTable({
   onCall,
   callHint,
   youLabel,
+  overlay,
 }: PokerTableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 880, height: 520 });
@@ -125,6 +128,52 @@ export function PokerTable({
     return () => observer.disconnect();
   }, []);
 
+  /**
+   * Fichas que acabaram de sair do snapshot e ainda estão sendo varridas.
+   *
+   * Sem isto, limpar a mesa faria uma dúzia de fichas sumirem no mesmo frame.
+   * Mantemos as removidas montadas por um instante para que deslizem para a
+   * lateral de quem está olhando — cada cliente se vê no assento 0, então a
+   * varredura sempre vai na direção da própria pessoa.
+   */
+  const [sweeping, setSweeping] = useState<SnapshotChip[]>([]);
+  const previousChips = useRef<SnapshotChip[]>([]);
+  const sweepTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    const currentIds = new Set(chips.map((chip) => chip.id));
+    const removed = previousChips.current.filter(
+      (chip) => !currentIds.has(chip.id)
+    );
+    previousChips.current = chips;
+
+    if (removed.length === 0) return;
+
+    setSweeping((current) => {
+      // Dedupe: o efeito pode reprocessar a mesma remoção se o array mudar de
+      // identidade sem mudar de conteúdo.
+      const known = new Set(current.map((chip) => chip.id));
+      return [...current, ...removed.filter((chip) => !known.has(chip.id))];
+    });
+
+    const removedIds = new Set(removed.map((chip) => chip.id));
+    const timer = setTimeout(() => {
+      setSweeping((current) =>
+        current.filter((chip) => !removedIds.has(chip.id))
+      );
+    }, 700);
+
+    // O timer não é cancelado no cleanup deste efeito: ele roda de novo a cada
+    // mudança em `chips`, e cancelar aqui deixaria as fichas varridas presas na
+    // tela para sempre. Só limpamos ao desmontar.
+    sweepTimers.current.push(timer);
+  }, [chips]);
+
+  useEffect(() => {
+    const timers = sweepTimers.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
   // Quem levou o "pagar pra ver" treme aos 560ms, quando a ficha bate.
   const latestCallId = useRef<string | null>(null);
 
@@ -153,7 +202,9 @@ export function PokerTable({
     <div
       ref={tableRef}
       className={cn(
-        "relative h-[420px] w-full md:h-[520px]",
+        // Acompanha a altura que sobra na coluna, com teto e piso para a
+        // elipse não virar nem um risco nem uma piscina.
+        "relative h-full max-h-[520px] min-h-[300px] w-full",
         "rounded-[290px/230px] border border-cy/24",
         "bg-[radial-gradient(130%_140%_at_50%_42%,rgb(var(--pa-cy)/.12),rgb(10_10_18/0)_60%),linear-gradient(180deg,#0b0c16,#08090f)]",
         "shadow-[inset_0_0_80px_rgb(var(--pa-cy)/.05),0_30px_80px_rgba(0,0,0,.55)]"
@@ -201,8 +252,9 @@ export function PokerTable({
         );
       })}
 
-      {/* Fichas apostadas. */}
-      {chips.map((chip) => {
+      {/* Fichas apostadas, mais as que estão sendo varridas. */}
+      {[...chips, ...sweeping].map((chip) => {
+        const isSweeping = sweeping.some((item) => item.id === chip.id);
         const from = positions.get(chip.authorId);
         const target = chip.targetId ? positions.get(chip.targetId) : null;
         if (!from) return null;
@@ -235,7 +287,12 @@ export function PokerTable({
             className={cn(
               "pointer-events-none absolute z-[8] flex items-center justify-center rounded-full",
               "border-[3px] border-dashed font-display font-bold tracking-[.02em]",
-              isCall ? "animate-call text-[10px]" : "animate-land text-[15px]"
+              isSweeping
+                ? "animate-sweep"
+                : isCall
+                  ? "animate-call"
+                  : "animate-land",
+              isCall ? "text-[10px]" : "text-[15px]"
             )}
             style={
               {
@@ -254,6 +311,9 @@ export function PokerTable({
                 "--hx": `${hx}px`,
                 "--hy": `${hy}px`,
                 "--rot": `${chip.rot}deg`,
+                // Destino da varredura: a borda de baixo, onde você se senta.
+                "--sx": `${((50 - restX) / 100) * size.width}px`,
+                "--sy": `${((104 - restY) / 100) * size.height}px`,
               } as React.CSSProperties
             }
           >
@@ -314,6 +374,19 @@ export function PokerTable({
           </div>
         );
       })}
+
+      {/*
+        Resultado sobre a mesa. Fica no miolo, onde só há fichas, para que as
+        cartas reveladas no anel continuem visíveis — e para a tela inteira
+        caber sem rolagem.
+      */}
+      {overlay ? (
+        <div className="pointer-events-none absolute inset-0 z-[9] flex items-center justify-center px-6">
+          <div className="pointer-events-auto w-full max-w-[560px] rounded-card border border-pa-text/10 bg-[rgb(9_10_18/.93)] px-6 py-5 shadow-[0_24px_60px_rgba(0,0,0,.6)] backdrop-blur-[3px]">
+            {overlay}
+          </div>
+        </div>
+      ) : null}
 
       {/* Contagem regressiva sincronizada. */}
       {countdown !== null ? (

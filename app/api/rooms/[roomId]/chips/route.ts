@@ -105,3 +105,37 @@ export async function POST(
     return NextResponse.json({ error: "Erro ao apostar ficha" }, { status: 500 });
   }
 }
+
+/**
+ * Varre as fichas da rodada.
+ *
+ * As fichas são apostas persistentes e ficam até o reset — o que também
+ * significa que uma discussão longa acaba enterrando a mesa. Isto limpa só as
+ * fichas, preservando votos, cronômetro e a rodada em si.
+ */
+export async function DELETE(
+  request: Request,
+  props: { params: Promise<{ roomId: string }> }
+) {
+  const { roomId } = await props.params;
+
+  try {
+    const [participant, story] = await Promise.all([
+      resolveParticipant(request, roomId),
+      ensureCurrentStory(roomId),
+    ]);
+
+    if (!participant) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
+
+    await prisma.chip.deleteMany({ where: { storyId: story.id } });
+
+    const snapshot = await publishRoomState(roomId);
+
+    return NextResponse.json({ success: true, snapshot });
+  } catch (error) {
+    console.error("[chips] erro ao limpar fichas", error);
+    return NextResponse.json({ error: "Erro ao limpar as fichas" }, { status: 500 });
+  }
+}

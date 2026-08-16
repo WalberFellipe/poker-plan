@@ -257,6 +257,23 @@ export function useRoom(roomId: string) {
     [roomId, meId, fail, applyResponse]
   );
 
+  /** Varre as fichas da mesa sem tocar em votos nem no cronômetro. */
+  const clearChips = useCallback(async () => {
+    setPendingChips([]);
+
+    const response = await apiFetch(`/api/rooms/${roomId}/chips`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      fail("Não foi possível limpar as fichas");
+      await refresh();
+      return;
+    }
+
+    await applyResponse(response);
+  }, [roomId, fail, refresh, applyResponse]);
+
   const acceptEstimate = useCallback(
     async (points?: string) => {
       if (isBusy) return false;
@@ -350,6 +367,7 @@ export function useRoom(roomId: string) {
     reveal,
     reset,
     throwChip,
+    clearChips,
     acceptEstimate,
     addTasks,
     removeTask,

@@ -7,11 +7,23 @@ import { cn } from "@/lib/utils";
 import type { SnapshotParticipant, SnapshotTask } from "@/types/room-state";
 
 /**
- * Altura de cerca de dez itens. Os dois painéis rolam por dentro em vez de
- * esticar a página: sem isso, cada pessoa que entra empurra a mesa para cima e
- * obriga a reposicionar a tela no meio da rodada.
+ * Os dois painéis têm altura de dez itens **sempre**, cheios ou não.
+ *
+ * Reservar o espaço desde o início é o que impede a página de se reorganizar
+ * quando alguém entra ou uma tarefa é importada. Passando de dez, a rolagem
+ * acontece dentro do card — a página em si nunca rola.
+ *
+ * Em telas baixas os dois dividem a altura disponível (`flex-1` + `min-h-0`),
+ * então continuam cabendo sem empurrar nada para fora.
  */
-const LIST_MAX_HEIGHT = "max-h-[336px]";
+const LIST_SURFACE = [
+  "min-h-0 flex-1 overflow-y-auto",
+  "rounded-card border border-pa-text/[.07] bg-pa-text/[.04] p-2.5",
+  // Teto de dez itens. Numa janela que não comporte os dois cheios, eles
+  // dividem a altura disponível em vez de empurrar a página — a rolagem
+  // acontece por dentro, nunca no documento.
+  "max-h-[340px] lg:min-h-[150px]",
+].join(" ");
 
 interface SidePanelProps {
   roomId: string;
@@ -39,8 +51,8 @@ export function SidePanel({
   const tTasks = useTranslations("tasks");
 
   return (
-    <aside className="flex w-full flex-col gap-6 lg:w-[320px]">
-      <section className="flex flex-col gap-3">
+    <aside className="flex min-h-0 w-full flex-col gap-5 lg:h-full lg:w-[320px] lg:overflow-hidden">
+      <section className="flex min-h-0 flex-1 flex-col gap-2.5">
         <div className="flex items-baseline justify-between gap-3">
           <Kicker>{t("participants")}</Kicker>
           <span className="pa-numeric text-[13px] text-pa-ghost">
@@ -49,12 +61,7 @@ export function SidePanel({
         </div>
         <Rule />
 
-        <div
-          className={cn(
-            "overflow-y-auto rounded-card bg-pa-text/[.025] p-2.5",
-            LIST_MAX_HEIGHT
-          )}
-        >
+        <div className={LIST_SURFACE}>
           <ul className="flex flex-col gap-2">
             {participants.map((participant) => {
               const isMe = participant.id === meId;
@@ -103,7 +110,7 @@ export function SidePanel({
         </div>
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex min-h-0 flex-1 flex-col gap-2.5">
         <div className="flex items-baseline justify-between gap-3">
           <Kicker>{t("queue")}</Kicker>
           <Link
@@ -115,17 +122,12 @@ export function SidePanel({
         </div>
         <Rule />
 
-        {queue.length === 0 ? (
-          <p className="text-[15px] leading-relaxed text-pa-faint">
-            {tTasks("queueEmpty")}
-          </p>
-        ) : (
-          <div
-            className={cn(
-              "overflow-y-auto rounded-card bg-pa-text/[.025] p-2.5",
-              LIST_MAX_HEIGHT
-            )}
-          >
+        <div className={LIST_SURFACE}>
+          {queue.length === 0 ? (
+            <p className="p-2 text-[15px] leading-relaxed text-pa-faint">
+              {tTasks("queueEmpty")}
+            </p>
+          ) : (
             <ol className="flex flex-col gap-1">
               {queue.map((task, index) => {
                 const isActive = task.id === activeTaskId;
@@ -196,8 +198,8 @@ export function SidePanel({
                 );
               })}
             </ol>
-          </div>
-        )}
+          )}
+        </div>
       </section>
 
       {connectedProvider ? (

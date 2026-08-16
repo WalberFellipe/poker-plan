@@ -330,6 +330,27 @@
   }
 }
 
+/*
+ * Varrer as fichas: elas deslizam para a lateral de quem está olhando,
+ * encolhem e somem — em vez de piscarem para fora da tela de uma vez.
+ * `--sx/--sy` são o deslocamento até aquela borda, em px.
+ */
+@keyframes pa-sweep {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(var(--rot));
+    opacity: 1;
+  }
+  25% {
+    transform: translate(calc(var(--sx) * 0.12), calc(var(--sy) * 0.12 - 10px))
+      scale(1.06) rotate(var(--rot));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--sx), var(--sy)) scale(0.35) rotate(720deg);
+    opacity: 0;
+  }
+}
+
 @keyframes pa-shake {
   0%,
   100% {

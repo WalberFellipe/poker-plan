@@ -14,33 +14,21 @@ import {
 } from "@/lib/vote-stats";
 import { cn } from "@/lib/utils";
 
-interface ResultPanelProps {
-  votes: string[];
-  onAccept: (points: string) => void;
-  isBusy: boolean;
-  /** Provedor conectado para o botão "Enviar para X"; null esconde o botão. */
-  pushProvider?: { id: string; name: string } | null;
-  onPush?: (points: string) => void;
-}
-
 /**
- * Painel de resultado. A frase de dispersão muda por faixa de consenso, que é
- * o único lugar onde o app diz ao time o que fazer com o número.
+ * O resultado vem em duas peças.
+ *
+ * `ResultSummary` é o que decide a rodada — média, mediana, consenso e o botão
+ * de aceitar — e fica sobreposto ao centro da mesa, porque é o que o time olha
+ * enquanto discute. A distribuição, que é leitura de apoio, ocupa embaixo o
+ * lugar que a mão deixou. Separadas, as duas cabem na tela sem rolagem.
  */
-export function ResultPanel({
-  votes,
-  onAccept,
-  isBusy,
-  pushProvider,
-  onPush,
-}: ResultPanelProps) {
-  const t = useTranslations("room");
-  const locale = useLocale();
 
-  const stats = useMemo(() => {
+function useStats(votes: string[]) {
+  return useMemo(() => {
     const average = computeAverage(votes);
     const median = computeMedian(votes);
     const consensus = computeConsensus(votes);
+
     return {
       average,
       median,
@@ -50,19 +38,41 @@ export function ResultPanel({
       unit: commonUnit(votes),
     };
   }, [votes]);
+}
+
+function useNumberFormat(unit: string) {
+  const locale = useLocale();
 
   // Vírgula em PT, ponto em EN, e a unidade do baralho quando houver uma só.
-  const formatNumber = (value: number | null) =>
+  return (value: number | null) =>
     value === null
       ? "—"
-      : new Intl.NumberFormat(locale, {
-          maximumFractionDigits: 1,
-        }).format(value) + stats.unit;
+      : new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(
+          value
+        ) + unit;
+}
 
-  const points =
-    stats.median !== null ? formatNumber(stats.median) : votes[0] ?? "?";
+interface ResultSummaryProps {
+  votes: string[];
+  onAccept: (points: string) => void;
+  isBusy: boolean;
+  /** Provedor conectado para o botão "Enviar para X"; null esconde o botão. */
+  pushProvider?: { id: string; name: string } | null;
+  onPush?: (points: string) => void;
+}
 
-  const maxCount = Math.max(1, ...stats.distribution.map((d) => d.count));
+export function ResultSummary({
+  votes,
+  onAccept,
+  isBusy,
+  pushProvider,
+  onPush,
+}: ResultSummaryProps) {
+  const t = useTranslations("room");
+  const stats = useStats(votes);
+  const format = useNumberFormat(stats.unit);
+
+  const points = stats.median !== null ? format(stats.median) : votes[0] ?? "?";
 
   const dispersionKey = {
     strong: "dispersionStrong",
@@ -71,77 +81,95 @@ export function ResultPanel({
   }[stats.band];
 
   return (
-    <div className="grid animate-rise gap-10 lg:grid-cols-[1.1fr_1fr]">
-      <div className="flex flex-col gap-6">
-        <Kicker>{t("result.kicker")}</Kicker>
+    <div className="flex animate-rise flex-col gap-4">
+      <Kicker>{t("result.kicker")}</Kicker>
 
-        <div className="flex flex-wrap gap-10">
-          <Stat
-            value={formatNumber(stats.average)}
-            label={t("result.average")}
-          />
-          <Stat value={formatNumber(stats.median)} label={t("result.median")} />
-          <Stat
-            value={`${stats.consensus}%`}
-            label={t("result.consensus")}
-            tone="mg"
-          />
-        </div>
+      <div className="flex flex-wrap items-end gap-9">
+        <Stat
+          value={format(stats.average)}
+          label={t("result.average")}
+          size={32}
+        />
+        <Stat
+          value={format(stats.median)}
+          label={t("result.median")}
+          size={32}
+        />
+        <Stat
+          value={`${stats.consensus}%`}
+          label={t("result.consensus")}
+          tone="mg"
+          size={32}
+        />
+      </div>
 
-        <div className="flex flex-col gap-2.5">
-          <Meter value={stats.consensus} tone="mg" />
-          <p className="text-[17px] leading-relaxed text-pa-muted">
-            {t(dispersionKey)}
-          </p>
-        </div>
+      <div className="flex flex-col gap-2">
+        <Meter value={stats.consensus} tone="mg" />
+        <p className="text-[16px] leading-snug text-pa-muted">
+          {t(dispersionKey)}
+        </p>
+      </div>
 
-        <div className="flex flex-wrap gap-3">
-          <Button onClick={() => onAccept(points)} loading={isBusy}>
-            {t("result.accept", { points })}
+      <div className="flex flex-wrap gap-2.5">
+        <Button onClick={() => onAccept(points)} loading={isBusy}>
+          {t("result.accept", { points })}
+        </Button>
+        {pushProvider && onPush ? (
+          <Button
+            variant="secondary"
+            onClick={() => onPush(points)}
+            disabled={isBusy}
+          >
+            {t("result.pushTo", { provider: pushProvider.name })}
           </Button>
-          {pushProvider && onPush ? (
-            <Button
-              variant="secondary"
-              onClick={() => onPush(points)}
-              disabled={isBusy}
-            >
-              {t("result.pushTo", { provider: pushProvider.name })}
-            </Button>
-          ) : null}
-        </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+export function ResultDistribution({ votes }: { votes: string[] }) {
+  const t = useTranslations("room");
+  const stats = useStats(votes);
+  const maxCount = Math.max(1, ...stats.distribution.map((d) => d.count));
+
+  return (
+    <div className="flex animate-rise flex-col gap-3">
+      <div className="flex w-full items-center gap-3.5">
+        <span className="pa-label whitespace-nowrap">
+          {t("result.distribution")}
+        </span>
+        <div
+          aria-hidden
+          className="h-px flex-1 bg-[linear-gradient(90deg,rgb(var(--pa-cy)/.35),transparent)]"
+        />
       </div>
 
-      <div className="flex flex-col gap-4">
-        <Kicker>{t("result.distribution")}</Kicker>
-
-        {stats.distribution.length === 0 ? (
-          <p className="text-[17px] text-pa-faint">
-            {t("result.noNumericVotes")}
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2.5">
-            {stats.distribution.map((entry) => (
-              <li key={entry.value} className="flex items-center gap-3.5">
-                <span className="pa-numeric w-10 shrink-0 text-[17px] font-bold text-pa-text">
-                  {entry.value}
-                </span>
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-pa-text/[.06]">
-                  <div
-                    className={cn(
-                      "h-full rounded-full bg-[linear-gradient(90deg,rgb(var(--pa-cy)),rgb(var(--pa-cy)/.25))]",
-                      "transition-[width] duration-500"
-                    )}
-                    style={{ width: `${(entry.count / maxCount) * 100}%` }}
-                  />
-                </div>
-                <span className="pa-numeric w-6 shrink-0 text-right text-[15px] text-pa-dim">
-                  {entry.count}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {stats.distribution.length === 0 ? (
+        <p className="text-[16px] text-pa-faint">{t("result.noNumericVotes")}</p>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {stats.distribution.map((entry) => (
+            <li key={entry.value} className="flex items-center gap-3.5">
+              <span className="pa-numeric w-12 shrink-0 text-[16px] font-bold text-pa-text">
+                {entry.value}
+              </span>
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-pa-text/[.06]">
+                <div
+                  className={cn(
+                    "h-full rounded-full bg-[linear-gradient(90deg,rgb(var(--pa-cy)),rgb(var(--pa-cy)/.25))]",
+                    "transition-[width] duration-500"
+                  )}
+                  style={{ width: `${(entry.count / maxCount) * 100}%` }}
+                />
+              </div>
+              <span className="pa-numeric w-6 shrink-0 text-right text-[15px] text-pa-dim">
+                {entry.count}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

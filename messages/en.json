@@ -180,7 +180,8 @@
     "dispersionStrong": "The team is aligned. Close the number and move on.",
     "dispersionOk": "Two camps here. One minute of debate before you close it.",
     "dispersionWeak": "High spread: the extreme votes explain first, then run the round again.",
-    "loadError": "Couldn't load the room."
+    "loadError": "Couldn't load the room.",
+    "clearChips": "Clear chips"
   },
   "tasks": {
     "kicker": "Session",
