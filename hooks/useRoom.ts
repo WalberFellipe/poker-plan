@@ -165,16 +165,14 @@ export function useRoom(roomId: string) {
     if (!storyId || isBusy) return;
 
     setIsBusy(true);
-    // A contagem começa agora, não quando o servidor responder.
-    const clickedAt = Date.now();
+    // A contagem começa agora, não quando o servidor responder. O `revealAt`
+    // autoritativo assume quando chegar, e a trava de monotonicidade impede
+    // que a diferença apareça como um salto para trás.
     beginLocalReveal();
 
     try {
       const response = await apiFetch(`/api/stories/${storyId}/reveal`, {
         method: "POST",
-        // Ancora a contagem no clique: sem isto o revealAt autoritativo cairia
-        // depois do previsto e a contagem pularia para trás ao ser corrigida.
-        body: JSON.stringify({ clientNow: clickedAt }),
       });
 
       if (!response.ok) {

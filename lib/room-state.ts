@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPusher } from "@/lib/pusher";
 import {
@@ -119,18 +120,25 @@ export async function buildRoomSnapshot(
     createdAt: c.createdAt.toISOString(),
   }));
 
-  const queue: SnapshotTask[] = room.tasks
-    .filter((t) => t.status !== "estimated")
-    .map((t) => ({
-      id: t.id,
-      key: t.key,
-      title: t.title,
-      source: t.source as TaskSource,
-      type: t.type,
-      externalUrl: t.externalUrl,
-      order: t.order,
-      status: t.status as TaskStatus,
-    }));
+  // A fila carrega também as tarefas já estimadas, com os pontos: o painel
+  // lateral precisa mostrar o que o time fechou, não só o que falta.
+  const pointsByTask = new Map(
+    room.estimates
+      .filter((e) => e.taskId !== null)
+      .map((e) => [e.taskId as string, e.points])
+  );
+
+  const queue: SnapshotTask[] = room.tasks.map((t) => ({
+    id: t.id,
+    key: t.key,
+    title: t.title,
+    source: t.source as TaskSource,
+    type: t.type,
+    externalUrl: t.externalUrl,
+    order: t.order,
+    status: t.status as TaskStatus,
+    points: pointsByTask.get(t.id) ?? null,
+  }));
 
   const estimates: SnapshotEstimate[] = room.estimates.map((e) => ({
     id: e.id,
@@ -209,10 +217,17 @@ export async function publishRoomState(
 
   const payload = JSON.stringify(snapshot);
 
-  // A publicação não é aguardada: o snapshot já volta na resposta da própria
-  // mutação, então quem agiu não precisa esperar o Pusher para ver o efeito.
-  // Só os *outros* participantes dependem deste trigger.
-  void publish(roomId, snapshot, payload);
+  // `after` em vez de um `void` solto.
+  //
+  // Quem agiu já recebe o snapshot no corpo da resposta e não precisa esperar
+  // o Pusher — mas os *outros* participantes dependem dele. Numa função
+  // serverless, uma promessa não aguardada morre junto com a resposta: o
+  // trigger simplesmente não saía, e os demais só descobriam a mudança no poll
+  // de reconciliação, até 20s depois. `after` mantém a invocação viva até a
+  // publicação terminar, sem cobrar essa espera de quem clicou.
+  after(async () => {
+    await publish(roomId, snapshot, payload);
+  });
 
   return snapshot;
 }

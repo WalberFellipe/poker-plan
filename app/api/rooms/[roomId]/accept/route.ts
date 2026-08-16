@@ -67,6 +67,7 @@ export async function POST(
     await prisma.estimate.create({
       data: {
         roomId,
+        taskId: story.taskId,
         key: story.task?.key ?? "—",
         title: story.title,
         source: story.task?.source ?? "manual",

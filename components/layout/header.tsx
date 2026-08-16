@@ -74,7 +74,7 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-[60] flex flex-wrap items-center gap-6 border-b border-pa-text/[.07] bg-[rgb(7_7_13/.86)] px-5 py-3.5 backdrop-blur-[14px] md:px-10">
+    <header className="flex flex-wrap items-center gap-6 border-b border-pa-text/[.07] bg-[rgb(7_7_13/.86)] px-5 py-3.5 backdrop-blur-[14px] md:px-10">
       <Link
         href="/"
         className="flex shrink-0 items-baseline gap-px font-display text-[19px] font-black tracking-[.02em]"

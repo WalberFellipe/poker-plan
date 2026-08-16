@@ -12,10 +12,18 @@ import { REVEAL_COUNTDOWN_MS } from '@/types/room-state'
  * Antes cada cliente contava 3-2-1 localmente a partir do momento em que
  * recebia o evento, então quem tinha rede mais lenta virava a carta depois.
  *
- * A contagem é ancorada no **clique** de quem revelou, não na chegada da
- * requisição: quem clicou já começou a contar localmente, e ancorar aqui faria
- * o `revealAt` autoritativo cair depois do previsto, jogando a contagem de
- * volta para trás (3, 2, 1, 2, 1) quando a resposta chegasse.
+ * `revealAt` é sempre do relógio **do servidor**.
+ *
+ * Uma tentativa anterior ancorava no `Date.now()` de quem clicou, para a
+ * contagem não pular para trás ao ser corrigida. Isso misturava dois relógios:
+ * o valor nascia na base de tempo do cliente, mas os clientes o comparam
+ * contra `Date.now() + offset`, onde o offset já corrige a diferença para o
+ * servidor. O desvio entrava duas vezes — com o relógio do servidor adiantado,
+ * `revealAt` já chegava no passado e as cartas viravam sem contagem nenhuma.
+ *
+ * O pulo para trás é resolvido no cliente, por uma trava que impede a contagem
+ * de subir. Aqui só garantimos que o instante seja fixado logo na entrada da
+ * requisição, antes das idas ao banco.
  */
 export async function POST(
   request: Request,
@@ -24,23 +32,7 @@ export async function POST(
   const { storyId } = await props.params;
 
   try {
-    const body = await request.json().catch(() => ({}));
-    const now = Date.now();
-
-    // `clientNow` é o relógio de quem clicou, no instante do clique. Tratamos
-    // como se estivesse na mesma base do nosso — os dois costumam estar em NTP —
-    // e o clamp abaixo protege de um relógio muito fora.
-    const clickedAt =
-      typeof body?.clientNow === "number" && Number.isFinite(body.clientNow)
-        ? body.clientNow
-        : now;
-
-    const revealAt = new Date(
-      Math.min(
-        Math.max(clickedAt + REVEAL_COUNTDOWN_MS, now),
-        now + REVEAL_COUNTDOWN_MS
-      )
-    );
+    const revealAt = new Date(Date.now() + REVEAL_COUNTDOWN_MS);
 
     const story = await prisma.story.findUnique({
       where: { id: storyId },

@@ -4,12 +4,46 @@
  * estimativa) e os dois nunca discordem.
  */
 
-/** Converte um valor de carta em número, quando ele for numérico. */
+/** Frações em caractere único que aparecem nos baralhos. */
+const FRACTIONS: Record<string, number> = {
+  "½": 0.5,
+  "⅓": 1 / 3,
+  "⅔": 2 / 3,
+  "¼": 0.25,
+  "¾": 0.75,
+};
+
+/**
+ * Converte um valor de carta em número, quando ele tiver um número dentro.
+ *
+ * Vale para "5", "0,5", "½" e também para valores com unidade — "16h", "3d",
+ * "2pt". O baralho de horas produzia média e mediana vazias e consenso 0%
+ * justamente porque "16h" era descartado como não-numérico, ainda que a
+ * comparação entre 1h e 16h seja perfeitamente aritmética.
+ *
+ * O que continua fora da conta é o que não tem magnitude: "?", "☕", "PP",
+ * "M", "G" e emoji. Tamanho de camiseta é ordinal, não quantidade — somar
+ * daria um número sem significado.
+ */
 export function toNumericVote(value: string): number | null {
-  const normalized = value.trim().replace(",", ".");
-  if (normalized === "") return null;
-  const parsed = Number(normalized);
-  return Number.isFinite(parsed) ? parsed : null;
+  const trimmed = value.trim();
+  if (trimmed === "") return null;
+
+  if (trimmed in FRACTIONS) return FRACTIONS[trimmed];
+
+  const normalized = trimmed.replace(",", ".");
+
+  const direct = Number(normalized);
+  if (Number.isFinite(direct)) return direct;
+
+  // Número seguido de uma unidade curta: "16h", "2d", "3pt".
+  const withUnit = normalized.match(/^(\d+(?:\.\d+)?)\s*[a-zA-Z]{1,3}$/);
+  if (withUnit) {
+    const parsed = Number(withUnit[1]);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
 }
 
 export function numericVotes(values: string[]): number[] {
@@ -73,6 +107,24 @@ export function computeDistribution(
       if (nb !== null) return 1;
       return a.value.localeCompare(b.value);
     });
+}
+
+/**
+ * Unidade compartilhada por todos os votos numéricos, se houver uma só.
+ *
+ * Num baralho de horas a mediana é 16, mas mostrar "Aceitar · 16" perde o
+ * sentido; com isto vira "16h". Se os votos misturarem unidades, devolve "".
+ */
+export function commonUnit(values: string[]): string {
+  const units = new Set<string>();
+
+  for (const value of values) {
+    if (toNumericVote(value) === null) continue;
+    const match = value.trim().match(/^\d+(?:[.,]\d+)?\s*([a-zA-Z]{1,3})$/);
+    units.add(match ? match[1] : "");
+  }
+
+  return units.size === 1 ? [...units][0] : "";
 }
 
 /** Faixa de consenso usada para cor e para a frase de dispersão. */

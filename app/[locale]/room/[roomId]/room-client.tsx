@@ -10,7 +10,7 @@ import { computeAverage, computeConsensus, consensusBand } from "@/lib/vote-stat
 import { Button } from "@/components/ui/button";
 import { Dot } from "@/components/ui/neon";
 import { PokerTable } from "@/components/room/poker-table";
-import { Hand } from "@/components/room/hand";
+import { Hand, Reactions } from "@/components/room/hand";
 import { ResultPanel } from "@/components/room/result-panel";
 import { SidePanel } from "@/components/room/side-panel";
 import { JoinRoomModal } from "@/components/room/join-room-modal";
@@ -66,6 +66,7 @@ export default function RoomClient({ roomId }: { roomId: string }) {
     reset,
     throwChip,
     acceptEstimate,
+    promoteTask,
   } = room;
 
   const [needsName, setNeedsName] = useState(false);
@@ -311,6 +312,10 @@ export default function RoomClient({ roomId }: { roomId: string }) {
           youLabel={t("you")}
         />
 
+        {/* As reações ficam disponíveis o tempo todo: a ficha vale até o reset
+            da rodada, e é na discussão do resultado que elas mais servem. */}
+        <Reactions onReact={react} />
+
         {revealed ? (
           <ResultPanel
             votes={revealedVotes}
@@ -332,7 +337,6 @@ export default function RoomClient({ roomId }: { roomId: string }) {
             myVote={myVote}
             disabled={countdown !== null}
             onSelect={selectCard}
-            onReact={react}
           />
         )}
       </div>
@@ -342,6 +346,9 @@ export default function RoomClient({ roomId }: { roomId: string }) {
         participants={participants}
         queue={snapshot.queue}
         meId={meId}
+        activeTaskId={snapshot.story?.taskId ?? null}
+        onPickTask={promoteTask}
+        isBusy={isBusy}
         connectedProvider={
           pushTarget
             ? {

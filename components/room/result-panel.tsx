@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Kicker, Meter, Stat } from "@/components/ui/neon";
 import {
+  commonUnit,
   computeAverage,
   computeConsensus,
   computeDistribution,
@@ -46,16 +47,17 @@ export function ResultPanel({
       consensus,
       band: consensusBand(consensus),
       distribution: computeDistribution(votes),
+      unit: commonUnit(votes),
     };
   }, [votes]);
 
-  // Vírgula em PT, ponto em EN.
+  // Vírgula em PT, ponto em EN, e a unidade do baralho quando houver uma só.
   const formatNumber = (value: number | null) =>
     value === null
       ? "—"
       : new Intl.NumberFormat(locale, {
           maximumFractionDigits: 1,
-        }).format(value);
+        }).format(value) + stats.unit;
 
   const points =
     stats.median !== null ? formatNumber(stats.median) : votes[0] ?? "?";

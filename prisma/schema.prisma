@@ -221,6 +221,7 @@ model Task {
 
   createdAt DateTime @default(now())
   stories   Story[]
+  estimates Estimate[]
 
   @@index([roomId, order])
 }
@@ -230,6 +231,11 @@ model Estimate {
   id     String @id @default(cuid())
   roomId String
   room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  /// Tarefa de origem, quando a estimativa veio da fila. É o que permite à
+  /// fila mostrar os pontos ao lado do que já foi votado, sem casar por título.
+  taskId    String?
+  task      Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
 
   key       String
   title     String

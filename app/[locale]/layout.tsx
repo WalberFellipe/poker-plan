@@ -2,6 +2,7 @@ import { Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/app/providers/auth-provider";
 import { Header } from "@/components/layout/header";
+import { AutoHideHeader } from "@/components/layout/auto-hide-header";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/react";
 import { NextIntlClientProvider } from "next-intl";
@@ -87,7 +88,9 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
             <div className="flex min-h-screen flex-col">
-              <Header />
+              <AutoHideHeader>
+                <Header />
+              </AutoHideHeader>
               <main className="flex-1">{children}</main>
             </div>
             <Analytics />

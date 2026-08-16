@@ -14,12 +14,42 @@ const REACTIONS: { kind: Exclude<ChipKind, "call">; labelKey: string; tone: stri
   { kind: "risk", labelKey: "risk", tone: "border-mg/30 text-mg-soft hover:bg-mg/10" },
 ];
 
+interface ReactionsProps {
+  onReact: (kind: Exclude<ChipKind, "call">) => void;
+}
+
+/**
+ * As pílulas de reação são um componente à parte porque continuam disponíveis
+ * *depois* da revelação: a ficha vale até o reset da rodada, e é justamente na
+ * discussão do resultado que "explica melhor" e "tem risco" fazem sentido.
+ */
+export function Reactions({ onReact }: ReactionsProps) {
+  const t = useTranslations("room");
+
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {REACTIONS.map((reaction) => (
+        <button
+          key={reaction.kind}
+          type="button"
+          onClick={() => onReact(reaction.kind)}
+          className={cn(
+            "rounded-chip border px-4 py-2 text-[15px] transition-colors",
+            reaction.tone
+          )}
+        >
+          {t(`reactions.${reaction.labelKey}`)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 interface HandProps {
   deckValues: string[];
   myVote: string | null;
   disabled: boolean;
   onSelect: (value: string) => void;
-  onReact: (kind: Exclude<ChipKind, "call">) => void;
 }
 
 /**
@@ -28,41 +58,22 @@ interface HandProps {
  * As cartas são strings puras — "0", "½", "?", "☕" ou emoji funcionam igual,
  * porque o voto trafega como texto de ponta a ponta.
  */
-export function Hand({
-  deckValues,
-  myVote,
-  disabled,
-  onSelect,
-  onReact,
-}: HandProps) {
+export function Hand({ deckValues, myVote, disabled, onSelect }: HandProps) {
   const t = useTranslations("room");
 
   return (
-    <div className="flex flex-col gap-3.5">
-      <div className="flex flex-wrap items-center gap-3.5">
+    <div className="flex flex-col items-center gap-3.5">
+      <div className="flex w-full items-center gap-3.5">
         <span className="pa-label whitespace-nowrap">{t("yourHand")}</span>
         <div
           aria-hidden
           className="h-px flex-1 bg-[linear-gradient(90deg,rgb(var(--pa-cy)/.35),transparent)]"
         />
-        <div className="flex flex-wrap gap-2">
-          {REACTIONS.map((reaction) => (
-            <button
-              key={reaction.kind}
-              type="button"
-              onClick={() => onReact(reaction.kind)}
-              className={cn(
-                "rounded-chip border px-3.5 py-1.5 text-[14px] transition-colors",
-                reaction.tone
-              )}
-            >
-              {t(`reactions.${reaction.labelKey}`)}
-            </button>
-          ))}
-        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2.5">
+      {/* Centralizadas com a mesa: encurta o caminho do mouse entre olhar o
+          resultado e escolher a carta. */}
+      <div className="flex flex-wrap justify-center gap-2.5">
         {deckValues.map((value) => {
           const selected = myVote === value;
 
@@ -88,7 +99,9 @@ export function Hand({
         })}
       </div>
 
-      <p className="text-[15px] text-pa-faint">{t("callHintLine")}</p>
+      <p className="text-center text-[15px] text-pa-faint">
+        {t("callHintLine")}
+      </p>
     </div>
   );
 }

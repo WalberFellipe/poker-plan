@@ -67,6 +67,8 @@ export interface SnapshotTask {
   externalUrl: string | null;
   order: number;
   status: TaskStatus;
+  /** Pontos fechados, quando a tarefa já foi estimada. */
+  points: string | null;
 }
 
 export interface SnapshotEstimate {
