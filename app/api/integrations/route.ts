@@ -25,6 +25,8 @@ export async function GET() {
     return {
       id: provider.id,
       mark: provider.mark,
+      authStyle: provider.authStyle,
+      canPushPoints: provider.canPushPoints,
       scopes: provider.scopes,
       configured: isProviderConfigured(provider),
       connected: Boolean(connection),

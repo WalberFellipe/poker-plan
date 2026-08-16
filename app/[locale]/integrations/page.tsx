@@ -6,7 +6,8 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { Badge, Kicker, Rule } from "@/components/ui/neon";
+import { Input } from "@/components/ui/input";
+import { Badge, FieldLabel, Kicker, Rule } from "@/components/ui/neon";
 import { useToast } from "@/hooks/useToast";
 import { Link } from "@/src/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,8 @@ import type { ProviderId } from "@/lib/integrations/providers";
 interface Summary {
   id: ProviderId;
   mark: string;
+  authStyle: "oauth" | "token";
+  canPushPoints: boolean;
   scopes: string[];
   configured: boolean;
   connected: boolean;
@@ -36,6 +39,9 @@ export default function IntegrationsPage() {
 
   const [summaries, setSummaries] = useState<Summary[]>([]);
   const [boards, setBoards] = useState<Record<string, { id: string; name: string }[]>>({});
+  /** Token digitado por provedor, antes de enviar. */
+  const [tokens, setTokens] = useState<Record<string, string>>({});
+  const [connecting, setConnecting] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const response = await fetch("/api/integrations", { cache: "no-store" });
@@ -95,6 +101,32 @@ export default function IntegrationsPage() {
     );
 
     if (response.ok) await load();
+  };
+
+  /** Conecta um provedor que autentica por credencial colada. */
+  const connectWithToken = async (provider: string) => {
+    const token = (tokens[provider] ?? "").trim();
+    if (!token) return;
+
+    setConnecting(provider);
+    try {
+      const response = await fetch(`/api/integrations/${provider}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+
+      if (!response.ok) {
+        toast({ variant: "destructive", description: t("tokenInvalid") });
+        return;
+      }
+
+      setTokens((current) => ({ ...current, [provider]: "" }));
+      toast({ description: tToast("connected") });
+      await load();
+    } finally {
+      setConnecting(null);
+    }
   };
 
   const chooseBoard = async (provider: string, boardId: string, board: string) => {
@@ -223,6 +255,32 @@ export default function IntegrationsPage() {
                     </dd>
                   </div>
                 </dl>
+              ) : summary.authStyle === "token" ? (
+                <div className="flex flex-col gap-2">
+                  <FieldLabel htmlFor={`token-${summary.id}`}>
+                    {t("tokenLabel")}
+                  </FieldLabel>
+                  <Input
+                    id={`token-${summary.id}`}
+                    type="password"
+                    autoComplete="off"
+                    value={tokens[summary.id] ?? ""}
+                    placeholder={t("tokenPlaceholder")}
+                    disabled={!session?.user}
+                    onChange={(event) =>
+                      setTokens((current) => ({
+                        ...current,
+                        [summary.id]: event.target.value,
+                      }))
+                    }
+                    onKeyDown={(event) =>
+                      event.key === "Enter" && connectWithToken(summary.id)
+                    }
+                  />
+                  <span className="text-[13px] text-pa-faint">
+                    {t("tokenHint")}
+                  </span>
+                </div>
               ) : (
                 <div className="flex flex-col gap-2">
                   <span className="pa-kicker">{t("scope")}</span>
@@ -236,6 +294,13 @@ export default function IntegrationsPage() {
                   ) : null}
                 </div>
               )}
+
+              {!summary.canPushPoints ? (
+                <p className="text-[13px] leading-relaxed text-pa-ghost">
+                  <span className="pa-kicker mr-2">{t("readOnly")}</span>
+                  {t("readOnlyHint")}
+                </p>
+              ) : null}
 
               <div className="mt-auto flex flex-wrap gap-2.5 pt-1">
                 {summary.connected ? (
@@ -255,6 +320,18 @@ export default function IntegrationsPage() {
                       {t("sync")}
                     </Button>
                   </>
+                ) : summary.authStyle === "token" ? (
+                  <Button
+                    size="sm"
+                    disabled={
+                      !session?.user ||
+                      !(tokens[summary.id] ?? "").trim() ||
+                      connecting === summary.id
+                    }
+                    onClick={() => connectWithToken(summary.id)}
+                  >
+                    {t("connect")}
+                  </Button>
                 ) : (
                   <Button
                     size="sm"

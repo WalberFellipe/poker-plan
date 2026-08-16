@@ -137,7 +137,7 @@ export default function CreateRoomPage() {
                   className={cn(
                     "flex flex-col gap-2 rounded-card border p-3.5 text-left transition-all",
                     active
-                      ? "border-cy/45 bg-cy/[.06] shadow-[0_0_26px_rgb(var(--pa-cy)/.2)]"
+                      ? "border-cy bg-cy/[.08]"
                       : "border-pa-text/8 bg-pa-text/[.03] hover:border-cy/24 hover:bg-cy/[.04]"
                   )}
                 >

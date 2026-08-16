@@ -22,6 +22,7 @@ import type { ChipKind } from "@/types/room-state";
 interface IntegrationSummary {
   id: string;
   connected: boolean;
+  canPushPoints: boolean;
   board: string | null;
 }
 
@@ -175,7 +176,11 @@ export default function RoomClient({ roomId }: { roomId: string }) {
   const pushTarget =
     activeTask && activeTask.source !== "manual"
       ? integrations.find(
-          (item) => item.id === activeTask.source && item.connected
+          (item) =>
+            item.id === activeTask.source &&
+            item.connected &&
+            // Provedores somente leitura não ganham botão de enviar.
+            item.canPushPoints
         )
       : undefined;
 
@@ -233,9 +238,16 @@ export default function RoomClient({ roomId }: { roomId: string }) {
   }
 
   if (error && !snapshot) {
+    const message =
+      error === "expired"
+        ? t("expired")
+        : error === "notFound"
+          ? t("notFound")
+          : t("loadError");
+
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-[17px] text-pa-muted">{error}</p>
+      <div className="flex min-h-[60vh] items-center justify-center px-5">
+        <p className="text-center text-[17px] text-pa-muted">{message}</p>
       </div>
     );
   }

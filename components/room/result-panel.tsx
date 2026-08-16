@@ -126,7 +126,7 @@ export function ResultPanel({
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-pa-text/[.06]">
                   <div
                     className={cn(
-                      "h-full rounded-full bg-cy shadow-[0_0_12px_rgb(var(--pa-cy)/.5)]",
+                      "h-full rounded-full bg-[linear-gradient(90deg,rgb(var(--pa-cy)),rgb(var(--pa-cy)/.25))]",
                       "transition-[width] duration-500"
                     )}
                     style={{ width: `${(entry.count / maxCount) * 100}%` }}

@@ -17,8 +17,11 @@ export async function GET(
   const url = new URL(request.url);
 
   const adapter = getAdapter(providerId);
-  if (!adapter) {
-    return NextResponse.json({ error: "Provedor desconhecido" }, { status: 400 });
+  if (!adapter?.exchangeCode) {
+    return NextResponse.json(
+      { error: "Provedor desconhecido ou sem fluxo OAuth" },
+      { status: 400 }
+    );
   }
 
   const state = url.searchParams.get("state");
@@ -46,7 +49,7 @@ export async function GET(
 
   try {
     const redirectUri = `${url.origin}/api/integrations/${providerId}/callback`;
-    const result = await adapter.exchangeCode(code, redirectUri);
+    const result = await adapter.exchangeCode!(code, redirectUri);
 
     await prisma.integration.upsert({
       where: { userId_provider: { userId, provider: providerId } },

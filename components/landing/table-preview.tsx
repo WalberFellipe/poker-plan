@@ -28,10 +28,10 @@ const CHIPS = [
 const HAND = ["1", "2", "3", "5", "8", "13"];
 
 const CHIP_TONES = {
-  cy: "bg-[radial-gradient(circle_at_35%_30%,#8df3ff,rgb(63_232_255))] border-white/60 text-cy-ink shadow-[0_0_18px_rgb(63_232_255/.55)]",
+  cy: "bg-[radial-gradient(circle_at_35%_30%,#9fdde6,rgb(var(--pa-cy)))] border-white/60 text-cy-ink shadow-[0_0_16px_rgb(var(--pa-cy)/.35)]",
   neutral:
-    "bg-[radial-gradient(circle_at_35%_30%,#f4f3fa,#b9b8cc)] border-[rgb(7_7_13/.35)] text-[#12121c] shadow-[0_0_18px_rgb(236_235_245/.3)]",
-  mg: "bg-[radial-gradient(circle_at_35%_30%,#ff9ad2,#c40073)] border-white/75 text-white shadow-[0_0_18px_rgb(255_47_160/.7)]",
+    "bg-[radial-gradient(circle_at_35%_30%,#f4f3fa,#b9b8cc)] border-[rgb(7_7_13/.35)] text-[#12121c] shadow-[0_0_16px_rgb(236_235_245/.3)]",
+  mg: "bg-[radial-gradient(circle_at_35%_30%,#f2adcd,#ab3d6f)] border-white/75 text-white shadow-[0_0_16px_rgb(var(--pa-mg)/.45)]",
 } as const;
 
 function seatPosition(index: number, total: number) {
@@ -53,19 +53,19 @@ export function TablePreview() {
       className={cn(
         "relative animate-float overflow-hidden rounded-lg border border-cy/[.18]",
         "bg-[linear-gradient(180deg,#0d0e18,#0a0a12)]",
-        "shadow-[0_40px_90px_rgba(0,0,0,.6),0_0_70px_rgb(63_232_255/.08)]"
+        "shadow-[0_40px_90px_rgba(0,0,0,.6)]"
       )}
     >
       <div className="flex items-center justify-between border-b border-pa-text/[.07] px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cy shadow-[0_0_8px_rgb(var(--pa-cy))]" />
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cy shadow-[0_0_6px_rgb(var(--pa-cy)/.7)]" />
           <span className="pa-kicker">{t("livePreview")}</span>
         </div>
         <span className="pa-numeric text-xs text-cy">01:12</span>
       </div>
 
       <div className="p-5">
-        <div className="relative h-[230px] rounded-[160px/120px] border border-cy/20 bg-[radial-gradient(130%_140%_at_50%_42%,rgb(63_232_255/.12),rgb(10_10_18/0)_60%),linear-gradient(180deg,#0b0c16,#08090f)] shadow-[inset_0_0_60px_rgb(63_232_255/.08)]">
+        <div className="relative h-[230px] rounded-[160px/120px] border border-cy/20 bg-[radial-gradient(130%_140%_at_50%_42%,rgb(var(--pa-cy)/.12),rgb(10_10_18/0)_60%),linear-gradient(180deg,#0b0c16,#08090f)] shadow-[inset_0_0_50px_rgb(var(--pa-cy)/.05)]">
           <div className="absolute inset-[14px] rounded-[150px/110px] border border-dashed border-pa-text/[.07]" />
 
           {SEATS.map((seat, index) => {
@@ -78,8 +78,8 @@ export function TablePreview() {
                     "absolute flex h-[38px] w-[27px] -translate-x-1/2 -translate-y-1/2 items-center justify-center",
                     "rounded-[3px] font-display text-[11px] font-bold",
                     seat.mine
-                      ? "border border-mg bg-[linear-gradient(180deg,rgb(255_47_160/.18),rgb(10_10_20/.9))] text-white"
-                      : "border border-cy bg-[linear-gradient(180deg,rgb(63_232_255/.14),rgb(10_10_20/.92))] text-pa-text"
+                      ? "border border-mg bg-[linear-gradient(180deg,rgb(var(--pa-mg)/.18),rgb(10_10_20/.9))] text-white"
+                      : "border border-cy bg-[linear-gradient(180deg,rgb(var(--pa-cy)/.14),rgb(10_10_20/.92))] text-pa-text"
                   )}
                   style={{ left: `${position.cardX}%`, top: `${position.cardY}%` }}
                 >
@@ -96,7 +96,7 @@ export function TablePreview() {
                   )}
                   style={{ left: `${position.x}%`, top: `${position.y}%` }}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-cy shadow-[0_0_6px_rgb(var(--pa-cy))]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-cy shadow-[0_0_6px_rgb(var(--pa-cy)/.7)]" />
                   {seat.name}
                 </div>
               </div>
@@ -130,7 +130,7 @@ export function TablePreview() {
                 "flex h-[52px] w-[36px] items-center justify-center rounded-[3px]",
                 "font-display text-[13px] font-bold transition-transform",
                 value === "5"
-                  ? "-translate-y-2 border border-mg bg-[linear-gradient(180deg,rgb(255_47_160/.18),rgb(10_10_20/.9))] text-white shadow-[0_0_20px_rgb(255_47_160/.35)]"
+                  ? "-translate-y-2 border border-mg bg-[linear-gradient(180deg,rgb(var(--pa-mg)/.18),rgb(10_10_20/.9))] text-white shadow-[0_0_16px_rgb(var(--pa-mg)/.25)]"
                   : "border border-pa-text/12 bg-pa-text/[.03] text-pa-dim"
               )}
             >

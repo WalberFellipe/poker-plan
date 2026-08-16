@@ -35,9 +35,9 @@ const toastVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-cy/40 shadow-[0_0_40px_rgb(var(--pa-cy)/.2)] before:bg-cy before:shadow-[0_0_10px_rgb(var(--pa-cy))]",
+          "border border-cy/40 before:bg-cy before:shadow-[0_0_6px_rgb(var(--pa-cy)/.7)]",
         destructive:
-          "border border-mg/50 shadow-[0_0_40px_rgb(var(--pa-mg)/.2)] before:bg-mg before:shadow-[0_0_10px_rgb(var(--pa-mg))]",
+          "border border-mg/50 before:bg-mg before:shadow-[0_0_6px_rgb(var(--pa-mg)/.7)]",
       },
     },
     defaultVariants: {

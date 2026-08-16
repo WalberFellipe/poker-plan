@@ -40,7 +40,7 @@ const DialogContent = React.forwardRef<
       className={cn(
         "fixed left-[50%] top-[50%] z-50 grid max-h-[86vh] w-full max-w-[480px] translate-x-[-50%] translate-y-[-50%] gap-[18px] overflow-auto",
         "rounded-lg border border-cy/28 bg-[linear-gradient(180deg,#0e0f1a,#0a0a12)] p-7",
-        "shadow-[0_40px_100px_rgba(0,0,0,.7),0_0_60px_rgb(var(--pa-cy)/.1)]",
+        "shadow-[0_40px_100px_rgba(0,0,0,.7)]",
         "animate-rise",
         className
       )}

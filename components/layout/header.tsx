@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { useParams, useSelectedLayoutSegments } from "next/navigation";
+import { useSelectedLayoutSegments } from "next/navigation";
 import Image from "next/image";
 import { LogOut, User } from "lucide-react";
 
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { useLastRoom } from "@/hooks/useLastRoom";
 import { Link } from "@/src/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -36,22 +37,41 @@ export function Header() {
   const t = useTranslations("nav");
   const tAuth = useTranslations("auth");
   const segments = useSelectedLayoutSegments();
-  const params = useParams();
 
-  const roomId = typeof params?.roomId === "string" ? params.roomId : null;
-  const inApp = segments[0] === "room" || segments[0] === "decks" || segments[0] === "integrations";
+  // A sala da rota ou, em Baralhos e Integrações, a última visitada. Sem isto
+  // as abas escopadas por sala sumiam e a pessoa perdia o caminho de volta.
+  const roomId = useLastRoom();
 
+  const inApp =
+    segments[0] === "room" ||
+    segments[0] === "decks" ||
+    segments[0] === "integrations";
+
+  // A ordem das cinco abas é fixa, como no handoff. As de sala ficam
+  // desabilitadas — visíveis, mas sem destino — enquanto não houver sala.
   const tabs = [
-    roomId && { href: `/room/${roomId}`, label: t("tabs.table"), active: segments[0] === "room" && segments.length <= 2 },
-    roomId && { href: `/room/${roomId}/tasks`, label: t("tabs.tasks"), active: segments.includes("tasks") },
+    {
+      href: roomId ? `/room/${roomId}` : null,
+      label: t("tabs.table"),
+      active: segments[0] === "room" && segments.length <= 2,
+    },
+    {
+      href: roomId ? `/room/${roomId}/tasks` : null,
+      label: t("tabs.tasks"),
+      active: segments.includes("tasks"),
+    },
     { href: "/decks", label: t("tabs.decks"), active: segments[0] === "decks" },
-    roomId && {
-      href: `/room/${roomId}/estimates`,
+    {
+      href: roomId ? `/room/${roomId}/estimates` : null,
       label: t("tabs.estimates"),
       active: segments.includes("estimates"),
     },
-    { href: "/integrations", label: t("tabs.integrations"), active: segments[0] === "integrations" },
-  ].filter(Boolean) as { href: string; label: string; active: boolean }[];
+    {
+      href: "/integrations",
+      label: t("tabs.integrations"),
+      active: segments[0] === "integrations",
+    },
+  ];
 
   return (
     <header className="sticky top-0 z-[60] flex flex-wrap items-center gap-6 border-b border-pa-text/[.07] bg-[rgb(7_7_13/.86)] px-5 py-3.5 backdrop-blur-[14px] md:px-10">
@@ -59,27 +79,43 @@ export function Header() {
         href="/"
         className="flex shrink-0 items-baseline gap-px font-display text-[19px] font-black tracking-[.02em]"
       >
-        <span className="text-cy pa-text-glow-cy">{t("brandFirst")}</span>
+        <span className="text-cy">{t("brandFirst")}</span>
         <span className="text-pa-text">{t("brandSecond")}</span>
       </Link>
 
       {inApp ? (
         <nav className="flex flex-1 flex-wrap items-center gap-1.5" aria-label="Seções">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              aria-current={tab.active ? "page" : undefined}
-              className={cn(
-                "rounded-sm border px-3 py-1.5 font-display text-[10px] font-medium uppercase tracking-[.14em] transition-colors",
-                tab.active
-                  ? "border-cy/45 bg-cy/12 text-cy"
-                  : "border-transparent text-pa-dim hover:text-pa-text"
-              )}
-            >
-              {tab.label}
-            </Link>
-          ))}
+          {tabs.map((tab) => {
+            const className = cn(
+              "rounded-sm border px-3 py-1.5 font-display text-[10px] font-medium uppercase tracking-[.14em] transition-colors",
+              tab.active
+                ? "border-cy/45 bg-cy/12 text-cy"
+                : "border-transparent text-pa-dim hover:text-pa-text"
+            );
+
+            if (!tab.href) {
+              return (
+                <span
+                  key={tab.label}
+                  aria-disabled
+                  className={cn(className, "cursor-default opacity-40 hover:text-pa-dim")}
+                >
+                  {tab.label}
+                </span>
+              );
+            }
+
+            return (
+              <Link
+                key={tab.label}
+                href={tab.href}
+                aria-current={tab.active ? "page" : undefined}
+                className={className}
+              >
+                {tab.label}
+              </Link>
+            );
+          })}
         </nav>
       ) : (
         <nav

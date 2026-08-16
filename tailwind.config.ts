@@ -15,7 +15,9 @@ export default {
     extend: {
       fontFamily: {
         // Display / chrome: logo, títulos, botões, números, cartas.
-        display: ["var(--font-orbitron)", "sans-serif"],
+        // Aponta para --pa-display, que o handoff define como a própria serifa
+        // do corpo em 700. Trocar a variável troca todo o chrome de uma vez.
+        display: ["var(--pa-display)", "Georgia", "serif"],
         // Corpo: parágrafos, títulos de tarefa, nomes de pessoas.
         sans: ["var(--font-source-serif)", "Georgia", "serif"],
         serif: ["var(--font-source-serif)", "Georgia", "serif"],
@@ -90,9 +92,9 @@ export default {
       boxShadow: {
         elevated: "0 30px 80px rgba(0,0,0,.55)",
         modal: "0 40px 100px rgba(0,0,0,.7)",
-        "glow-cy": "0 0 26px rgb(var(--pa-cy) / .35)",
-        "glow-cy-strong": "0 0 44px rgb(var(--pa-cy) / .6)",
-        "glow-mg": "0 0 30px rgb(var(--pa-mg) / .35)",
+        "glow-cy": "0 0 16px rgb(var(--pa-cy) / .18)",
+        "glow-cy-strong": "0 0 22px rgb(var(--pa-cy) / .3)",
+        "glow-mg": "0 0 18px rgb(var(--pa-mg) / .25)",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

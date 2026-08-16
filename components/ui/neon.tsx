@@ -42,8 +42,8 @@ export function Dot({
   className?: string;
 }) {
   const tones = {
-    cy: "bg-cy shadow-[0_0_10px_rgb(var(--pa-cy))]",
-    mg: "bg-mg shadow-[0_0_10px_rgb(var(--pa-mg))]",
+    cy: "bg-cy shadow-[0_0_6px_rgb(var(--pa-cy)/.7)]",
+    mg: "bg-mg shadow-[0_0_6px_rgb(var(--pa-mg)/.7)]",
     idle: "bg-pa-ghost",
   } as const;
 
@@ -190,8 +190,8 @@ export function Meter({
         className={cn(
           "h-full rounded-full transition-[width] duration-500",
           tone === "cy"
-            ? "bg-cy shadow-[0_0_12px_rgb(var(--pa-cy)/.6)]"
-            : "bg-mg shadow-[0_0_12px_rgb(var(--pa-mg)/.6)]"
+            ? "bg-cy"
+            : "bg-mg"
         )}
         style={{ width: `${clamped}%` }}
       />

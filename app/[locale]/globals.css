@@ -21,20 +21,28 @@
 
     /* Texto */
     --pa-text: 236 235 245;
-    --pa-text-muted: 154 153 179;
-    --pa-text-dim: 141 140 166;
-    --pa-text-faint: 123 122 147;
+    --pa-text-muted: 176 175 194;
+    --pa-text-dim: 156 155 176;
+    --pa-text-faint: 138 138 160;
     --pa-text-ghost: 93 92 114;
 
-    /* Acento primário: ciano */
-    --pa-cy: 63 232 255;
-    --pa-cy-deep: 18 180 214;
-    --pa-cy-ink: 4 19 26;
-    --pa-cy-soft: 157 246 255;
+    /* Acento primário: ciano, deliberadamente dessaturado */
+    --pa-cy: 92 199 214;
+    --pa-cy-deep: 47 149 166;
+    --pa-cy-ink: 6 20 24;
+    --pa-cy-soft: 154 223 232;
 
     /* Acento secundário: magenta */
-    --pa-mg: 255 47 160;
-    --pa-mg-soft: 255 108 187;
+    --pa-mg: 224 97 155;
+    --pa-mg-soft: 235 143 184;
+
+    /*
+     * Fonte de display/chrome. O handoff v2 entrega a mesma serifa do corpo em
+     * 700 — a alternativa futurista era só ferramenta de comparação. Todo o
+     * chrome lê esta variável, então trocar a família aqui (por exemplo, para
+     * uma Circuit Forem licenciada via @font-face) muda o app inteiro.
+     */
+    --pa-display: var(--font-source-serif), Georgia, serif;
 
     --pa-radius: 2px;
 
@@ -46,19 +54,19 @@
     --card-foreground: 246 26% 94%;
     --popover: 236 29% 7%;
     --popover-foreground: 246 26% 94%;
-    --primary: 189 100% 62%;
-    --primary-foreground: 200 73% 6%;
+    --primary: 187 57% 60%;
+    --primary-foreground: 193 60% 6%;
     --secondary: 240 20% 12%;
     --secondary-foreground: 246 26% 94%;
     --muted: 240 20% 12%;
     --muted-foreground: 245 12% 65%;
-    --accent: 189 100% 62%;
-    --accent-foreground: 200 73% 6%;
-    --destructive: 328 100% 59%;
+    --accent: 187 57% 60%;
+    --accent-foreground: 193 60% 6%;
+    --destructive: 333 68% 63%;
     --destructive-foreground: 0 0% 100%;
     --border: 246 26% 94%;
     --input: 246 26% 94%;
-    --ring: 189 100% 62%;
+    --ring: 187 57% 60%;
     --radius: 2px;
   }
 
@@ -76,12 +84,12 @@
     background:
       radial-gradient(
         1100px 620px at 78% -10%,
-        rgb(var(--pa-cy) / 0.1),
+        rgb(var(--pa-cy) / 0.06),
         transparent 60%
       ),
       radial-gradient(
         900px 560px at 8% 108%,
-        rgb(var(--pa-mg) / 0.09),
+        rgb(var(--pa-mg) / 0.055),
         transparent 62%
       ),
       rgb(var(--pa-bg));
@@ -95,9 +103,9 @@
   h1,
   h2,
   h3 {
-    font-family: var(--font-orbitron), var(--font-source-serif), sans-serif;
+    font-family: var(--pa-display);
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 
   button {
@@ -143,7 +151,7 @@
 @layer components {
   /* Kicker: rótulo curto em caixa alta acima de um título. */
   .pa-kicker {
-    font-family: var(--font-orbitron), sans-serif;
+    font-family: var(--pa-display);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.18em;
@@ -152,7 +160,7 @@
   }
 
   .pa-label {
-    font-family: var(--font-orbitron), sans-serif;
+    font-family: var(--pa-display);
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.12em;
@@ -190,25 +198,27 @@
 }
 
 @layer utilities {
+  /*
+   * Halo é exceção, não regra: glow em excesso cansa em poucos minutos.
+   * Só recebem halo a mesa, o botão primário, as fichas, os pontos de status e
+   * a contagem regressiva. Profundidade em todo o resto é feita com sombra
+   * preta.
+   */
   .pa-glow-cy {
-    box-shadow: 0 0 26px rgb(var(--pa-cy) / 0.35);
+    box-shadow: 0 0 16px rgb(var(--pa-cy) / 0.18);
   }
 
   .pa-glow-cy-strong {
-    box-shadow: 0 0 44px rgb(var(--pa-cy) / 0.6);
+    box-shadow: 0 0 22px rgb(var(--pa-cy) / 0.3);
   }
 
   .pa-glow-mg {
-    box-shadow: 0 0 30px rgb(var(--pa-mg) / 0.35);
-  }
-
-  .pa-text-glow-cy {
-    text-shadow: 0 0 22px rgb(var(--pa-cy) / 0.55);
+    box-shadow: 0 0 18px rgb(var(--pa-mg) / 0.25);
   }
 
   /* Números, valores de carta e relógio pedem tabular para não "pular". */
   .pa-numeric {
-    font-family: var(--font-orbitron), sans-serif;
+    font-family: var(--pa-display);
     font-variant-numeric: tabular-nums;
   }
 }

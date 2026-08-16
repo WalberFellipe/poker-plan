@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { resolveParticipant } from "@/lib/participant";
 import { getAdapter } from "@/lib/integrations/adapters";
+import { getProvider } from "@/lib/integrations/providers";
 
 /**
  * Escreve os pontos de volta na issue de origem.
@@ -56,10 +57,22 @@ export async function POST(
     });
 
     const adapter = getAdapter(task.source);
+    const descriptor = getProvider(task.source);
 
     if (!integration || !adapter) {
       return NextResponse.json(
         { error: "Integração não conectada" },
+        { status: 400 }
+      );
+    }
+
+    // Alguns provedores só leem. É melhor dizer isso do que fingir que enviou.
+    if (!descriptor?.canPushPoints || !adapter.pushPoints) {
+      return NextResponse.json(
+        {
+          error:
+            "Este provedor não aceita escrita de pontos; a estimativa fica registrada aqui.",
+        },
         { status: 400 }
       );
     }

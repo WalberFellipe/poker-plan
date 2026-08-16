@@ -5,13 +5,13 @@ import { cn } from "@/lib/utils";
 import type { ChipKind } from "@/types/room-state";
 
 const REACTIONS: { kind: Exclude<ChipKind, "call">; labelKey: string; tone: string }[] = [
-  { kind: "agree", labelKey: "agree", tone: "border-cy/40 text-cy hover:bg-cy/10" },
+  { kind: "agree", labelKey: "agree", tone: "border-mg/30 text-mg-soft hover:bg-mg/10" },
   {
     kind: "explain",
     labelKey: "explain",
-    tone: "border-pa-text/20 text-pa-muted hover:text-pa-text hover:bg-pa-text/5",
+    tone: "border-mg/30 text-mg-soft hover:bg-mg/10",
   },
-  { kind: "risk", labelKey: "risk", tone: "border-mg/45 text-mg-soft hover:bg-mg/10" },
+  { kind: "risk", labelKey: "risk", tone: "border-mg/30 text-mg-soft hover:bg-mg/10" },
 ];
 
 interface HandProps {
@@ -43,7 +43,7 @@ export function Hand({
         <span className="pa-label whitespace-nowrap">{t("yourHand")}</span>
         <div
           aria-hidden
-          className="h-px flex-1 bg-[linear-gradient(90deg,rgb(63_232_255/.35),transparent)]"
+          className="h-px flex-1 bg-[linear-gradient(90deg,rgb(var(--pa-cy)/.35),transparent)]"
         />
         <div className="flex flex-wrap gap-2">
           {REACTIONS.map((reaction) => (
@@ -78,8 +78,8 @@ export function Hand({
                 "font-display text-[20px] font-bold transition-all duration-200",
                 "disabled:pointer-events-none disabled:opacity-45",
                 selected
-                  ? "-translate-y-2.5 border border-mg bg-[linear-gradient(180deg,rgb(255_47_160/.18),rgb(10_10_20/.9))] text-white shadow-[0_0_30px_rgb(255_47_160/.35)]"
-                  : "border border-pa-text/12 bg-pa-text/[.03] text-pa-muted hover:-translate-y-1 hover:border-cy/45 hover:text-cy"
+                  ? "-translate-y-2.5 border border-mg bg-[linear-gradient(180deg,rgb(var(--pa-mg)/.22),rgb(12_12_22/.95))] text-white shadow-[0_18px_40px_rgba(0,0,0,.6),0_0_18px_rgb(var(--pa-mg)/.25)]"
+                  : "border border-pa-text/14 bg-pa-text/[.04] text-pa-muted shadow-[0_6px_18px_rgba(0,0,0,.4)] hover:-translate-y-1 hover:border-cy/45 hover:text-cy"
               )}
             >
               {value}

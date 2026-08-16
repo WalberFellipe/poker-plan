@@ -25,12 +25,12 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "rounded-sm bg-cy-fill text-cy-ink font-bold shadow-[0_0_26px_rgb(var(--pa-cy)/.35)] hover:shadow-[0_0_48px_rgb(var(--pa-cy)/.6)]",
+          "rounded-sm bg-cy-fill text-cy-ink font-bold shadow-[0_0_16px_rgb(var(--pa-cy)/.18)] hover:shadow-[0_0_22px_rgb(var(--pa-cy)/.3)]",
         secondary:
           "rounded-sm border border-pa-text/20 bg-transparent text-pa-text hover:border-mg/60 hover:text-mg-soft",
         outline:
           "rounded-sm border border-cy/40 bg-cy/5 text-cy hover:bg-cy/10 hover:border-cy/70",
-        call: "rounded-sm border border-mg/50 bg-mg/10 text-mg-soft hover:bg-mg/20 hover:shadow-[0_0_30px_rgb(var(--pa-mg)/.35)]",
+        call: "rounded-sm border border-mg/50 bg-mg/10 text-mg-soft hover:bg-mg/20",
         ghost:
           "rounded-sm bg-transparent text-pa-dim hover:text-pa-text hover:bg-pa-text/5",
         destructive:

@@ -34,6 +34,10 @@ export interface UseRoomStateResult {
   myVote: string | null;
   setMyVote: (value: string | null) => void;
   isLoading: boolean;
+  /**
+   * Código estável do erro ("notFound" | "expired" | "generic"), não uma frase
+   * pronta: quem traduz é a tela, no idioma ativo.
+   */
   error: string | null;
   /** true quando as cartas já viraram de fato (revealAt no passado). */
   revealed: boolean;
@@ -159,7 +163,7 @@ export function useRoomState(roomId: string): UseRoomStateResult {
 
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
-        setError(payload?.error ?? "Erro ao carregar a sala");
+        setError(payload?.code ?? "generic");
         return;
       }
 

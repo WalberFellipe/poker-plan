@@ -24,11 +24,11 @@ export async function GET(
     const room = await prisma.room.findUnique({ where: { id: roomId } });
 
     if (!room) {
-      return NextResponse.json({ error: "Sala não encontrada" }, { status: 404 });
+      return NextResponse.json({ code: "notFound" }, { status: 404 });
     }
 
     if (room.expiresAt < new Date()) {
-      return NextResponse.json({ error: "Sala expirada" }, { status: 410 });
+      return NextResponse.json({ code: "expired" }, { status: 410 });
     }
 
     await ensureCurrentStory(roomId);

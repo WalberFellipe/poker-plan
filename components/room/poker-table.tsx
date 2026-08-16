@@ -16,10 +16,10 @@ import type { SnapshotChip, SnapshotParticipant } from "@/types/room-state";
 
 const CHIP_COLORS = {
   agree: {
-    background: "radial-gradient(circle at 35% 30%, #8df3ff, rgb(63 232 255))",
+    background: "radial-gradient(circle at 35% 30%, #9fdde6, rgb(92 199 214))",
     ring: "rgba(255,255,255,.6)",
-    glow: "rgba(63,232,255,.55)",
-    color: "#04131a",
+    glow: "rgba(92,199,214,.35)",
+    color: "#061418",
   },
   explain: {
     background: "radial-gradient(circle at 35% 30%, #f4f3fa, #b9b8cc)",
@@ -28,15 +28,15 @@ const CHIP_COLORS = {
     color: "#12121c",
   },
   risk: {
-    background: "radial-gradient(circle at 35% 30%, #ff7cc4, rgb(255 47 160))",
+    background: "radial-gradient(circle at 35% 30%, #ef9dc2, rgb(224 97 155))",
     ring: "rgba(255,255,255,.55)",
-    glow: "rgba(255,47,160,.6)",
-    color: "#210513",
+    glow: "rgba(224,97,155,.38)",
+    color: "#1d0a14",
   },
   call: {
-    background: "radial-gradient(circle at 35% 30%, #ff9ad2, #c40073)",
+    background: "radial-gradient(circle at 35% 30%, #f2adcd, #ab3d6f)",
     ring: "rgba(255,255,255,.75)",
-    glow: "rgba(255,47,160,.75)",
+    glow: "rgba(224,97,155,.45)",
     color: "#fff",
   },
 } as const;
@@ -155,8 +155,8 @@ export function PokerTable({
       className={cn(
         "relative h-[420px] w-full md:h-[520px]",
         "rounded-[290px/230px] border border-cy/24",
-        "bg-[radial-gradient(130%_140%_at_50%_42%,rgb(63_232_255/.12),rgb(10_10_18/0)_60%),linear-gradient(180deg,#0b0c16,#08090f)]",
-        "shadow-[inset_0_0_90px_rgb(63_232_255/.08),0_30px_80px_rgba(0,0,0,.55),0_0_60px_rgb(63_232_255/.06)]"
+        "bg-[radial-gradient(130%_140%_at_50%_42%,rgb(var(--pa-cy)/.12),rgb(10_10_18/0)_60%),linear-gradient(180deg,#0b0c16,#08090f)]",
+        "shadow-[inset_0_0_80px_rgb(var(--pa-cy)/.05),0_30px_80px_rgba(0,0,0,.55)]"
       )}
     >
       <div
@@ -186,13 +186,13 @@ export function PokerTable({
               "absolute z-[3] flex h-[78px] w-[56px] -translate-x-1/2 -translate-y-1/2 items-center justify-center",
               "select-none rounded-lg font-display text-[20px] font-bold transition-all duration-200",
               state === "back" &&
-                "border border-cy/40 bg-card-back text-cy/55 shadow-[0_10px_26px_rgba(0,0,0,.5),0_0_22px_rgb(63_232_255/.18)]",
+                "border border-cy/40 bg-card-back text-cy/55 shadow-[0_10px_26px_rgba(0,0,0,.5)]",
               state === "empty" &&
                 "border border-dashed border-pa-text/14 bg-pa-text/[.03] text-pa-text/20",
               state === "front" &&
-                "animate-flip border border-cy bg-[linear-gradient(180deg,rgb(63_232_255/.14),rgb(10_10_20/.92))] text-pa-text shadow-[0_12px_30px_rgba(0,0,0,.5),0_0_28px_rgb(63_232_255/.28)]",
+                "animate-flip border border-cy bg-[linear-gradient(180deg,rgb(var(--pa-cy)/.14),rgb(10_10_20/.92))] text-pa-text shadow-[0_12px_30px_rgba(0,0,0,.5),0_0_14px_rgb(var(--pa-cy)/.16)]",
               state === "mine" &&
-                "animate-flip border border-mg bg-[linear-gradient(180deg,rgb(255_47_160/.18),rgb(10_10_20/.9))] text-white shadow-[0_12px_30px_rgba(0,0,0,.5),0_0_30px_rgb(255_47_160/.35)]"
+                "animate-flip border border-mg bg-[linear-gradient(180deg,rgb(var(--pa-mg)/.18),rgb(10_10_20/.9))] text-white shadow-[0_12px_30px_rgba(0,0,0,.5),0_0_16px_rgb(var(--pa-mg)/.2)]"
             )}
             style={{ left: `${position.cardX}%`, top: `${position.cardY}%` }}
           >
@@ -248,7 +248,7 @@ export function PokerTable({
                 background: palette.background,
                 borderColor: palette.ring,
                 color: palette.color,
-                boxShadow: `0 0 24px ${palette.glow}, 0 8px 18px rgba(0,0,0,.5)`,
+                boxShadow: `0 0 14px ${palette.glow}, 0 8px 18px rgba(0,0,0,.5)`,
                 "--fx": `${fx}px`,
                 "--fy": `${fy}px`,
                 "--hx": `${hx}px`,
@@ -287,9 +287,9 @@ export function PokerTable({
                 "text-pa-text transition-[border-color,box-shadow] duration-200",
                 isMe
                   ? "cursor-default border border-mg/50 bg-mg/12"
-                  : "border border-pa-text/12 bg-[rgb(12_13_22/.9)] hover:border-mg hover:shadow-[0_0_20px_rgb(255_47_160/.35)]",
+                  : "border border-pa-text/12 bg-[rgb(12_13_22/.9)] hover:border-mg hover:shadow-[0_0_20px_rgb(var(--pa-mg)/.35)]",
                 isShaken &&
-                  "border-mg shadow-[0_0_30px_rgb(255_47_160/.7)]",
+                  "border-mg shadow-[0_0_18px_rgb(var(--pa-mg)/.45)]",
                 !participant.isOnline && "opacity-55"
               )}
             >
@@ -298,7 +298,7 @@ export function PokerTable({
                 className={cn(
                   "h-2 w-2 shrink-0 rounded-full",
                   participant.hasVoted
-                    ? "bg-cy shadow-[0_0_10px_rgb(var(--pa-cy))]"
+                    ? "bg-cy shadow-[0_0_6px_rgb(var(--pa-cy)/.7)]"
                     : "bg-pa-text/20"
                 )}
               />
@@ -320,7 +320,7 @@ export function PokerTable({
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-[290px/230px] bg-[rgb(7_7_13/.72)] backdrop-blur-[3px]">
           <span
             key={countdown}
-            className="pa-numeric animate-count text-[80px] font-black leading-none text-cy [text-shadow:0_0_70px_rgb(63_232_255/.75)] md:text-[110px]"
+            className="pa-numeric animate-count text-[80px] font-black leading-none text-cy [text-shadow:0_0_34px_rgb(var(--pa-cy)/.3)] md:text-[110px]"
           >
             {countdown}
           </span>

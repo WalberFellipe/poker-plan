@@ -27,6 +27,15 @@ export async function GET(
     );
   }
 
+  // Provedores `token` não têm consentimento para redirecionar: a credencial
+  // chega por POST em /api/integrations/[provider].
+  if (descriptor.authStyle !== "oauth" || !adapter.authorizeUrl) {
+    return NextResponse.json(
+      { error: "Este provedor conecta por token, não por OAuth" },
+      { status: 400 }
+    );
+  }
+
   const url = new URL(request.url);
   const redirectUri = `${url.origin}/api/integrations/${providerId}/callback`;
   const returnTo = url.searchParams.get("returnTo") ?? "/integrations";

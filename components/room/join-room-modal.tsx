@@ -34,7 +34,7 @@ export function JoinRoomModal({ defaultName = "", onJoin }: JoinRoomModalProps) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgb(4_4_9/.78)] p-5 backdrop-blur-[6px]">
-      <div className="flex w-full max-w-[480px] animate-rise flex-col gap-5 rounded-lg border border-cy/28 bg-[linear-gradient(180deg,#0e0f1a,#0a0a12)] p-7 shadow-[0_40px_100px_rgba(0,0,0,.7),0_0_60px_rgb(var(--pa-cy)/.1)]">
+      <div className="flex w-full max-w-[480px] animate-rise flex-col gap-5 rounded-lg border border-cy/28 bg-[linear-gradient(180deg,#0e0f1a,#0a0a12)] p-7 shadow-[0_40px_100px_rgba(0,0,0,.7)]">
         <div className="flex flex-col gap-1.5">
           <h2 className="font-display text-[22px] text-pa-text">
             {t("joinTitle")}

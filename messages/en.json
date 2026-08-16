@@ -166,7 +166,8 @@
     "consensusWeak": "Team is split",
     "dispersionStrong": "The team is aligned. Close the number and move on.",
     "dispersionOk": "Two camps here. One minute of debate before you close it.",
-    "dispersionWeak": "High spread: the extreme votes explain first, then run the round again."
+    "dispersionWeak": "High spread: the extreme votes explain first, then run the round again.",
+    "loadError": "Couldn't load the room."
   },
   "tasks": {
     "kicker": "Session",
@@ -282,11 +283,17 @@
       },
       "izzyplan": {
         "name": "IzzyPlan",
-        "description": "Internal connector. Not publicly available yet."
+        "description": "IzzyPlan projects and tasks. Imports the queue; pushing points back isn't supported by their API."
       }
     },
     "signInRequired": "Sign in to connect a board — the access is tied to your account.",
-    "connectError": "Couldn't complete the connection."
+    "connectError": "Couldn't complete the connection.",
+    "tokenLabel": "API token",
+    "tokenPlaceholder": "Paste the token you generated in IzzyPlan",
+    "tokenHint": "The token is encrypted and tied to your account only.",
+    "tokenInvalid": "The provider rejected this token.",
+    "readOnly": "Read-only",
+    "readOnlyHint": "This provider's public API cannot write points back, so the estimate stays recorded here."
   },
   "toast": {
     "deckUsed": "Deck applied to the room.",

@@ -29,7 +29,7 @@ export default async function HomePage() {
 
           <h1 className="max-w-[16ch] font-display text-[38px] font-black leading-[1.04] tracking-tight text-pa-text md:text-[52px]">
             {t("heroA")}{" "}
-            <span className="text-cy pa-text-glow-cy">{t("heroB")}</span>
+            <span className="text-cy">{t("heroB")}</span>
           </h1>
 
           <p className="max-w-[52ch] text-[17px] leading-relaxed text-pa-muted md:text-[19px]">
@@ -68,7 +68,7 @@ export default async function HomePage() {
           <div key={pillar} className="flex flex-col gap-3.5">
             <div
               aria-hidden
-              className="h-px w-12 bg-[linear-gradient(90deg,rgb(63_232_255/.6),transparent)]"
+              className="h-px w-12 bg-[linear-gradient(90deg,rgb(var(--pa-cy)/.6),transparent)]"
             />
             <Kicker>{t(`pillars.${pillar}.kicker`)}</Kicker>
             <h2 className="font-display text-[22px] leading-snug text-pa-text">

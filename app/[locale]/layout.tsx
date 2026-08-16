@@ -1,4 +1,4 @@
-import { Orbitron, Source_Serif_4 } from "next/font/google";
+import { Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/app/providers/auth-provider";
 import { Header } from "@/components/layout/header";
@@ -11,19 +11,13 @@ import { routing } from "@/src/i18n/routing";
 import { hasLocale } from "next-intl";
 
 /**
- * Orbitron para display/chrome e Source Serif 4 para corpo, conforme o handoff.
+ * Uma única família: Source Serif 4 no corpo e, em 700, também no chrome.
  *
- * A fonte pedida originalmente (Circuit Forem) não tem versão web hospedada;
- * Orbitron é o substituto indicado no próprio handoff. Para trocar depois basta
- * mudar a família aqui — todo o resto do app referencia --font-orbitron.
+ * O handoff chegou a comparar uma alternativa futurista para os títulos e
+ * escolheu a serifa — o peso e o `letter-spacing` já dão a diferença de
+ * hierarquia sem precisar de uma segunda fonte. O chrome lê `--pa-display`
+ * (definida em globals.css), então trocar de família depois é uma linha.
  */
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "900"],
-  variable: "--font-orbitron",
-  display: "swap",
-});
-
 const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
   weight: ["300", "400", "600", "700"],
@@ -66,10 +60,16 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body
-        className={`${orbitron.variable} ${sourceSerif.variable} antialiased`}
-      >
+    // A variável da fonte vai no <html>, não no <body>: `--pa-display` é
+    // declarada em `:root` e precisa enxergar `--font-source-serif` no mesmo
+    // escopo. No <body>, ela resolveria vazio e todo o `font-display` do app
+    // viraria um no-op silencioso — funcionando só por herança.
+    <html
+      lang={locale}
+      className={sourceSerif.variable}
+      suppressHydrationWarning
+    >
+      <body className="antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
             <div className="flex min-h-screen flex-col">

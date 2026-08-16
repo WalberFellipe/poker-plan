@@ -52,7 +52,7 @@ export function SidePanel({
                   className={cn(
                     "h-2 w-2 shrink-0 rounded-full",
                     participant.hasVoted
-                      ? "bg-cy shadow-[0_0_10px_rgb(var(--pa-cy))]"
+                      ? "bg-cy shadow-[0_0_6px_rgb(var(--pa-cy)/.7)]"
                       : "bg-pa-text/20"
                   )}
                 />

@@ -166,7 +166,8 @@
     "consensusWeak": "Time dividido",
     "dispersionStrong": "O time está junto. Feche o número e siga.",
     "dispersionOk": "Dois blocos de opinião. Vale um minuto de conversa antes de fechar.",
-    "dispersionWeak": "Dispersão alta: quem votou nos extremos explica primeiro, depois vocês repetem a rodada."
+    "dispersionWeak": "Dispersão alta: quem votou nos extremos explica primeiro, depois vocês repetem a rodada.",
+    "loadError": "Não foi possível carregar a sala."
   },
   "tasks": {
     "kicker": "Sessão",
@@ -282,11 +283,17 @@
       },
       "izzyplan": {
         "name": "IzzyPlan",
-        "description": "Conector interno. Ainda não disponível publicamente."
+        "description": "Projetos e tarefas do IzzyPlan. Importa a fila; a devolução de pontos não é suportada pela API deles."
       }
     },
     "signInRequired": "Entre na sua conta para conectar um board — o acesso fica vinculado ao seu usuário.",
-    "connectError": "Não foi possível concluir a conexão."
+    "connectError": "Não foi possível concluir a conexão.",
+    "tokenLabel": "Token de API",
+    "tokenPlaceholder": "Cole aqui o token gerado no IzzyPlan",
+    "tokenHint": "O token fica cifrado e vinculado só à sua conta.",
+    "tokenInvalid": "O provedor recusou este token.",
+    "readOnly": "Somente leitura",
+    "readOnlyHint": "A API pública deste provedor não permite escrever pontos: a estimativa fica registrada aqui."
   },
   "toast": {
     "deckUsed": "Baralho aplicado à sala.",

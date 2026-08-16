@@ -25,16 +25,22 @@ export interface Board {
 }
 
 export interface ProviderAdapter {
-  /** URL de autorização para onde mandamos o usuário. */
-  authorizeUrl(redirectUri: string, state: string): string;
-  /** Troca o `code` recebido no callback por um access token. */
-  exchangeCode(code: string, redirectUri: string): Promise<TokenResult>;
+  /** URL de autorização para onde mandamos o usuário. Só em provedores OAuth. */
+  authorizeUrl?(redirectUri: string, state: string): string;
+  /** Troca o `code` recebido no callback por um access token. Só em OAuth. */
+  exchangeCode?(code: string, redirectUri: string): Promise<TokenResult>;
+  /**
+   * Valida uma credencial colada pelo usuário e a transforma num TokenResult.
+   * Só em provedores `token`. Deve lançar se a credencial não funcionar — é o
+   * que impede guardar um token inválido e só descobrir na hora de importar.
+   */
+  connectWithToken?(token: string): Promise<TokenResult>;
   /** Boards/projetos/repositórios que o token consegue enxergar. */
   listBoards(integration: Integration): Promise<Board[]>;
   /** Issues abertas do board escolhido. */
   listIssues(integration: Integration): Promise<ExternalIssue[]>;
-  /** Escreve a estimativa de volta. */
-  pushPoints(
+  /** Escreve a estimativa de volta. Ausente onde a API é somente leitura. */
+  pushPoints?(
     integration: Integration,
     externalId: string,
     points: string
@@ -415,10 +421,103 @@ const trello: ProviderAdapter = {
   },
 };
 
+/* ---------------------------------------------------------------- IzzyPlan */
+
+const IZZY_BASE = "https://izzyplan.com/api/v1";
+
+function izzyHeaders(token: string) {
+  return {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "api-token": token,
+  };
+}
+
+interface IzzyPage<T> {
+  data?: T[];
+}
+
+/**
+ * IzzyPlan.
+ *
+ * Não usa OAuth: a autorização é um header `api-token` com uma credencial que a
+ * pessoa gera no próprio IzzyPlan. E a API pública é **somente leitura** — não
+ * há endpoint de escrita documentado, então `pushPoints` não existe aqui e a
+ * interface não oferece "Enviar para IzzyPlan".
+ */
+const izzyplan: ProviderAdapter = {
+  async connectWithToken(token) {
+    // Valida a credencial antes de guardá-la, para o erro aparecer no momento
+    // de conectar e não semanas depois, na hora de importar uma tarefa.
+    const response = await fetch(`${IZZY_BASE}/projects`, {
+      headers: izzyHeaders(token),
+      cache: "no-store",
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("Token recusado pelo IzzyPlan");
+    }
+
+    await expectOk(response, "IzzyPlan projects");
+
+    return { accessToken: token, workspace: "IzzyPlan" };
+  },
+
+  async listBoards(integration) {
+    const response = await fetch(`${IZZY_BASE}/projects?per_page=100`, {
+      headers: izzyHeaders(token(integration)),
+      cache: "no-store",
+    });
+
+    await expectOk(response, "IzzyPlan projects");
+    const payload = (await response.json()) as IzzyPage<{
+      id: number;
+      name: string;
+    }>;
+
+    return (payload.data ?? []).map((project) => ({
+      id: String(project.id),
+      name: project.name,
+    }));
+  },
+
+  async listIssues(integration) {
+    if (!integration.boardId) return [];
+
+    // A coleção documenta `work_id` no *corpo* de um GET, o que `fetch` não
+    // permite enviar; mandamos como query string, que é a leitura padrão. O
+    // valor é o id do projeto escolhido.
+    const response = await fetch(
+      `${IZZY_BASE}/tasks?` +
+        new URLSearchParams({ work_id: integration.boardId, per_page: "100" }),
+      { headers: izzyHeaders(token(integration)), cache: "no-store" }
+    );
+
+    await expectOk(response, "IzzyPlan tasks");
+    const payload = (await response.json()) as IzzyPage<{
+      id: number;
+      organization_task_id?: number;
+      name: string;
+      task_state?: { name?: string };
+    }>;
+
+    return (payload.data ?? []).map((task) => ({
+      externalId: String(task.id),
+      key: task.organization_task_id ? `#${task.organization_task_id}` : `#${task.id}`,
+      title: task.name,
+      type: task.task_state?.name ?? null,
+      url: null,
+    }));
+  },
+
+  // Sem pushPoints: a API documentada não expõe escrita.
+};
+
 const ADAPTERS: Partial<Record<ProviderId, ProviderAdapter>> = {
   github,
   jira,
   trello,
+  izzyplan,
 };
 
 export function getAdapter(provider: string): ProviderAdapter | null {
