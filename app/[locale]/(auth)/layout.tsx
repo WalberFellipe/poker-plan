@@ -1,13 +1,15 @@
+/**
+ * O layout raiz já fornece o `<main>`; aqui só centralizamos o cartão.
+ * A versão anterior aninhava um segundo `<main>` dentro do primeiro.
+ */
 export default function AuthLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 flex items-center justify-center p-4">
-        {children}
-      </main>
+    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-5 py-12">
+      {children}
     </div>
-  )
-} 
+  );
+}

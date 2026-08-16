@@ -87,7 +87,7 @@ export function Header() {
         <nav className="flex flex-1 flex-wrap items-center gap-1.5" aria-label="Seções">
           {tabs.map((tab) => {
             const className = cn(
-              "rounded-sm border px-3 py-1.5 font-display text-[10px] font-medium uppercase tracking-[.14em] transition-colors",
+              "rounded-sm border px-3.5 py-[7px] font-display text-[11px] uppercase tracking-[.1em] transition-colors",
               tab.active
                 ? "border-cy/45 bg-cy/12 text-cy"
                 : "border-transparent text-pa-dim hover:text-pa-text"
@@ -126,7 +126,7 @@ export function Header() {
             <Link
               key={link.key}
               href={link.href}
-              className="font-display text-[10px] uppercase tracking-[.14em] text-pa-dim transition-colors hover:text-pa-text"
+              className="text-[15px] text-pa-dim transition-colors hover:text-pa-text"
             >
               {t(link.key)}
             </Link>
@@ -140,7 +140,7 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-sm border border-pa-text/14 px-2.5 py-1.5 text-[13px] text-pa-muted transition-colors hover:border-cy/40 hover:text-pa-text"
+                className="flex items-center gap-2 rounded-sm border border-pa-text/14 px-3 py-1.5 text-[14px] text-pa-muted transition-colors hover:border-cy/40 hover:text-pa-text"
               >
                 {session.user.image ? (
                   <Image
@@ -174,13 +174,13 @@ export function Header() {
         ) : (
           <Link
             href="/login"
-            className="font-display text-[10px] uppercase tracking-[.14em] text-pa-dim transition-colors hover:text-pa-text"
+            className="text-[15px] text-pa-dim transition-colors hover:text-pa-text"
           >
             {t("signIn")}
           </Link>
         )}
 
-        <Button asChild size="sm">
+        <Button asChild>
           <Link href="/room/create">{t("newRoom")}</Link>
         </Button>
 

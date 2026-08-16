@@ -12,7 +12,20 @@
     "signIn": "Sign in",
     "signUp": "Sign up",
     "signOut": "Sign out",
-    "loggedInAs": "Signed in as"
+    "loggedInAs": "Signed in as",
+    "kicker": "Access",
+    "welcomeBack": "Welcome back",
+    "chooseProvider": "Choose how to sign in",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithGithub": "Continue with GitHub",
+    "terms": "By continuing you agree to our Terms of Service and Privacy Policy.",
+    "errorDefault": "Couldn't complete the sign-in. Try again.",
+    "errorConfiguration": "Authentication is misconfigured on the server. Check NEXTAUTH_URL, NEXTAUTH_SECRET and the provider credentials.",
+    "errorAccessDenied": "The provider denied access.",
+    "errorVerification": "The verification link expired or was already used.",
+    "errorOAuth": "The provider replied, but the session couldn't be created. Usually NEXTAUTH_URL pointing at a different address, or the database being unreachable.",
+    "errorAccountNotLinked": "An account with this email already exists from another provider. Sign in with the original one.",
+    "errorSessionRequired": "Sign in to continue."
   },
   "nav": {
     "brandFirst": "POKER",

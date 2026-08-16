@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 const buttonVariants = cva(
   [
     "inline-flex items-center justify-center whitespace-nowrap gap-2",
-    "font-display uppercase tracking-[.14em]",
+    "font-display uppercase tracking-[.08em]",
     "transition-all duration-200",
     "focus-visible:outline-none focus-visible:ring-0",
     "disabled:pointer-events-none disabled:opacity-45",
@@ -38,9 +38,9 @@ const buttonVariants = cva(
         link: "text-cy hover:text-cy-soft normal-case tracking-normal font-sans",
       },
       size: {
-        default: "h-10 px-5 text-[11px]",
-        sm: "h-8 px-3.5 text-[10px]",
-        lg: "h-12 px-7 text-xs",
+        default: "h-10 px-[18px] text-[12px]",
+        sm: "h-9 px-4 text-[11px]",
+        lg: "h-12 px-7 text-[13px]",
         icon: "h-10 w-10 px-0",
       },
     },

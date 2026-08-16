@@ -12,7 +12,20 @@
     "signIn": "Entrar",
     "signUp": "Cadastrar",
     "signOut": "Sair",
-    "loggedInAs": "Conectado como"
+    "loggedInAs": "Conectado como",
+    "kicker": "Acesso",
+    "welcomeBack": "Bem-vindo de volta",
+    "chooseProvider": "Escolha como deseja entrar",
+    "continueWithGoogle": "Continuar com Google",
+    "continueWithGithub": "Continuar com GitHub",
+    "terms": "Ao continuar, você concorda com nossos Termos de Serviço e Política de Privacidade.",
+    "errorDefault": "Não foi possível concluir o login. Tente de novo.",
+    "errorConfiguration": "A autenticação está mal configurada no servidor. Confira NEXTAUTH_URL, NEXTAUTH_SECRET e as credenciais do provedor.",
+    "errorAccessDenied": "Acesso negado pelo provedor.",
+    "errorVerification": "O link de verificação expirou ou já foi usado.",
+    "errorOAuth": "O provedor respondeu, mas a sessão não pôde ser criada. Normalmente é NEXTAUTH_URL apontando para outro endereço, ou o banco fora do ar.",
+    "errorAccountNotLinked": "Já existe uma conta com este e-mail criada por outro provedor. Entre pelo provedor original.",
+    "errorSessionRequired": "Entre na sua conta para continuar."
   },
   "nav": {
     "brandFirst": "POKER",

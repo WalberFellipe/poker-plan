@@ -26,6 +26,10 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
+    // Sem isto, um callback falho cai na página de erro embutida do NextAuth
+    // (ou volta calado para o login). Mandando para cá, a tela consegue ler
+    // `?error=` e dizer o que aconteceu.
+    error: '/login',
   },
   debug: process.env.NODE_ENV === "development",
 }
