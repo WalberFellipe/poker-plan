@@ -199,9 +199,10 @@ export function PokerTable({
     <div
       ref={tableRef}
       className={cn(
-        // Acompanha a altura que sobra na coluna, com teto e piso para a
-        // elipse não virar nem um risco nem uma piscina.
-        "relative h-full max-h-[520px] min-h-[300px] w-full",
+        // Ocupa a altura que sobra na coluna. Abaixo de xl a mesa passa a
+        // ocupar a largura inteira, e um piso baixo a deixaria achatada — daí
+        // o piso maior no layout empilhado.
+        "relative h-full max-h-[600px] min-h-[360px] w-full xl:min-h-[260px]",
         "rounded-[290px/230px] border border-cy/24",
         "bg-[radial-gradient(130%_140%_at_50%_42%,rgb(var(--pa-cy)/.12),rgb(10_10_18/0)_60%),linear-gradient(180deg,#0b0c16,#08090f)]",
         "shadow-[inset_0_0_80px_rgb(var(--pa-cy)/.05),0_30px_80px_rgba(0,0,0,.55)]"

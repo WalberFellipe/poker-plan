@@ -165,14 +165,16 @@ export function useRoom(roomId: string) {
     if (!storyId || isBusy) return;
 
     setIsBusy(true);
-    // A contagem começa agora, não quando o servidor responder. O `revealAt`
-    // autoritativo assume quando chegar, e a trava de monotonicidade impede
-    // que a diferença apareça como um salto para trás.
-    beginLocalReveal();
+    // A contagem começa agora e o instante da virada vai junto na requisição,
+    // já convertido para o relógio do servidor. Sem isso, o valor autoritativo
+    // nascia depois — a latência da requisição — e a contagem esticava,
+    // repetindo dígitos (3, 3, 2, 2, 1) até o servidor alcançar.
+    const revealAt = beginLocalReveal();
 
     try {
       const response = await apiFetch(`/api/stories/${storyId}/reveal`, {
         method: "POST",
+        body: JSON.stringify({ revealAt }),
       });
 
       if (!response.ok) {

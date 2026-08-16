@@ -52,10 +52,12 @@ export interface UseRoomStateResult {
    */
   applySnapshot: (snapshot: RoomSnapshot) => void;
   /**
-   * Inicia a contagem regressiva localmente, no clique, sem esperar o servidor.
-   * O `revealAt` autoritativo substitui este assim que a resposta chega.
+   * Inicia a contagem no clique e devolve o instante da virada **em tempo de
+   * servidor**, para ser enviado na requisição. Como cliente e servidor passam
+   * a falar do mesmo instante, o valor autoritativo que volta coincide com o
+   * que já está na tela — a contagem não estica nem salta.
    */
-  beginLocalReveal: () => void;
+  beginLocalReveal: () => number;
   /**
    * Trata a rodada atual como encerrada já no clique de "Nova rodada", sem
    * esperar a história nova chegar. Passe `null` para desfazer, se o servidor
@@ -148,7 +150,10 @@ export function useRoomState(roomId: string): UseRoomStateResult {
   }, []);
 
   const beginLocalReveal = useCallback(() => {
-    setLocalRevealAt(Date.now() + REVEAL_COUNTDOWN_MS);
+    const localAt = Date.now() + REVEAL_COUNTDOWN_MS;
+    setLocalRevealAt(localAt);
+    // Mesmo instante, na base de tempo do servidor.
+    return localAt + clockOffsetRef.current;
   }, []);
 
   const beginLocalReset = useCallback((storyId: string | null) => {

@@ -18,11 +18,11 @@ import type { SnapshotParticipant, SnapshotTask } from "@/types/room-state";
  */
 const LIST_SURFACE = [
   "min-h-0 flex-1 overflow-y-auto",
-  "rounded-card border border-pa-text/[.07] bg-pa-text/[.04] p-2.5",
-  // Teto de dez itens. Numa janela que não comporte os dois cheios, eles
-  // dividem a altura disponível em vez de empurrar a página — a rolagem
-  // acontece por dentro, nunca no documento.
-  "max-h-[340px] lg:min-h-[150px]",
+  "rounded-card border border-pa-text/[.07] bg-pa-text/[.04] p-2",
+  // Um piso modesto — cerca de cinco linhas — em vez de reservar dez desde o
+  // início: com duas pessoas na sala, um card de dez linhas é quase todo
+  // vazio. Passando disso, a lista rola por dentro e a altura não muda.
+  "min-h-[132px] max-h-[300px]",
 ].join(" ");
 
 interface SidePanelProps {
@@ -51,7 +51,14 @@ export function SidePanel({
   const tTasks = useTranslations("tasks");
 
   return (
-    <aside className="flex min-h-0 w-full flex-col gap-5 lg:h-full lg:w-[320px] lg:overflow-hidden">
+    <aside
+      className={cn(
+        "grid min-h-0 w-full gap-4 md:grid-cols-2",
+        // Empilhado, o painel ganha a largura inteira — melhor usá-la em duas
+        // colunas do que esticar duas listas curtas uma sobre a outra.
+        "xl:h-full xl:grid-cols-1 xl:grid-rows-[auto_1fr] xl:overflow-hidden"
+      )}
+    >
       <section className="flex min-h-0 flex-1 flex-col gap-2.5">
         <div className="flex items-baseline justify-between gap-3">
           <Kicker>{t("participants")}</Kicker>
@@ -69,7 +76,7 @@ export function SidePanel({
               return (
                 <li
                   key={participant.id}
-                  className="flex items-center gap-2.5 text-[16px]"
+                  className="flex items-center gap-2.5 text-[15px]"
                 >
                   <span
                     aria-hidden

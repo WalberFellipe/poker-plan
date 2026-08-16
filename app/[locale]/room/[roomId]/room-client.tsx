@@ -270,8 +270,11 @@ export default function RoomClient({ roomId }: { roomId: string }) {
     */
     <div
       className={cn(
-        "mx-auto grid w-full max-w-[1560px] animate-rise gap-6 px-5 pb-5 pt-4 md:px-10",
-        "lg:h-[calc(100dvh-var(--pa-header-h,69px))] lg:grid-cols-[1fr_320px] lg:overflow-hidden"
+        "mx-auto grid w-full max-w-[1720px] animate-rise gap-5 px-4 pb-5 pt-4 md:px-8",
+        // A promessa de "sem rolagem" vale a partir de 1280px. Abaixo disso o
+        // conteúdo genuinamente não cabe sem deixar a mesa pequena demais para
+        // jogar, então a página volta a rolar e as colunas empilham.
+        "xl:h-[calc(100dvh-var(--pa-header-h,69px))] xl:grid-cols-[1fr_272px] xl:overflow-hidden"
       )}
     >
       <div className="flex min-h-0 min-w-0 flex-col gap-4">
@@ -354,8 +357,18 @@ export default function RoomClient({ roomId }: { roomId: string }) {
           e a distribuição. Como o espaço já está reservado, a mesa não muda de
           tamanho no instante em que as cartas viram.
         */}
-        <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[300px_1fr]">
-          <div className="flex min-h-0 flex-col gap-5 overflow-y-auto rounded-card border border-pa-text/[.07] bg-pa-text/[.03] p-5">
+        {/*
+          Mesa e mão moram na mesma coluna, à direita do painel da rodada: é o
+          que faz as cartas ficarem centradas *com a mesa*, e não com a largura
+          inteira da tela.
+        */}
+        <div className="grid min-h-0 flex-1 gap-5 xl:grid-cols-[248px_1fr]">
+          {/*
+            `self-start` faz o card abraçar o conteúdo em vez de esticar até o
+            fim da coluna — a altura da linha é ditada pela mesa, então crescer
+            no resultado não move nada.
+          */}
+          <div className="flex min-h-0 flex-col gap-4 self-start overflow-y-auto rounded-card border border-pa-text/[.07] bg-pa-text/[.03] p-4 xl:max-h-full">
             {revealed ? (
               <>
                 <ResultSummary
@@ -384,35 +397,35 @@ export default function RoomClient({ roomId }: { roomId: string }) {
             )}
           </div>
 
-          <div className="flex min-h-0 items-center">
-            <PokerTable
-              participants={participants}
-              chips={chips}
-              meId={meId}
-              revealed={revealed}
-              countdown={countdown}
-              onCall={call}
-              callHint={t("callHint")}
-              youLabel={t("you")}
+          <div className="flex min-h-0 flex-col gap-3">
+            <div className="flex min-h-0 flex-1 items-center">
+              <PokerTable
+                participants={participants}
+                chips={chips}
+                meId={meId}
+                revealed={revealed}
+                countdown={countdown}
+                onCall={call}
+                callHint={t("callHint")}
+                youLabel={t("you")}
+              />
+            </div>
+
+            {/* As reações ficam disponíveis o tempo todo: a ficha vale até o
+                reset, e é na discussão do resultado que elas mais servem. */}
+            <Reactions onReact={react} />
+
+            {/*
+              A mão permanece montada depois da revelação, apenas desabilitada:
+              some-la faria a coluna encolher e a mesa saltar.
+            */}
+            <Hand
+              deckValues={deckValues}
+              myVote={myVote}
+              disabled={revealed || countdown !== null}
+              onSelect={selectCard}
             />
           </div>
-        </div>
-
-        <div className="flex shrink-0 flex-col gap-3">
-          {/* As reações ficam disponíveis o tempo todo: a ficha vale até o
-              reset, e é na discussão do resultado que elas mais servem. */}
-          <Reactions onReact={react} />
-
-          {/*
-            A mão permanece montada depois da revelação, apenas desabilitada:
-            some-la faria a coluna inteira encolher e a mesa saltar.
-          */}
-          <Hand
-            deckValues={deckValues}
-            myVote={myVote}
-            disabled={revealed || countdown !== null}
-            onSelect={selectCard}
-          />
         </div>
       </div>
 
