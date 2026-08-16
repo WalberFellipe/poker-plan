@@ -18,9 +18,10 @@ import { cn } from "@/lib/utils";
  * O resultado vem em duas peças.
  *
  * `ResultSummary` é o que decide a rodada — média, mediana, consenso e o botão
- * de aceitar — e fica sobreposto ao centro da mesa, porque é o que o time olha
- * enquanto discute. A distribuição, que é leitura de apoio, ocupa embaixo o
- * lugar que a mão deixou. Separadas, as duas cabem na tela sem rolagem.
+ * de aceitar. `ResultDistribution` é a leitura de apoio. As duas moram na
+ * coluna à esquerda da mesa, que existe durante a rodada inteira: antes da
+ * revelação ela é ocupada por `RoundProgress`, então a mesa nunca muda de
+ * tamanho no momento em que as cartas viram.
  */
 
 function useStats(votes: string[]) {
@@ -123,6 +124,43 @@ export function ResultSummary({
             {t("result.pushTo", { provider: pushProvider.name })}
           </Button>
         ) : null}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * O que ocupa a coluna da rodada *antes* da revelação.
+ *
+ * Existe para a coluna estar sempre lá: se ela só aparecesse no resultado, a
+ * mesa mudaria de tamanho no meio da revelação. E o espaço não fica ocioso —
+ * durante a votação ele mostra quem já jogou, que é a informação que o time
+ * fica procurando para saber se pode revelar.
+ */
+export function RoundProgress({
+  total,
+  voted,
+}: {
+  total: number;
+  voted: number;
+}) {
+  const t = useTranslations("room");
+  const pending = Math.max(0, total - voted);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Kicker>{t("roundKicker")}</Kicker>
+
+      <div className="flex flex-wrap items-end gap-9">
+        <Stat value={voted} label={t("votedCount")} tone="cy" size={32} />
+        <Stat value={pending} label={t("pendingCount")} size={32} />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Meter value={total === 0 ? 0 : (voted / total) * 100} />
+        <p className="text-[16px] leading-snug text-pa-muted">
+          {pending === 0 && total > 0 ? t("allVoted") : t("waitingVotes")}
+        </p>
       </div>
     </div>
   );

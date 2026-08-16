@@ -15,6 +15,7 @@ import { Eraser } from "lucide-react";
 import {
   ResultDistribution,
   ResultSummary,
+  RoundProgress,
 } from "@/components/room/result-panel";
 import { SidePanel } from "@/components/room/side-panel";
 import { JoinRoomModal } from "@/components/room/join-room-modal";
@@ -347,18 +348,16 @@ export default function RoomClient({ roomId }: { roomId: string }) {
           </div>
         </header>
 
-        <div className="flex min-h-0 flex-1 items-center">
-          <PokerTable
-            participants={participants}
-            chips={chips}
-            meId={meId}
-            revealed={revealed}
-            countdown={countdown}
-            onCall={call}
-            callHint={t("callHint")}
-            youLabel={t("you")}
-            overlay={
-              revealed ? (
+        {/*
+          Coluna da rodada à esquerda da mesa, presente o tempo todo.
+          Antes da revelação mostra o andamento dos votos; depois, o resultado
+          e a distribuição. Como o espaço já está reservado, a mesa não muda de
+          tamanho no instante em que as cartas viram.
+        */}
+        <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[300px_1fr]">
+          <div className="flex min-h-0 flex-col gap-5 overflow-y-auto rounded-card border border-pa-text/[.07] bg-pa-text/[.03] p-5">
+            {revealed ? (
+              <>
                 <ResultSummary
                   votes={revealedVotes}
                   onAccept={onAccept}
@@ -375,9 +374,28 @@ export default function RoomClient({ roomId }: { roomId: string }) {
                   }
                   onPush={onPush}
                 />
-              ) : null
-            }
-          />
+                <ResultDistribution votes={revealedVotes} />
+              </>
+            ) : (
+              <RoundProgress
+                total={participants.length}
+                voted={participants.filter((p) => p.hasVoted).length}
+              />
+            )}
+          </div>
+
+          <div className="flex min-h-0 items-center">
+            <PokerTable
+              participants={participants}
+              chips={chips}
+              meId={meId}
+              revealed={revealed}
+              countdown={countdown}
+              onCall={call}
+              callHint={t("callHint")}
+              youLabel={t("you")}
+            />
+          </div>
         </div>
 
         <div className="flex shrink-0 flex-col gap-3">
@@ -385,16 +403,16 @@ export default function RoomClient({ roomId }: { roomId: string }) {
               reset, e é na discussão do resultado que elas mais servem. */}
           <Reactions onReact={react} />
 
-          {revealed ? (
-            <ResultDistribution votes={revealedVotes} />
-          ) : (
-            <Hand
-              deckValues={deckValues}
-              myVote={myVote}
-              disabled={countdown !== null}
-              onSelect={selectCard}
-            />
-          )}
+          {/*
+            A mão permanece montada depois da revelação, apenas desabilitada:
+            some-la faria a coluna inteira encolher e a mesa saltar.
+          */}
+          <Hand
+            deckValues={deckValues}
+            myVote={myVote}
+            disabled={revealed || countdown !== null}
+            onSelect={selectCard}
+          />
         </div>
       </div>
 

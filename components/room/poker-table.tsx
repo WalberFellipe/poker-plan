@@ -82,8 +82,6 @@ interface PokerTableProps {
   onCall: (targetId: string) => void;
   callHint: string;
   youLabel: string;
-  /** Painel de resultado, sobreposto ao centro da mesa após a revelação. */
-  overlay?: React.ReactNode;
 }
 
 export function PokerTable({
@@ -95,7 +93,6 @@ export function PokerTable({
   onCall,
   callHint,
   youLabel,
-  overlay,
 }: PokerTableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 880, height: 520 });
@@ -374,19 +371,6 @@ export function PokerTable({
           </div>
         );
       })}
-
-      {/*
-        Resultado sobre a mesa. Fica no miolo, onde só há fichas, para que as
-        cartas reveladas no anel continuem visíveis — e para a tela inteira
-        caber sem rolagem.
-      */}
-      {overlay ? (
-        <div className="pointer-events-none absolute inset-0 z-[9] flex items-center justify-center px-6">
-          <div className="pointer-events-auto w-full max-w-[560px] rounded-card border border-pa-text/10 bg-[rgb(9_10_18/.93)] px-6 py-5 shadow-[0_24px_60px_rgba(0,0,0,.6)] backdrop-blur-[3px]">
-            {overlay}
-          </div>
-        </div>
-      ) : null}
 
       {/* Contagem regressiva sincronizada. */}
       {countdown !== null ? (

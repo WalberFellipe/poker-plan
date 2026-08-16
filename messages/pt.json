@@ -181,7 +181,12 @@
     "dispersionOk": "Dois blocos de opinião. Vale um minuto de conversa antes de fechar.",
     "dispersionWeak": "Dispersão alta: quem votou nos extremos explica primeiro, depois vocês repetem a rodada.",
     "loadError": "Não foi possível carregar a sala.",
-    "clearChips": "Limpar fichas"
+    "clearChips": "Limpar fichas",
+    "roundKicker": "Rodada em jogo",
+    "votedCount": "já votaram",
+    "pendingCount": "faltam",
+    "waitingVotes": "A mesa revela quando vocês quiserem — não é preciso esperar todo mundo.",
+    "allVoted": "Todo mundo votou. Pode revelar."
   },
   "tasks": {
     "kicker": "Sessão",
