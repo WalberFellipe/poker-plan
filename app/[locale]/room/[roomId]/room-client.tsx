@@ -299,12 +299,26 @@ export default function RoomClient({ roomId }: { roomId: string }) {
               </span>
             </div>
 
+            {/*
+              Revelar e Nova rodada dividem o mesmo lugar e têm largura
+              mínima igual: sem isso, a troca de rótulo empurraria os botões
+              vizinhos bem na hora em que alguém vai clicar neles.
+            */}
             {revealed ? (
-              <Button variant="call" onClick={reset} disabled={isBusy}>
+              <Button
+                variant="call"
+                onClick={reset}
+                disabled={isBusy}
+                className="min-w-[148px]"
+              >
                 {t("newRound")}
               </Button>
             ) : (
-              <Button onClick={reveal} disabled={isBusy}>
+              <Button
+                onClick={reveal}
+                disabled={isBusy}
+                className="min-w-[148px]"
+              >
                 {t("reveal")}
               </Button>
             )}
@@ -313,19 +327,21 @@ export default function RoomClient({ roomId }: { roomId: string }) {
               {t("reset")}
             </Button>
 
-            {/* Varrer as fichas sem encerrar a rodada: uma discussão longa
-                acaba enterrando a mesa em fichas. */}
-            {chips.length > 0 ? (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={clearChips}
-                title={t("clearChips")}
-              >
-                <Eraser className="h-3.5 w-3.5" aria-hidden />
-                {t("clearChips")}
-              </Button>
-            ) : null}
+            {/*
+              Varrer as fichas sem encerrar a rodada. Fica sempre visível e
+              apenas desabilita quando a mesa está limpa — aparecer e sumir
+              faria a fileira inteira dançar a cada ficha jogada.
+            */}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={clearChips}
+              disabled={isBusy || chips.length === 0}
+              title={t("clearChips")}
+            >
+              <Eraser className="h-3.5 w-3.5" aria-hidden />
+              {t("clearChips")}
+            </Button>
 
             <InviteButton roomId={roomId} />
           </div>

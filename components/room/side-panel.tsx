@@ -90,13 +90,19 @@ export function SidePanel({
                     {isMe ? t("you") : participant.name}
                   </span>
 
-                  {participant.callsReceived > 0 ? (
-                    <span className="pa-numeric shrink-0 text-[13px] text-mg-soft">
-                      ×{participant.callsReceived}
-                    </span>
-                  ) : null}
+                  {/*
+                    Contador e status ocupam largura fixa mesmo vazios: o
+                    contador só existe depois do primeiro "pagar pra ver", e o
+                    status troca entre palavras de tamanhos diferentes — sem
+                    reservar, o nome ao lado se mexe a cada voto.
+                  */}
+                  <span className="pa-numeric w-6 shrink-0 text-right text-[13px] text-mg-soft">
+                    {participant.callsReceived > 0
+                      ? `×${participant.callsReceived}`
+                      : ""}
+                  </span>
 
-                  <span className="shrink-0 text-[13px] text-pa-faint">
+                  <span className="w-[68px] shrink-0 text-right text-[13px] text-pa-faint">
                     {!participant.isOnline
                       ? t("offline")
                       : participant.hasVoted
@@ -183,16 +189,22 @@ export function SidePanel({
                         {task.title}
                       </span>
 
-                      {/* Já votada: mostra o número que o time fechou. */}
-                      {isEstimated && task.points ? (
-                        <span className="pa-numeric shrink-0 rounded-sm border border-cy/30 px-1.5 py-0.5 text-[13px] text-cy">
-                          {task.points}
-                        </span>
-                      ) : isActive ? (
-                        <span className="pa-kicker shrink-0 text-cy">
-                          {tTasks("onTable")}
-                        </span>
-                      ) : null}
+                      {/*
+                        Coluna reservada à direita: os pontos aparecem quando a
+                        tarefa fecha e "na mesa" quando ela entra em jogo, e sem
+                        largura fixa o título saltaria a cada estimativa aceita.
+                      */}
+                      <span className="flex w-[58px] shrink-0 justify-end">
+                        {isEstimated && task.points ? (
+                          <span className="pa-numeric rounded-sm border border-cy/30 px-1.5 py-0.5 text-[13px] text-cy">
+                            {task.points}
+                          </span>
+                        ) : isActive ? (
+                          <span className="pa-kicker text-cy">
+                            {tTasks("onTable")}
+                          </span>
+                        ) : null}
+                      </span>
                     </button>
                   </li>
                 );
