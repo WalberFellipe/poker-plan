@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -29,10 +29,11 @@ interface Summary {
 
 const NOTES = ["in", "out", "record"] as const;
 
-export default function IntegrationsPage() {
+function IntegrationsContent() {
   const t = useTranslations("integrations");
   const tToast = useTranslations("toast");
   const tAuth = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const { data: session } = useSession();
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -42,10 +43,17 @@ export default function IntegrationsPage() {
   /** Token digitado por provedor, antes de enviar. */
   const [tokens, setTokens] = useState<Record<string, string>>({});
   const [connecting, setConnecting] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState<string | null>(null);
+  const [loadingBoards, setLoadingBoards] = useState<Set<string>>(new Set());
+  const [isLoadingSummaries, setIsLoadingSummaries] = useState(true);
 
   const load = useCallback(async () => {
-    const response = await fetch("/api/integrations", { cache: "no-store" });
-    if (response.ok) setSummaries(await response.json());
+    try {
+      const response = await fetch("/api/integrations", { cache: "no-store" });
+      if (response.ok) setSummaries(await response.json());
+    } finally {
+      setIsLoadingSummaries(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -62,13 +70,22 @@ export default function IntegrationsPage() {
   }, [searchParams, toast, tToast, t]);
 
   const loadBoards = useCallback(async (provider: string) => {
-    const response = await fetch(`/api/integrations/${provider}/boards`, {
-      cache: "no-store",
-    });
-    if (!response.ok) return;
+    setLoadingBoards((current) => new Set(current).add(provider));
+    try {
+      const response = await fetch(`/api/integrations/${provider}/boards`, {
+        cache: "no-store",
+      });
+      if (!response.ok) return;
 
-    const options = await response.json();
-    setBoards((current) => ({ ...current, [provider]: options }));
+      const options = await response.json();
+      setBoards((current) => ({ ...current, [provider]: options }));
+    } finally {
+      setLoadingBoards((current) => {
+        const next = new Set(current);
+        next.delete(provider);
+        return next;
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -88,19 +105,26 @@ export default function IntegrationsPage() {
   };
 
   const sync = async (provider: string) => {
-    const response = await fetch(`/api/integrations/${provider}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sync: true }),
-    });
+    if (syncing) return;
+    setSyncing(provider);
 
-    toast(
-      response.ok
-        ? { description: tToast("synced") }
-        : { variant: "destructive", description: t("connectError") }
-    );
+    try {
+      const response = await fetch(`/api/integrations/${provider}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sync: true }),
+      });
 
-    if (response.ok) await load();
+      toast(
+        response.ok
+          ? { description: tToast("synced") }
+          : { variant: "destructive", description: t("connectError") }
+      );
+
+      if (response.ok) await load();
+    } finally {
+      setSyncing(null);
+    }
   };
 
   /** Conecta um provedor que autentica por credencial colada. */
@@ -152,11 +176,15 @@ export default function IntegrationsPage() {
 
       {!session?.user ? (
         <div className="flex flex-wrap items-center gap-4 rounded-card border border-dashed border-pa-text/14 p-5">
-          <p className="text-[15px] text-pa-muted">{t("signInRequired")}</p>
+          <p className="text-[17px] text-pa-muted">{t("signInRequired")}</p>
           <Button asChild size="sm">
             <Link href="/login">{tAuth("signIn")}</Link>
           </Button>
         </div>
+      ) : null}
+
+      {isLoadingSummaries ? (
+        <p className="text-[16px] text-pa-faint">{tCommon("loading")}</p>
       ) : null}
 
       <div className="grid gap-5 md:grid-cols-2">
@@ -176,7 +204,7 @@ export default function IntegrationsPage() {
               <div className="flex items-start gap-3.5">
                 <span
                   className={cn(
-                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-[3px] border font-display text-[13px] font-bold",
+                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-[3px] border font-display text-[14px] font-bold",
                     summary.connected
                       ? "border-cy/45 bg-cy/10 text-cy"
                       : "border-pa-text/12 text-pa-dim"
@@ -187,7 +215,7 @@ export default function IntegrationsPage() {
 
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <h2 className="font-display text-[16px] text-pa-text">
+                    <h2 className="font-display text-[18px] text-pa-text">
                       {t(`providers.${summary.id}.name`)}
                     </h2>
                     <Badge
@@ -206,7 +234,7 @@ export default function IntegrationsPage() {
                           : t("notConnected")}
                     </Badge>
                   </div>
-                  <p className="text-[15px] leading-relaxed text-pa-muted">
+                  <p className="text-[17px] leading-relaxed text-pa-muted">
                     {t(`providers.${summary.id}.description`)}
                   </p>
                 </div>
@@ -215,7 +243,7 @@ export default function IntegrationsPage() {
               <Rule />
 
               {summary.connected ? (
-                <dl className="flex flex-col gap-2 text-[14px]">
+                <dl className="flex flex-col gap-2 text-[15px]">
                   <div className="flex justify-between gap-4">
                     <dt className="pa-kicker">{t("workspace")}</dt>
                     <dd className="truncate text-pa-text">
@@ -235,9 +263,12 @@ export default function IntegrationsPage() {
                             void chooseBoard(summary.id, option.id, option.name);
                           }
                         }}
-                        className="w-full rounded-sm border border-pa-text/14 bg-pa-sunken px-2 py-1.5 text-right text-[14px] text-pa-text"
+                        disabled={loadingBoards.has(summary.id)}
+                        className="w-full rounded-sm border border-pa-text/14 bg-pa-sunken px-2 py-1.5 text-right text-[17px] text-pa-text disabled:opacity-50"
                       >
-                        <option value="">—</option>
+                        <option value="">
+                          {loadingBoards.has(summary.id) ? "…" : "—"}
+                        </option>
                         {options.map((option) => (
                           <option key={option.id} value={option.id}>
                             {option.name}
@@ -277,18 +308,18 @@ export default function IntegrationsPage() {
                       event.key === "Enter" && connectWithToken(summary.id)
                     }
                   />
-                  <span className="text-[13px] text-pa-faint">
+                  <span className="text-[14px] text-pa-faint">
                     {t("tokenHint")}
                   </span>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
                   <span className="pa-kicker">{t("scope")}</span>
-                  <p className="pa-numeric text-[13px] text-pa-faint">
+                  <p className="pa-numeric text-[14px] text-pa-faint">
                     {summary.scopes.join(" · ") || "—"}
                   </p>
                   {!summary.configured ? (
-                    <p className="text-[13px] leading-relaxed text-pa-ghost">
+                    <p className="text-[14px] leading-relaxed text-pa-ghost">
                       {t("unavailableHint")}
                     </p>
                   ) : null}
@@ -296,7 +327,7 @@ export default function IntegrationsPage() {
               )}
 
               {!summary.canPushPoints ? (
-                <p className="text-[13px] leading-relaxed text-pa-ghost">
+                <p className="text-[14px] leading-relaxed text-pa-ghost">
                   <span className="pa-kicker mr-2">{t("readOnly")}</span>
                   {t("readOnlyHint")}
                 </p>
@@ -315,6 +346,7 @@ export default function IntegrationsPage() {
                     <Button
                       variant="secondary"
                       size="sm"
+                      loading={syncing === summary.id}
                       onClick={() => sync(summary.id)}
                     >
                       {t("sync")}
@@ -323,10 +355,9 @@ export default function IntegrationsPage() {
                 ) : summary.authStyle === "token" ? (
                   <Button
                     size="sm"
+                    loading={connecting === summary.id}
                     disabled={
-                      !session?.user ||
-                      !(tokens[summary.id] ?? "").trim() ||
-                      connecting === summary.id
+                      !session?.user || !(tokens[summary.id] ?? "").trim()
                     }
                     onClick={() => connectWithToken(summary.id)}
                   >
@@ -357,12 +388,24 @@ export default function IntegrationsPage() {
         {NOTES.map((note) => (
           <div key={note} className="flex flex-col gap-2.5">
             <Kicker>{t(`notes.${note}.kicker`)}</Kicker>
-            <p className="text-[15px] leading-relaxed text-pa-muted">
+            <p className="text-[17px] leading-relaxed text-pa-muted">
               {t(`notes.${note}.body`)}
             </p>
           </div>
         ))}
       </div>
     </div>
+  );
+}
+
+/**
+ * `useSearchParams` (usado para ler o retorno do OAuth) obriga a árvore a ser
+ * dinâmica. Isolando num Suspense, o resto da página continua pré-renderizável.
+ */
+export default function IntegrationsPage() {
+  return (
+    <Suspense fallback={null}>
+      <IntegrationsContent />
+    </Suspense>
   );
 }

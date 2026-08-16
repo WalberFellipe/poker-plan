@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const fieldClasses = [
   "w-full rounded-sm border border-pa-text/14 bg-pa-text/[.03]",
-  "px-3.5 py-2.5 text-[15px] text-pa-text",
+  "px-3.5 py-2.5 text-[17px] text-pa-text",
   "placeholder:text-pa-ghost",
   "transition-colors duration-150",
   "hover:border-pa-text/25",

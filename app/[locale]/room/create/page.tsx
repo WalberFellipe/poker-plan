@@ -143,13 +143,13 @@ export default function CreateRoomPage() {
                 >
                   <span
                     className={cn(
-                      "font-display text-[13px]",
+                      "font-display text-[16px]",
                       active ? "text-cy" : "text-pa-text"
                     )}
                   >
                     {deck.name}
                   </span>
-                  <span className="pa-numeric truncate text-xs text-pa-faint">
+                  <span className="pa-numeric truncate text-[14px] text-pa-faint">
                     {deck.values.join(" ")}
                   </span>
                 </button>
@@ -161,13 +161,13 @@ export default function CreateRoomPage() {
             <button
               type="button"
               onClick={() => setDeckModalOpen(true)}
-              className="text-[14px] text-cy transition-colors hover:text-cy-soft"
+              className="text-[15px] text-cy transition-colors hover:text-cy-soft"
             >
               {t("customDeckCta")}
             </button>
             <Link
               href="/decks"
-              className="text-[14px] text-pa-dim transition-colors hover:text-pa-text"
+              className="text-[15px] text-pa-dim transition-colors hover:text-pa-text"
             >
               {t("seeAllDecks")}
             </Link>
@@ -175,10 +175,10 @@ export default function CreateRoomPage() {
         </div>
 
         {error ? (
-          <span className="text-[14px] text-mg-soft">{error}</span>
+          <span className="text-[15px] text-mg-soft">{error}</span>
         ) : null}
 
-        <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
+        <Button type="submit" size="lg" loading={isSubmitting} className="w-full">
           {isSubmitting ? t("submitting") : t("submit")}
         </Button>
       </form>

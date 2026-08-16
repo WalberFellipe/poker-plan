@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveParticipant } from "@/lib/participant";
-import { publishRoomState } from "@/lib/room-state";
+import { buildRoomSnapshot, publishRoomState } from "@/lib/room-state";
 import type { TaskSource } from "@/types/room-state";
 
 const SOURCES: TaskSource[] = ["manual", "jira", "trello", "github", "izzyplan"];
@@ -54,16 +54,41 @@ export async function POST(
       return NextResponse.json({ error: "Nenhuma tarefa válida" }, { status: 400 });
     }
 
-    const last = await prisma.task.findFirst({
-      where: { roomId },
-      orderBy: { order: "desc" },
-      select: { order: true },
-    });
+    const [last, existing] = await Promise.all([
+      prisma.task.findFirst({
+        where: { roomId },
+        orderBy: { order: "desc" },
+        select: { order: true },
+      }),
+      // Tudo que já veio de um board para esta sala, inclusive o que já foi
+      // estimado — reimportar uma tarefa fechada a traria de volta para a fila.
+      prisma.task.findMany({
+        where: { roomId, externalId: { not: null } },
+        select: { externalId: true, source: true },
+      }),
+    ]);
+
+    const alreadyImported = new Set(
+      existing.map((task) => `${task.source}:${task.externalId}`)
+    );
+
+    // Dedupe no servidor, não só no botão: protege contra clique duplo que
+    // escapa, duas abas abertas e reenvio de requisição.
+    const fresh = parsed.filter(
+      (task) =>
+        !task.externalId ||
+        !alreadyImported.has(`${task.source}:${task.externalId}`)
+    );
+
+    if (fresh.length === 0) {
+      const snapshot = await buildRoomSnapshot(roomId);
+      return NextResponse.json({ success: true, added: 0, snapshot });
+    }
 
     let nextOrder = (last?.order ?? -1) + 1;
 
     await prisma.task.createMany({
-      data: parsed.map((task) => ({
+      data: fresh.map((task) => ({
         roomId,
         key: task.key || `T-${nextOrder + 1}`,
         title: task.title,
@@ -77,7 +102,7 @@ export async function POST(
 
     const snapshot = await publishRoomState(roomId);
 
-    return NextResponse.json({ success: true, added: parsed.length, snapshot });
+    return NextResponse.json({ success: true, added: fresh.length, snapshot });
   } catch (error) {
     console.error("[tasks] erro ao adicionar tarefas", error);
     return NextResponse.json({ error: "Erro ao adicionar tarefas" }, { status: 500 });

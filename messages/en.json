@@ -201,7 +201,8 @@
     "nothingPicked": "Pick at least one",
     "notConnected": "Connect {provider} to import issues from the board.",
     "loadingIssues": "Fetching issues...",
-    "noIssues": "No open issues found on this board."
+    "noIssues": "No open issues found on this board.",
+    "allImported": "Every task from this board is already queued."
   },
   "decks": {
     "kicker": "Library",

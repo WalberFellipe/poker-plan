@@ -48,13 +48,13 @@ function LoginCard() {
         <h1 className="font-display text-[26px] leading-tight text-pa-text">
           {t("welcomeBack")}
         </h1>
-        <p className="text-[15px] text-pa-muted">{t("chooseProvider")}</p>
+        <p className="text-[17px] text-pa-muted">{t("chooseProvider")}</p>
       </div>
 
       {errorKey ? (
         <p
           role="alert"
-          className="rounded-sm border border-mg/40 bg-mg/[.08] px-4 py-3 text-center text-[14px] leading-relaxed text-mg-soft"
+          className="rounded-sm border border-mg/40 bg-mg/[.08] px-4 py-3 text-center text-[15px] leading-relaxed text-mg-soft"
         >
           {t(errorKey)}
         </p>
@@ -81,7 +81,7 @@ function LoginCard() {
         </Button>
       </div>
 
-      <p className="text-center text-[13px] leading-relaxed text-pa-faint">
+      <p className="text-center text-[14px] leading-relaxed text-pa-faint">
         {t("terms")}
       </p>
     </div>

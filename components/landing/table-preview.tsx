@@ -61,7 +61,7 @@ export function TablePreview() {
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cy shadow-[0_0_6px_rgb(var(--pa-cy)/.7)]" />
           <span className="pa-kicker">{t("livePreview")}</span>
         </div>
-        <span className="pa-numeric text-xs text-cy">01:12</span>
+        <span className="pa-numeric text-[13px] text-cy">01:12</span>
       </div>
 
       <div className="p-5">
@@ -128,7 +128,7 @@ export function TablePreview() {
               key={value}
               className={cn(
                 "flex h-[52px] w-[36px] items-center justify-center rounded-[3px]",
-                "font-display text-[13px] font-bold transition-transform",
+                "font-display text-[14px] font-bold transition-transform",
                 value === "5"
                   ? "-translate-y-2 border border-mg bg-[linear-gradient(180deg,rgb(var(--pa-mg)/.18),rgb(10_10_20/.9))] text-white shadow-[0_0_16px_rgb(var(--pa-mg)/.25)]"
                   : "border border-pa-text/12 bg-pa-text/[.03] text-pa-dim"

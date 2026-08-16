@@ -5,7 +5,7 @@ import { Header } from "@/components/layout/header";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/react";
 import { NextIntlClientProvider } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/src/i18n/routing";
 import { hasLocale } from "next-intl";
@@ -25,6 +25,16 @@ const sourceSerif = Source_Serif_4({
   variable: "--font-source-serif",
   display: "swap",
 });
+
+/**
+ * Sem isto o Next trata toda rota sob `[locale]` como dinâmica, e cada
+ * navegação vira uma invocação serverless — com cold start de até dois
+ * segundos, que era a origem da lentidão ao trocar de tela. Pré-gerando os
+ * locales, as telas sem dado de servidor passam a ser servidas do CDN.
+ */
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({
   params,
@@ -51,6 +61,10 @@ export default async function RootLayout({
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
+
+  // Informa o locale ao next-intl fora do ciclo de request, que é o que
+  // permite ao Next pré-renderizar esta árvore.
+  setRequestLocale(locale);
 
   let messages;
   try {

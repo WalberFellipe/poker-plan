@@ -32,7 +32,7 @@ export function SidePanel({
       <section className="flex flex-col gap-3.5">
         <div className="flex items-baseline justify-between gap-3">
           <Kicker>{t("participants")}</Kicker>
-          <span className="pa-numeric text-xs text-pa-ghost">
+          <span className="pa-numeric text-[13px] text-pa-ghost">
             {participants.length}
           </span>
         </div>
@@ -45,7 +45,7 @@ export function SidePanel({
             return (
               <li
                 key={participant.id}
-                className="flex items-center gap-2.5 text-[15px]"
+                className="flex items-center gap-2.5 text-[17px]"
               >
                 <span
                   aria-hidden
@@ -67,12 +67,12 @@ export function SidePanel({
                 </span>
 
                 {participant.callsReceived > 0 ? (
-                  <span className="pa-numeric shrink-0 text-xs text-mg-soft">
+                  <span className="pa-numeric shrink-0 text-[13px] text-mg-soft">
                     ×{participant.callsReceived}
                   </span>
                 ) : null}
 
-                <span className="shrink-0 text-xs text-pa-faint">
+                <span className="shrink-0 text-[13px] text-pa-faint">
                   {!participant.isOnline
                     ? t("offline")
                     : participant.hasVoted
@@ -90,7 +90,7 @@ export function SidePanel({
           <Kicker>{t("queue")}</Kicker>
           <Link
             href={`/room/${roomId}/tasks`}
-            className="font-display text-[10px] uppercase tracking-[.14em] text-cy transition-colors hover:text-cy-soft"
+            className="font-display text-[11px] uppercase tracking-[.1em] text-cy transition-colors hover:text-cy-soft"
           >
             {t("manage")}
           </Link>
@@ -98,13 +98,13 @@ export function SidePanel({
         <Rule />
 
         {upcoming.length === 0 ? (
-          <p className="text-sm leading-relaxed text-pa-faint">
+          <p className="text-[15px] leading-relaxed text-pa-faint">
             {tTasks("queueEmpty")}
           </p>
         ) : (
           <ol className="flex flex-col gap-2.5">
             {upcoming.map((task, index) => (
-              <li key={task.id} className="flex items-baseline gap-2.5 text-sm">
+              <li key={task.id} className="flex items-baseline gap-2.5 text-[15px]">
                 <span className="pa-numeric w-4 shrink-0 text-pa-ghost">
                   {index + 1}
                 </span>
@@ -115,7 +115,7 @@ export function SidePanel({
                   )}
                 >
                   {task.key !== "—" ? (
-                    <span className="pa-numeric mr-1.5 text-xs text-cy">
+                    <span className="pa-numeric mr-1.5 text-[13px] text-cy">
                       {task.key}
                     </span>
                   ) : null}
@@ -132,17 +132,17 @@ export function SidePanel({
           <span className="pa-kicker text-mg-soft">
             {tIntegrations("connected")}
           </span>
-          <span className="font-display text-sm text-pa-text">
+          <span className="font-display text-[15px] text-pa-text">
             {connectedProvider.name}
           </span>
           {connectedProvider.board ? (
-            <span className="truncate text-[13px] text-pa-faint">
+            <span className="truncate text-[14px] text-pa-faint">
               {connectedProvider.board}
             </span>
           ) : null}
           <Link
             href="/integrations"
-            className="mt-1 font-display text-[10px] uppercase tracking-[.14em] text-mg-soft transition-colors hover:text-mg"
+            className="mt-1 font-display text-[11px] uppercase tracking-[.1em] text-mg-soft transition-colors hover:text-mg"
           >
             {tIntegrations("manage")}
           </Link>

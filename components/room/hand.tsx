@@ -52,7 +52,7 @@ export function Hand({
               type="button"
               onClick={() => onReact(reaction.kind)}
               className={cn(
-                "rounded-chip border px-3.5 py-1.5 text-[13px] transition-colors",
+                "rounded-chip border px-3.5 py-1.5 text-[14px] transition-colors",
                 reaction.tone
               )}
             >
@@ -88,7 +88,7 @@ export function Hand({
         })}
       </div>
 
-      <p className="text-sm text-pa-faint">{t("callHintLine")}</p>
+      <p className="text-[15px] text-pa-faint">{t("callHintLine")}</p>
     </div>
   );
 }

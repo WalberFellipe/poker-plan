@@ -96,7 +96,7 @@ export function Badge({
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-sm border px-2 py-1",
-        "font-display text-[10px] font-medium uppercase tracking-[.12em]",
+        "font-display text-[11px] font-medium uppercase tracking-[.1em]",
         badgeTones[tone],
         className
       )}

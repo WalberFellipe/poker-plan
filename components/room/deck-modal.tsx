@@ -93,7 +93,7 @@ export function DeckModal({ open, onOpenChange, deck, onSave }: DeckModalProps) 
               setError(null);
             }}
           />
-          <span className="text-[13px] text-pa-faint">{t("hint")}</span>
+          <span className="text-[14px] text-pa-faint">{t("hint")}</span>
         </div>
 
         {preview.length > 0 ? (
@@ -103,7 +103,7 @@ export function DeckModal({ open, onOpenChange, deck, onSave }: DeckModalProps) 
               {preview.map((value, index) => (
                 <span
                   key={`${value}-${index}`}
-                  className="flex h-11 w-8 items-center justify-center rounded-[3px] border border-cy/35 bg-cy/[.06] font-display text-[13px] font-bold text-cy"
+                  className="flex h-11 w-8 items-center justify-center rounded-[3px] border border-cy/35 bg-cy/[.06] font-display text-[14px] font-bold text-cy"
                 >
                   {value}
                 </span>
@@ -113,14 +113,14 @@ export function DeckModal({ open, onOpenChange, deck, onSave }: DeckModalProps) 
         ) : null}
 
         {error ? (
-          <span className="text-[13px] text-mg-soft">{error}</span>
+          <span className="text-[14px] text-mg-soft">{error}</span>
         ) : null}
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             {tCommon("close")}
           </Button>
-          <Button onClick={submit} disabled={isSaving}>
+          <Button onClick={submit} loading={isSaving}>
             {tCommon("save")}
           </Button>
         </DialogFooter>

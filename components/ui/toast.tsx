@@ -28,7 +28,7 @@ const toastVariants = cva(
   [
     "group pointer-events-auto relative flex items-center gap-2.5 whitespace-nowrap",
     "rounded-sm bg-[rgb(12_13_22/.95)] px-5 py-3",
-    "font-sans text-[15px] text-pa-text",
+    "font-sans text-[17px] text-pa-text",
     "before:h-1.5 before:w-1.5 before:shrink-0 before:rounded-full before:content-['']",
   ].join(" "),
   {
@@ -73,7 +73,7 @@ const ToastAction = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex h-8 shrink-0 items-center justify-center rounded-sm border border-cy/40 bg-transparent px-3",
-      "font-display text-[10px] uppercase tracking-[.14em] text-cy transition-colors",
+      "font-display text-[11px] uppercase tracking-[.1em] text-cy transition-colors",
       "hover:bg-cy/10 focus:outline-none",
       "disabled:pointer-events-none disabled:opacity-45",
       className
@@ -120,7 +120,7 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn("text-[15px] text-pa-text", className)}
+    className={cn("text-[17px] text-pa-text", className)}
     {...props}
   />
 ))

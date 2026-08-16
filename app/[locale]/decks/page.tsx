@@ -69,7 +69,7 @@ export default function DecksPage() {
             )}
           >
             <div className="flex items-start justify-between gap-3">
-              <h2 className="font-display text-[16px] leading-snug text-pa-text">
+              <h2 className="font-display text-[18px] leading-snug text-pa-text">
                 {deck.name}
               </h2>
               <Badge tone={deck.builtin ? "neutral" : "cy"}>
@@ -88,7 +88,7 @@ export default function DecksPage() {
               ))}
             </div>
 
-            <p className="pa-numeric truncate text-xs text-pa-faint">
+            <p className="pa-numeric truncate text-[14px] text-pa-faint">
               {t("cardsCount", { count: deck.values.length })} ·{" "}
               {deck.values.join(" ")}
             </p>
@@ -97,7 +97,7 @@ export default function DecksPage() {
               <button
                 type="button"
                 onClick={() => duplicate(deck)}
-                className="text-[13px] text-pa-dim transition-colors hover:text-pa-text"
+                className="text-[14px] text-pa-dim transition-colors hover:text-pa-text"
               >
                 {t("duplicate")}
               </button>
@@ -107,14 +107,14 @@ export default function DecksPage() {
                   <button
                     type="button"
                     onClick={() => openEdit(deck)}
-                    className="text-[13px] text-cy transition-colors hover:text-cy-soft"
+                    className="text-[14px] text-cy transition-colors hover:text-cy-soft"
                   >
                     {t("edit")}
                   </button>
                   <button
                     type="button"
                     onClick={() => remove(deck)}
-                    className="text-[13px] text-pa-dim transition-colors hover:text-mg-soft"
+                    className="text-[14px] text-pa-dim transition-colors hover:text-mg-soft"
                   >
                     {t("remove")}
                   </button>

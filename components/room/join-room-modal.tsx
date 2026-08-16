@@ -39,7 +39,7 @@ export function JoinRoomModal({ defaultName = "", onJoin }: JoinRoomModalProps) 
           <h2 className="font-display text-[22px] text-pa-text">
             {t("joinTitle")}
           </h2>
-          <p className="text-[15px] leading-relaxed text-pa-muted">
+          <p className="text-[17px] leading-relaxed text-pa-muted">
             {t("joinSubtitle")}
           </p>
         </div>
@@ -59,7 +59,8 @@ export function JoinRoomModal({ defaultName = "", onJoin }: JoinRoomModalProps) 
 
         <Button
           onClick={submit}
-          disabled={!name.trim() || isSubmitting}
+          disabled={!name.trim()}
+          loading={isSubmitting}
           className="w-full"
         >
           {t("joinSubmit")}

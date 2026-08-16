@@ -266,8 +266,8 @@ export default function RoomClient({ roomId }: { roomId: string }) {
             <span
               className={
                 statusLine.tone === "accent"
-                  ? "text-[15px] text-mg-soft"
-                  : "text-[15px] text-pa-dim"
+                  ? "text-[17px] text-mg-soft"
+                  : "text-[17px] text-pa-dim"
               }
             >
               {statusLine.text}
@@ -277,7 +277,7 @@ export default function RoomClient({ roomId }: { roomId: string }) {
           <div className="ml-auto flex flex-wrap items-center gap-2.5">
             <div className="flex items-center gap-2 rounded-sm border border-cy/30 px-3.5 py-2">
               <Dot size={7} />
-              <span className="pa-numeric text-[15px] text-cy">
+              <span className="pa-numeric text-[17px] text-cy">
                 {formatClock(elapsedSeconds)}
               </span>
             </div>

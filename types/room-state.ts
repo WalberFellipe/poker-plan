@@ -89,7 +89,8 @@ export interface RoomSnapshot {
     name: string;
     deckValues: string[];
     expiresAt: string;
-    ownerId: string;
+    /** Nulo em salas criadas sem login. */
+    ownerId: string | null;
   };
   story: SnapshotStory | null;
   participants: SnapshotParticipant[];

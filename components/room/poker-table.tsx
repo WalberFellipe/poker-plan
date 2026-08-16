@@ -235,7 +235,7 @@ export function PokerTable({
             className={cn(
               "pointer-events-none absolute z-[8] flex items-center justify-center rounded-full",
               "border-[3px] border-dashed font-display font-bold tracking-[.02em]",
-              isCall ? "animate-call text-[10px]" : "animate-land text-[14px]"
+              isCall ? "animate-call text-[10px]" : "animate-land text-[15px]"
             )}
             style={
               {
@@ -302,11 +302,11 @@ export function PokerTable({
                     : "bg-pa-text/20"
                 )}
               />
-              <span className="whitespace-nowrap text-sm">
+              <span className="whitespace-nowrap text-[15px]">
                 {isMe ? youLabel : participant.name}
               </span>
               {participant.callsReceived > 0 ? (
-                <span className="pa-numeric whitespace-nowrap text-xs text-mg-soft">
+                <span className="pa-numeric whitespace-nowrap text-[13px] text-mg-soft">
                   ×{participant.callsReceived}
                 </span>
               ) : null}

@@ -25,16 +25,9 @@ export async function POST(request: Request) {
 
     const ownerName = session?.user?.name ?? participantName ?? "Anônimo";
 
-    // Sem sessão ainda precisamos de um User para ser dono da sala; ele existe
-    // só para satisfazer a relação e não aparece em lugar nenhum da interface.
-    let ownerId = session?.user?.id;
-
-    if (!ownerId) {
-      const guestOwner = await prisma.user.create({
-        data: { name: ownerName },
-      });
-      ownerId = guestOwner.id;
-    }
+    // Sala sem login simplesmente não tem dono. A versão anterior criava um
+    // `User` fantasma só para preencher a relação, e ele sobrevivia à sala.
+    const ownerId = session?.user?.id ?? null;
 
     const values =
       Array.isArray(deckValues) && deckValues.length > 0

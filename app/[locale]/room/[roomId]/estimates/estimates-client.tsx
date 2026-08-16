@@ -157,7 +157,7 @@ export default function EstimatesClient({ roomId }: { roomId: string }) {
       </div>
 
       {estimates.length === 0 ? (
-        <p className="text-[15px] leading-relaxed text-pa-faint">{t("empty")}</p>
+        <p className="text-[17px] leading-relaxed text-pa-faint">{t("empty")}</p>
       ) : (
         <div className="overflow-x-auto">
           <div className="min-w-[760px]">
@@ -179,21 +179,21 @@ export default function EstimatesClient({ roomId }: { roomId: string }) {
                   key={estimate.id}
                   className="grid grid-cols-[96px_1fr_110px_90px_110px_100px] items-center gap-4 border-b border-pa-text/[.06] py-3.5"
                 >
-                  <span className="pa-numeric truncate text-[13px] text-cy">
+                  <span className="pa-numeric truncate text-[14px] text-cy">
                     {estimate.key}
                   </span>
-                  <span className="truncate text-[15px] text-pa-text">
+                  <span className="truncate text-[17px] text-pa-text">
                     {estimate.title}
                   </span>
-                  <span className="truncate text-[13px] text-pa-faint">
+                  <span className="truncate text-[14px] text-pa-faint">
                     {estimate.source}
                   </span>
-                  <span className="pa-numeric text-[15px] font-bold text-pa-text">
+                  <span className="pa-numeric text-[17px] font-bold text-pa-text">
                     {estimate.points}
                   </span>
                   <span
                     className={cn(
-                      "pa-numeric text-[15px]",
+                      "pa-numeric text-[17px]",
                       band === "strong"
                         ? "text-cy"
                         : band === "ok"
@@ -203,7 +203,7 @@ export default function EstimatesClient({ roomId }: { roomId: string }) {
                   >
                     {estimate.consensus}%
                   </span>
-                  <span className="text-[13px] text-pa-faint">
+                  <span className="text-[14px] text-pa-faint">
                     {format.dateTime(new Date(estimate.createdAt), {
                       day: "2-digit",
                       month: "2-digit",

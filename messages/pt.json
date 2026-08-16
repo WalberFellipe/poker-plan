@@ -201,7 +201,8 @@
     "nothingPicked": "Selecione ao menos uma",
     "notConnected": "Conecte {provider} para importar as issues do board.",
     "loadingIssues": "Buscando issues...",
-    "noIssues": "Nenhuma issue aberta encontrada neste board."
+    "noIssues": "Nenhuma issue aberta encontrada neste board.",
+    "allImported": "Todas as tarefas deste board já estão na fila."
   },
   "decks": {
     "kicker": "Biblioteca",

@@ -56,7 +56,7 @@ export function JoinRoomDialog({ trigger }: { trigger: React.ReactNode }) {
               onKeyDown={(event) => event.key === "Enter" && submit()}
             />
             {error ? (
-              <span className="text-[13px] text-mg-soft">{error}</span>
+              <span className="text-[14px] text-mg-soft">{error}</span>
             ) : null}
           </div>
 

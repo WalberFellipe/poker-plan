@@ -65,8 +65,13 @@ model Room {
   name       String
   createdAt  DateTime      @default(now())
   expiresAt  DateTime
-  ownerId    String
-  owner      User          @relation("RoomHost", fields: [ownerId], references: [id])
+  /// Nulo em salas criadas sem login.
+  ///
+  /// Antes, uma sala anônima criava um `User` fantasma só para satisfazer esta
+  /// relação — e ele sobrevivia à expiração da sala, acumulando lixo na mesma
+  /// tabela que guarda as contas de verdade.
+  ownerId    String?
+  owner      User?         @relation("RoomHost", fields: [ownerId], references: [id], onDelete: SetNull)
   deckValues String[]
 
   /// Contador monotônico do estado da sala. Toda mutação que afeta o snapshot

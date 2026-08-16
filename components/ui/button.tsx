@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -40,7 +41,7 @@ const buttonVariants = cva(
       size: {
         default: "h-10 px-[18px] text-[12px]",
         sm: "h-9 px-4 text-[11px]",
-        lg: "h-12 px-7 text-[13px]",
+        lg: "h-12 px-7 text-[14px]",
         icon: "h-10 w-10 px-0",
       },
     },
@@ -55,17 +56,46 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  /**
+   * Mostra um spinner e desabilita o botão.
+   *
+   * Desabilitar é a metade que importa: sem isso, uma ação lenta convida ao
+   * segundo clique — e foi assim que "importar selecionadas" chegou a
+   * duplicar a fila.
+   */
+  loading?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
+  (
+    { className, variant, size, asChild = false, loading = false, children, disabled, ...props },
+    ref
+  ) => {
+    if (asChild) {
+      return (
+        <Slot
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          {...props}
+        >
+          {children}
+        </Slot>
+      );
+    }
+
     return (
-      <Comp
+      <button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
         {...props}
-      />
+      >
+        {loading ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+        ) : null}
+        {children}
+      </button>
     );
   }
 );

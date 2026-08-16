@@ -126,7 +126,7 @@ export function Header() {
             <Link
               key={link.key}
               href={link.href}
-              className="text-[15px] text-pa-dim transition-colors hover:text-pa-text"
+              className="text-[17px] text-pa-dim transition-colors hover:text-pa-text"
             >
               {t(link.key)}
             </Link>
@@ -140,7 +140,7 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-sm border border-pa-text/14 px-3 py-1.5 text-[14px] text-pa-muted transition-colors hover:border-cy/40 hover:text-pa-text"
+                className="flex items-center gap-2 rounded-sm border border-pa-text/14 px-3 py-1.5 text-[15px] text-pa-muted transition-colors hover:border-cy/40 hover:text-pa-text"
               >
                 {session.user.image ? (
                   <Image
@@ -164,7 +164,7 @@ export function Header() {
             >
               <DropdownMenuItem
                 onClick={() => signOut()}
-                className="gap-2 text-[14px] focus:bg-cy/10 focus:text-pa-text"
+                className="gap-2 text-[15px] focus:bg-cy/10 focus:text-pa-text"
               >
                 <LogOut className="h-4 w-4" aria-hidden />
                 {tAuth("signOut")}
@@ -174,7 +174,7 @@ export function Header() {
         ) : (
           <Link
             href="/login"
-            className="text-[15px] text-pa-dim transition-colors hover:text-pa-text"
+            className="text-[17px] text-pa-dim transition-colors hover:text-pa-text"
           >
             {t("signIn")}
           </Link>

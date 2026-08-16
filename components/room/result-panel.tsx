@@ -88,13 +88,13 @@ export function ResultPanel({
 
         <div className="flex flex-col gap-2.5">
           <Meter value={stats.consensus} tone="mg" />
-          <p className="text-[15px] leading-relaxed text-pa-muted">
+          <p className="text-[17px] leading-relaxed text-pa-muted">
             {t(dispersionKey)}
           </p>
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Button onClick={() => onAccept(points)} disabled={isBusy}>
+          <Button onClick={() => onAccept(points)} loading={isBusy}>
             {t("result.accept", { points })}
           </Button>
           {pushProvider && onPush ? (
@@ -113,14 +113,14 @@ export function ResultPanel({
         <Kicker>{t("result.distribution")}</Kicker>
 
         {stats.distribution.length === 0 ? (
-          <p className="text-[15px] text-pa-faint">
+          <p className="text-[17px] text-pa-faint">
             {t("result.noNumericVotes")}
           </p>
         ) : (
           <ul className="flex flex-col gap-2.5">
             {stats.distribution.map((entry) => (
               <li key={entry.value} className="flex items-center gap-3.5">
-                <span className="pa-numeric w-10 shrink-0 text-[15px] font-bold text-pa-text">
+                <span className="pa-numeric w-10 shrink-0 text-[17px] font-bold text-pa-text">
                   {entry.value}
                 </span>
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-pa-text/[.06]">
@@ -132,7 +132,7 @@ export function ResultPanel({
                     style={{ width: `${(entry.count / maxCount) * 100}%` }}
                   />
                 </div>
-                <span className="pa-numeric w-6 shrink-0 text-right text-sm text-pa-dim">
+                <span className="pa-numeric w-6 shrink-0 text-right text-[15px] text-pa-dim">
                   {entry.count}
                 </span>
               </li>
