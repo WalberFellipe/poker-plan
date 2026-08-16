@@ -5,6 +5,7 @@ import { pusherClient } from "@/lib/pusher";
 import { apiFetch, getClientId } from "@/lib/client-id";
 import {
   ROOM_STATE_EVENT,
+  REVEAL_COUNTDOWN_MS,
   REVEAL_STEP_MS,
   RoomSnapshot,
 } from "@/types/room-state";
@@ -41,6 +42,22 @@ export interface UseRoomStateResult {
   /** Segundos decorridos na rodada, derivados do relógio do servidor. */
   elapsedSeconds: number;
   refresh: () => Promise<void>;
+  /**
+   * Aplica um snapshot que veio na resposta de uma mutação. Evita o GET extra
+   * que dobrava a latência percebida de cada ação.
+   */
+  applySnapshot: (snapshot: RoomSnapshot) => void;
+  /**
+   * Inicia a contagem regressiva localmente, no clique, sem esperar o servidor.
+   * O `revealAt` autoritativo substitui este assim que a resposta chega.
+   */
+  beginLocalReveal: () => void;
+  /**
+   * Trata a rodada atual como encerrada já no clique de "Nova rodada", sem
+   * esperar a história nova chegar. Passe `null` para desfazer, se o servidor
+   * recusar.
+   */
+  beginLocalReset: (storyId: string | null) => void;
 }
 
 /**
@@ -74,8 +91,30 @@ export function useRoomState(roomId: string): UseRoomStateResult {
   /** Força re-render a cada tick para o cronômetro e a contagem regressiva. */
   const [, setTick] = useState(0);
 
+  /**
+   * Menor dígito já exibido nesta contagem. A contagem regressiva é monotônica
+   * por definição — se uma correção de relógio a empurrasse para cima, o
+   * usuário veria "3, 2, 1, 2, 1". Esta trava garante que ela só desça.
+   */
+  const countdownFloorRef = useRef<number | null>(null);
+
   /** Id da história aplicada por último, para detectar troca de rodada. */
   const storyIdRef = useRef<string | null>(null);
+
+  /**
+   * Contagem regressiva iniciada no clique, antes da confirmação do servidor.
+   * Sem isto, quem apertou "Revelar" ficava olhando uma tela parada durante
+   * todo o round-trip e só então via o 3-2-1 — que já vinha pela metade.
+   */
+  const [localRevealAt, setLocalRevealAt] = useState<number | null>(null);
+
+  /**
+   * Id da história que acabou de ser resetada localmente. Enquanto o snapshot
+   * ainda for dessa história, a mesa é exibida limpa — o painel de resultado
+   * sumia só quando a história nova chegava, o que dava quase dois segundos de
+   * tela parada depois do clique.
+   */
+  const [resetStoryId, setResetStoryId] = useState<string | null>(null);
 
   const applySnapshot = useCallback((incoming: RoomSnapshot) => {
     if (incoming.version <= versionRef.current) return;
@@ -92,9 +131,26 @@ export function useRoomState(roomId: string): UseRoomStateResult {
       setMyVote(null);
       localVoteAtRef.current = 0;
     }
+    if (storyIdRef.current !== incomingStoryId) {
+      setLocalRevealAt(null);
+      countdownFloorRef.current = null;
+    }
     storyIdRef.current = incomingStoryId;
 
+    // O servidor já decidiu o instante da virada: ele manda no assunto.
+    if (incoming.story?.revealAt) setLocalRevealAt(null);
+
     setSnapshot(incoming);
+  }, []);
+
+  const beginLocalReveal = useCallback(() => {
+    setLocalRevealAt(Date.now() + REVEAL_COUNTDOWN_MS);
+  }, []);
+
+  const beginLocalReset = useCallback((storyId: string | null) => {
+    setResetStoryId(storyId);
+    setLocalRevealAt(null);
+    countdownFloorRef.current = null;
   }, []);
 
   const refresh = useCallback(async () => {
@@ -202,7 +258,7 @@ export function useRoomState(roomId: string): UseRoomStateResult {
 
   // Tick de 200ms enquanto há algo animando ou contando.
   const story = snapshot?.story ?? null;
-  const needsTick = story !== null;
+  const needsTick = story !== null || localRevealAt !== null;
 
   useEffect(() => {
     if (!needsTick) return;
@@ -212,7 +268,30 @@ export function useRoomState(roomId: string): UseRoomStateResult {
 
   const now = Date.now() + clockOffsetRef.current;
 
-  const { revealed, countdown } = useMemo(() => {
+  const { revealed, countdown } = useMemo((): {
+    revealed: boolean;
+    countdown: number | null;
+  } => {
+    // Reset otimista: a rodada já acabou aqui, ainda que o servidor não tenha
+    // confirmado a história nova.
+    if (resetStoryId !== null && story?.id === resetStoryId) {
+      return { revealed: false, countdown: null };
+    }
+
+    // Contagem otimista: já começou aqui, o servidor ainda não respondeu.
+    if (!story?.revealed && localRevealAt !== null) {
+      const remaining = localRevealAt - Date.now();
+      if (remaining > 0) {
+        return {
+          revealed: false,
+          countdown: Math.max(1, Math.ceil(remaining / REVEAL_STEP_MS)),
+        };
+      }
+      // A contagem local acabou mas o servidor ainda não confirmou: segura em 1
+      // em vez de revelar cartas que talvez nem tenham sido gravadas.
+      return { revealed: false, countdown: 1 };
+    }
+
     if (!story?.revealed) return { revealed: false, countdown: null };
 
     if (!story.revealAt) return { revealed: true, countdown: null };
@@ -226,7 +305,21 @@ export function useRoomState(roomId: string): UseRoomStateResult {
       revealed: false,
       countdown: Math.max(1, Math.ceil(remaining / REVEAL_STEP_MS)),
     };
-  }, [story, now]);
+  }, [story, now, localRevealAt, resetStoryId]);
+
+  // Aplica a trava de monotonicidade fora do useMemo, para não guardar estado
+  // dentro dele.
+  let displayedCountdown = countdown;
+  if (displayedCountdown === null) {
+    countdownFloorRef.current = null;
+  } else {
+    const floor = countdownFloorRef.current;
+    if (floor !== null && displayedCountdown > floor) {
+      displayedCountdown = floor;
+    } else {
+      countdownFloorRef.current = displayedCountdown;
+    }
+  }
 
   const elapsedSeconds = useMemo(() => {
     if (!story) return 0;
@@ -256,8 +349,11 @@ export function useRoomState(roomId: string): UseRoomStateResult {
     isLoading,
     error,
     revealed,
-    countdown,
+    countdown: displayedCountdown,
     elapsedSeconds,
     refresh,
+    applySnapshot,
+    beginLocalReveal,
+    beginLocalReset,
   };
 }

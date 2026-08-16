@@ -21,9 +21,9 @@ export async function DELETE(
     }
 
     await prisma.task.deleteMany({ where: { id: taskId, roomId } });
-    await publishRoomState(roomId);
+    const snapshot = await publishRoomState(roomId);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, snapshot });
   } catch (error) {
     console.error("[tasks] erro ao remover tarefa", error);
     return NextResponse.json({ error: "Erro ao remover tarefa" }, { status: 500 });
@@ -65,9 +65,9 @@ export async function PATCH(
       }),
     ]);
 
-    await publishRoomState(roomId);
+    const snapshot = await publishRoomState(roomId);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, snapshot });
   } catch (error) {
     console.error("[tasks] erro ao promover tarefa", error);
     return NextResponse.json({ error: "Erro ao promover tarefa" }, { status: 500 });

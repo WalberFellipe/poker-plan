@@ -108,9 +108,9 @@ export async function POST(
       },
     });
 
-    await publishRoomState(roomId);
+    const snapshot = await publishRoomState(roomId);
 
-    return NextResponse.json({ success: true, points, consensus });
+    return NextResponse.json({ success: true, points, consensus, snapshot });
   } catch (error) {
     console.error("[accept] erro ao aceitar estimativa", error);
     return NextResponse.json(

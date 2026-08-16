@@ -58,6 +58,7 @@ export default function RoomClient({ roomId }: { roomId: string }) {
     countdown,
     elapsedSeconds,
     isBusy,
+    chips,
     join,
     selectCard,
     reveal,
@@ -289,7 +290,7 @@ export default function RoomClient({ roomId }: { roomId: string }) {
 
         <PokerTable
           participants={participants}
-          chips={snapshot.chips}
+          chips={chips}
           meId={meId}
           revealed={revealed}
           countdown={countdown}

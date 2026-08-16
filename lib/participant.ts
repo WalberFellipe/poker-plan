@@ -40,21 +40,30 @@ export async function resolveParticipant(
 ): Promise<Participant | null> {
   const session = await getServerSession(authOptions);
   const clientId = readClientId(request);
+  const userId = session?.user?.id;
 
-  if (session?.user?.id) {
-    const byUser = await prisma.participant.findUnique({
-      where: { roomId_userId: { roomId, userId: session.user.id } },
-    });
-    if (byUser) return byUser;
-  }
+  if (!userId && !clientId) return null;
 
-  if (clientId) {
-    return prisma.participant.findUnique({
-      where: { roomId_clientId: { roomId, clientId } },
-    });
-  }
+  // Uma query só, não duas: cada ida ao banco custa ~200ms de rede, e este
+  // caminho roda em toda mutação. A cadeira autenticada tem prioridade quando
+  // as duas existirem.
+  const candidates = await prisma.participant.findMany({
+    where: {
+      roomId,
+      OR: [
+        ...(userId ? [{ userId }] : []),
+        ...(clientId ? [{ clientId }] : []),
+      ],
+    },
+    take: 2,
+  });
 
-  return null;
+  if (candidates.length === 0) return null;
+
+  return (
+    candidates.find((candidate) => userId && candidate.userId === userId) ??
+    candidates[0]
+  );
 }
 
 /**

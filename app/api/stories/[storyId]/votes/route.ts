@@ -62,9 +62,9 @@ export async function POST(
       create: { storyId, participantId: participant.id, value },
     });
 
-    await publishRoomState(story.roomId);
+    const snapshot = await publishRoomState(story.roomId);
 
-    return NextResponse.json({ success: true, voteId: vote.id });
+    return NextResponse.json({ success: true, voteId: vote.id, snapshot });
   } catch (error) {
     console.error("[votes] erro ao salvar voto", error);
     return NextResponse.json({ error: "Erro ao salvar voto" }, { status: 500 });
@@ -105,9 +105,9 @@ export async function DELETE(
       where: { participantId: participant.id, storyId },
     });
 
-    await publishRoomState(story.roomId);
+    const snapshot = await publishRoomState(story.roomId);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, snapshot });
   } catch (error) {
     console.error("[votes] erro ao remover voto", error);
     return NextResponse.json({ error: "Erro ao remover voto" }, { status: 500 });

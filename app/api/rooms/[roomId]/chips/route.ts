@@ -17,8 +17,11 @@ function clamp(value: unknown, min: number, max: number, fallback: number) {
  *
  * Persistimos só o sorteio (jitter do pouso e rotação final): a trajetória é
  * derivada em cada cliente a partir do próprio layout de assentos, já que cada
- * pessoa se vê sentada embaixo ao centro. O resultado é a mesma ficha caindo no
- * mesmo ponto relativo da mesa para todos, saindo da cadeira certa em cada tela.
+ * pessoa se vê sentada embaixo ao centro.
+ *
+ * O `id` vem do cliente, que já desenhou a ficha localmente antes de chamar
+ * esta rota — assim o snapshot que volta substitui a ficha otimista em vez de
+ * duplicá-la.
  */
 export async function POST(
   request: Request,
@@ -36,7 +39,27 @@ export async function POST(
       return NextResponse.json({ error: "Ficha inválida" }, { status: 400 });
     }
 
-    const author = await resolveParticipant(request, roomId);
+    const requestedTarget =
+      mode === "call" && typeof body?.targetId === "string"
+        ? body.targetId
+        : null;
+
+    if (mode === "call" && !requestedTarget) {
+      return NextResponse.json({ error: "Alvo inválido" }, { status: 400 });
+    }
+
+    // Independentes entre si: buscadas em paralelo para pagar uma latência de
+    // rede em vez de três.
+    const [author, story, target] = await Promise.all([
+      resolveParticipant(request, roomId),
+      ensureCurrentStory(roomId),
+      requestedTarget
+        ? prisma.participant.findFirst({
+            where: { id: requestedTarget, roomId },
+            select: { id: true },
+          })
+        : Promise.resolve(null),
+    ]);
 
     if (!author) {
       return NextResponse.json(
@@ -45,36 +68,27 @@ export async function POST(
       );
     }
 
-    let targetId: string | null = null;
-
-    if (mode === "call") {
-      const requestedTarget = body?.targetId;
-
-      if (typeof requestedTarget !== "string" || requestedTarget === author.id) {
-        // Não dá para pagar pra ver de si mesmo.
+    if (requestedTarget) {
+      // Não dá para pagar pra ver de si mesmo.
+      if (requestedTarget === author.id) {
         return NextResponse.json({ error: "Alvo inválido" }, { status: 400 });
       }
-
-      const target = await prisma.participant.findFirst({
-        where: { id: requestedTarget, roomId },
-        select: { id: true },
-      });
-
       if (!target) {
         return NextResponse.json({ error: "Alvo não encontrado" }, { status: 404 });
       }
-
-      targetId = target.id;
     }
-
-    const story = await ensureCurrentStory(roomId);
 
     await prisma.chip.create({
       data: {
+        // Aceita o id proposto pelo cliente, caindo no default do banco quando
+        // ausente. É o que casa a ficha otimista com a persistida.
+        ...(typeof body?.id === "string" && body.id.length <= 64
+          ? { id: body.id }
+          : {}),
         roomId,
         storyId: story.id,
         authorId: author.id,
-        targetId,
+        targetId: target?.id ?? null,
         kind,
         mode,
         jitterX: clamp(body?.jitterX, -20, 20, 0),
@@ -83,9 +97,9 @@ export async function POST(
       },
     });
 
-    await publishRoomState(roomId);
+    const snapshot = await publishRoomState(roomId);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, snapshot });
   } catch (error) {
     console.error("[chips] erro ao apostar ficha", error);
     return NextResponse.json({ error: "Erro ao apostar ficha" }, { status: 500 });

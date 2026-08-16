@@ -34,21 +34,32 @@ export function channelForRoom(roomId: string) {
  * participante curioso consegue antecipar o número dos outros.
  */
 export async function buildRoomSnapshot(
-  roomId: string
+  roomId: string,
+  options: { bumpVersion?: boolean } = {}
 ): Promise<RoomSnapshot | null> {
-  const room = await prisma.room.findUnique({
-    where: { id: roomId },
-    include: {
-      participants: {
-        orderBy: { createdAt: "asc" },
-        include: {
-          callsReceived: { select: { id: true, storyId: true } },
-        },
+  const include = {
+    participants: {
+      orderBy: { createdAt: "asc" },
+      include: {
+        callsReceived: { select: { id: true, storyId: true } },
       },
-      tasks: { orderBy: { order: "asc" } },
-      estimates: { orderBy: { createdAt: "desc" } },
     },
-  });
+    tasks: { orderBy: { order: "asc" } },
+    estimates: { orderBy: { createdAt: "desc" } },
+  } as const;
+
+  // O banco fica atrás do Prisma Accelerate, então cada query custa uma ida à
+  // rede (~200ms). Incrementar a versão e ler a sala são feitos numa query só:
+  // `update ... returning` devolve o registro já atualizado.
+  const room = options.bumpVersion
+    ? await prisma.room
+        .update({
+          where: { id: roomId },
+          data: { version: { increment: 1 } },
+          include,
+        })
+        .catch(() => null)
+    : await prisma.room.findUnique({ where: { id: roomId }, include });
 
   if (!room) return null;
 
@@ -193,16 +204,24 @@ export async function ensureCurrentStory(roomId: string) {
 export async function publishRoomState(
   roomId: string
 ): Promise<RoomSnapshot | null> {
-  await prisma.room.update({
-    where: { id: roomId },
-    data: { version: { increment: 1 } },
-  });
-
-  const snapshot = await buildRoomSnapshot(roomId);
+  const snapshot = await buildRoomSnapshot(roomId, { bumpVersion: true });
   if (!snapshot) return null;
 
   const payload = JSON.stringify(snapshot);
 
+  // A publicação não é aguardada: o snapshot já volta na resposta da própria
+  // mutação, então quem agiu não precisa esperar o Pusher para ver o efeito.
+  // Só os *outros* participantes dependem deste trigger.
+  void publish(roomId, snapshot, payload);
+
+  return snapshot;
+}
+
+async function publish(
+  roomId: string,
+  snapshot: RoomSnapshot,
+  payload: string
+) {
   try {
     if (Buffer.byteLength(payload, "utf8") > MAX_PUSHER_PAYLOAD_BYTES) {
       // Grande demais para o canal: manda só a versão. O cliente vê que está
@@ -224,8 +243,6 @@ export async function publishRoomState(
     // atualizado, e o poll de reconciliação do cliente recupera o estado.
     console.error("[room-state] falha ao publicar no Pusher", error);
   }
-
-  return snapshot;
 }
 
 // A matemática dos votos vive em `lib/vote-stats` para que cliente e servidor

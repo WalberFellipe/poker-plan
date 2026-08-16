@@ -1,17 +1,21 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { resolveParticipant } from "@/lib/participant";
-import { publishRoomState } from "@/lib/room-state";
-import { REVEAL_COUNTDOWN_MS } from "@/types/room-state";
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { resolveParticipant } from '@/lib/participant'
+import { publishRoomState } from '@/lib/room-state'
+import { REVEAL_COUNTDOWN_MS } from '@/types/room-state'
 
 /**
  * Revelar as cartas.
  *
- * O servidor grava `revealAt = agora + contagem regressiva` e todos os clientes
- * agendam a virada contra esse instante absoluto, corrigido pelo offset de
- * relógio que vem no snapshot. Antes cada cliente contava 3-2-1 localmente a
- * partir do momento em que recebia o evento, então quem tinha rede mais lenta
- * virava a carta depois — o "reveal não é simultâneo".
+ * O servidor grava `revealAt` e todos os clientes agendam a virada contra esse
+ * instante absoluto, corrigido pelo offset de relógio que vem no snapshot.
+ * Antes cada cliente contava 3-2-1 localmente a partir do momento em que
+ * recebia o evento, então quem tinha rede mais lenta virava a carta depois.
+ *
+ * A contagem é ancorada no **clique** de quem revelou, não na chegada da
+ * requisição: quem clicou já começou a contar localmente, e ancorar aqui faria
+ * o `revealAt` autoritativo cair depois do previsto, jogando a contagem de
+ * volta para trás (3, 2, 1, 2, 1) quando a resposta chegasse.
  */
 export async function POST(
   request: Request,
@@ -20,6 +24,24 @@ export async function POST(
   const { storyId } = await props.params;
 
   try {
+    const body = await request.json().catch(() => ({}));
+    const now = Date.now();
+
+    // `clientNow` é o relógio de quem clicou, no instante do clique. Tratamos
+    // como se estivesse na mesma base do nosso — os dois costumam estar em NTP —
+    // e o clamp abaixo protege de um relógio muito fora.
+    const clickedAt =
+      typeof body?.clientNow === "number" && Number.isFinite(body.clientNow)
+        ? body.clientNow
+        : now;
+
+    const revealAt = new Date(
+      Math.min(
+        Math.max(clickedAt + REVEAL_COUNTDOWN_MS, now),
+        now + REVEAL_COUNTDOWN_MS
+      )
+    );
+
     const story = await prisma.story.findUnique({
       where: { id: storyId },
       select: { id: true, roomId: true, revealed: true },
@@ -47,10 +69,7 @@ export async function POST(
 
     await prisma.story.update({
       where: { id: storyId },
-      data: {
-        revealed: true,
-        revealAt: new Date(Date.now() + REVEAL_COUNTDOWN_MS),
-      },
+      data: { revealed: true, revealAt },
     });
 
     const snapshot = await publishRoomState(story.roomId);

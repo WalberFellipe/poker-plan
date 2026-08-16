@@ -75,9 +75,9 @@ export async function POST(
       })),
     });
 
-    await publishRoomState(roomId);
+    const snapshot = await publishRoomState(roomId);
 
-    return NextResponse.json({ success: true, added: parsed.length });
+    return NextResponse.json({ success: true, added: parsed.length, snapshot });
   } catch (error) {
     console.error("[tasks] erro ao adicionar tarefas", error);
     return NextResponse.json({ error: "Erro ao adicionar tarefas" }, { status: 500 });
